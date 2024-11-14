@@ -1,6 +1,6 @@
 CREATE TABLE IF NOT EXISTS Utilisateur (
     id INT PRIMARY KEY AUTO_INCREMENT,
-    mail VARCHAR(255) NOT NULL,
+    adresseMail VARCHAR(255) NOT NULL,
     mdpHash VARCHAR(255) NOT NULL,
     dateInscription DATE NOT NULL,
     theme INT NOT NULL,
@@ -17,7 +17,7 @@ CREATE TABLE IF NOT EXISTS Dossier (
 CREATE TABLE IF NOT EXISTS Algorithme (
     id INT PRIMARY KEY AUTO_INCREMENT,
     nom VARCHAR(255) NOT NULL,
-    url VARCHAR(255) NOT NULL,
+    path VARCHAR(255) NOT NULL,
     dateCreation DATE NOT NULL,
     dateModification DATE NOT NULL
 );
