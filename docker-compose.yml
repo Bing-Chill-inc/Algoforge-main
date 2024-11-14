@@ -7,7 +7,7 @@ services:
     ports:
       - "5205:80"
     volumes:
-      - ./src:/var/www/html
+      - ./src/front-editeur/src:/var/www/html
     depends_on:
       - db_postgres
 
@@ -19,7 +19,7 @@ services:
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
       POSTGRES_DB: ${POSTGRES_DB:-postgres}
     volumes:
-      - ./db/init.sql:/docker-entrypoint-initdb.d/init.sql
+      - ./src/back/db/scripts/init.sql:/docker-entrypoint-initdb.d/init.sql
       - db_data:/var/lib/postgresql/data
     networks:
       - db_network
