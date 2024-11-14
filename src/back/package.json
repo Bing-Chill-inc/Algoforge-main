@@ -3,15 +3,15 @@
 	"version": "1.0.0",
 	"main": "index.ts",
 	"scripts": {
-		"start": "npx tsc --noEmit && npx tsx index.ts"
+		"start": "bun --env-file=../../.env index.ts"
 	},
 	"author": "AlgoForge inc.",
 	"license": "ISC",
 	"description": "",
 	"dependencies": {
 		"express": "^4.21.1",
+		"pg": "^8.13.1",
 		"reflect-metadata": "^0.2.2",
-		"sqlite3": "^5.1.7",
 		"typeorm": "^0.3.20"
 	},
 	"devDependencies": {
