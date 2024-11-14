@@ -3,8 +3,7 @@
 	"version": "1.0.0",
 	"main": "index.ts",
 	"scripts": {
-		"start": "tsx index.ts",
-		"test": "echo \"Error: no test specified\" && exit 1"
+		"start": "tsx index.ts"
 	},
 	"author": "AlgoForge inc.",
 	"license": "ISC",
