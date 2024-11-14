@@ -3,15 +3,20 @@
 	"version": "1.0.0",
 	"main": "index.ts",
 	"scripts": {
-		"start": "tsx index.ts"
+		"start": "npx tsc --noEmit && npx tsx index.ts"
 	},
 	"author": "AlgoForge inc.",
 	"license": "ISC",
 	"description": "",
 	"dependencies": {
-		"express": "^4.21.1"
+		"express": "^4.21.1",
+		"reflect-metadata": "^0.2.2",
+		"sqlite3": "^5.1.7",
+		"typeorm": "^0.3.20"
 	},
 	"devDependencies": {
-		"@types/express": "^5.0.0"
+		"@types/express": "^5.0.0",
+		"tsx": "^4.19.2",
+		"typescript": "^5.6.3"
 	}
 }
