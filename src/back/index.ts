@@ -20,6 +20,17 @@ app.get(iconHandler.route, iconHandler.callback);
 
 app.use("/edit", express.static(path.join(__dirname, "../front-editeur/src")));
 
-app.listen(port, () => {
-	console.log(`Server is running on http://localhost:${port}`);
+// Init database connection
+import { AppDataSource } from "./db/data-source";
+
+AppDataSource.initialize().then(async () => {
+	console.log("Database connection initialized");
+
+	// Start server
+	app.listen(port, () => {
+		console.log(`Server is running on http://localhost:${port}`);
+	});
+}).catch((err) => {
+	console.error("Error while initializing database connection: \n", err);
+	process.exit(1);
 });
