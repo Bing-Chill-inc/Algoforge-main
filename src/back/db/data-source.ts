@@ -1,6 +1,11 @@
 import "reflect-metadata";
 import { DataSource } from "typeorm";
-import { User } from "./schemas/User.schema";
+import { Utilisateur } from "./schemas/Utilisateur.schema";
+import { Algorithme } from "./schemas/Algorithme.schema";
+import { Token } from "./schemas/Token.schema";
+import { Dossier } from "./schemas/Dossier.schema";
+import { PermDossier } from "./schemas/PermDossier.schema";
+import { PermAlgorithme } from "./schemas/PermAlgorithme.schema";
 
 export const AppDataSource = new DataSource({
 	type: "postgres",
@@ -11,5 +16,12 @@ export const AppDataSource = new DataSource({
 	database: process.env.POSTGRES_DB,
 	synchronize: true,
 	logging: false,
-	entities: [User],
+	entities: [
+		Utilisateur,
+		Algorithme,
+		Token,
+		Dossier,
+		PermDossier,
+		PermAlgorithme,
+	],
 });
