@@ -7,6 +7,13 @@ CREATE TABLE IF NOT EXISTS Utilisateur (
     urlPfp VARCHAR(255) NOT NULL
 );
 
+CREATE TABLE IF NOT EXISTS Token (
+    token VARCHAR(255) PRIMARY KEY,
+    idUtilisateur INT NOT NULL,
+    dateExpiration DATE NOT NULL,
+    FOREIGN KEY (idUtilisateur) REFERENCES Utilisateur(id)
+);
+
 CREATE TABLE IF NOT EXISTS Dossier (
     id SERIAL PRIMARY KEY,
     nom VARCHAR(255) NOT NULL,
