@@ -1,20 +1,22 @@
 version: '3.8'
 
 services:
-  web:
-    image: php:8.1-apache
-    container_name: php-web-app
-    ports:
-      - "5205:80"
+  backend:
+    container_name: algoforge-backend
+    build:
+      context: .
+      dockerfile: src/back/Dockerfile
     volumes:
-      - ./src/front-editeur/src:/var/www/html
-    depends_on:
-      - db_postgres
+      - ./:/app
+    ports:
+      - "5205:3000"
+    networks:
+      - algo_network
 
   db_postgres:
     image: postgres:17
-    container_name: db_postgres
-    environment:  
+    container_name: algoforge-db-postgres
+    environment:
       POSTGRES_USER: ${POSTGRES_USER:-postgres}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
       POSTGRES_DB: ${POSTGRES_DB:-postgres}
@@ -22,11 +24,12 @@ services:
       - ./src/back/db/scripts/init.sql:/docker-entrypoint-initdb.d/init.sql
       - db_data:/var/lib/postgresql/data
     networks:
+      - algo_network
       - db_network
 
-  pgmyadmin:
+  pgadmin:
     image: dpage/pgadmin4:8.12
-    container_name: pgmyadmin
+    container_name: algoforge-db-pgadmin
     restart: always
     environment:
       PGADMIN_DEFAULT_EMAIL: ${PGADMIN_DEFAULT_EMAIL:-admin@admin.com}
@@ -34,6 +37,7 @@ services:
     ports:
       - "5300:80"
     networks:
+      - algo_network
       - db_network
     depends_on:
       - db_postgres
@@ -42,4 +46,5 @@ volumes:
   db_data: {}
 
 networks:
+  algo_network: {}
   db_network: {}
