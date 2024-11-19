@@ -3,6 +3,7 @@
 	"version": "1.0.0",
 	"main": "index.ts",
 	"scripts": {
+		"prod": "bun install && bun start",
 		"start": "bun --env-file=../../.env index.ts"
 	},
 	"author": "AlgoForge inc.",
