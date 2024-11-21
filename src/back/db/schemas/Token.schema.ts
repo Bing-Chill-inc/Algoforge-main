@@ -8,6 +8,9 @@ export class Token {
 	token: string;
 
 	@Column({ type: "date" })
+	dateCreation: Date;
+
+	@Column({ type: "date" })
 	dateExpiration: Date;
 
 	@ManyToOne(() => Utilisateur, (utilisateur) => utilisateur.tokens)
