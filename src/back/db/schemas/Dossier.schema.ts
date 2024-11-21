@@ -19,8 +19,11 @@ export class Dossier {
 	@OneToOne(() => Dossier, (dossier) => dossier.id)
 	idParent: Dossier;
 
-	// NOTE: ne manquerait-il pas les dates de création et de modification ?
-	// ex: Algorithme.schema.ts
+	@Column({ type: "date" })
+	dateCreation: Date;
+
+	@Column({ type: "date" })
+	dateModification: Date;
 
 	@OneToMany(() => PermDossier, (permDossier) => permDossier.idDossier)
 	permDossiers: Relation<PermDossier[]>;
