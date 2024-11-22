@@ -103,7 +103,7 @@ WIP
 - Maxime JACOB-SAUSSEREAU: [**@Fetnmax**](https://github.com/Fetnmax)
 - Fabien SPROCQ: [**@Sprocq**](https://github.com/Sprocq)
 - Samuel CURRAN: [**@SamuelCURRAN0**](https://github.com/SamuelCURRAN0)
-- Mathieu FOISSAC: [**@toxykaubleu**](https://github.com/ToxykAuBleu)
+- Mathieu FOISSAC: [**@ToxykAuBleu**](https://github.com/ToxykAuBleu)
 - Adrien HIRIBARREN TOUYA: [**@Alakamar**](https://github.com/Alakamar)
 - Lucas MARROT: [**@LucasMarrot**](https://github.com/LucasMarrot)
 - Romain LABORDE: [**@RomLabo**](https://github.com/RomLabo)
