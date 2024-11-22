@@ -1,6 +1,20 @@
-import { app, BrowserWindow } from "electron";
-import express from "express";
+import { app, BrowserWindow, protocol } from "electron";
 import path from "path";
+import fs from "fs";
+import AssetsDynamiques from "./assetsDynamiquesForElectron.js";
+import getBibliothèque, { iconHandler } from "./getBibliothequesForElectron.js";
+
+protocol.registerSchemesAsPrivileged([
+	{
+		scheme: "app",
+		privileges: {
+			standard: true,
+			secure: true,
+			supportFetchAPI: true,
+			bypassCSP: true,
+		},
+	},
+]);
 
 // Helper to resolve paths based on environment
 const isDev = !app.isPackaged; // Detect if running in development
@@ -8,46 +22,125 @@ const staticPath = isDev
 	? path.join(path.resolve(), "../front-editeur/src") // Dev path
 	: path.join(process.resourcesPath, "src"); // Production path
 
-// Express app setup
-const expressApp = express();
-
-// Get an available port
-const port = Math.floor(Math.random() * 1000) + 3000;
-
-// Example dynamic route handlers (ensure these are imported correctly)
-import AssetsDynamiques from "./assetsDynamiquesForElectron.js";
-import getBibliothèque from "./getBibliothequesForElectron.js";
-import { iconHandler } from "./getBibliothequesForElectron.js";
-
-AssetsDynamiques.forEach((asset) => {
-	expressApp.get(`/edit/assetsDynamiques${asset.route}`, asset.callback);
-});
-
-expressApp.get(getBibliothèque.route, getBibliothèque.callback);
-expressApp.get(iconHandler.route, iconHandler.callback);
-
-// Serve static files
-expressApp.use("/edit", express.static(staticPath));
-
-// Start the server
-expressApp.listen(port, () => {
-	console.log(`Server is running on http://localhost:${port}`);
-});
+// Helper function to get MIME types
+function getMimeType(filePath) {
+	const ext = path.extname(filePath).toLowerCase();
+	switch (ext) {
+		case ".html":
+			return "text/html";
+		case ".js":
+			return "application/javascript";
+		case ".css":
+			return "text/css";
+		case ".png":
+			return "image/png";
+		case ".jpg":
+		case ".jpeg":
+			return "image/jpeg";
+		case ".svg":
+			return "image/svg+xml";
+		case ".json":
+			return "application/json";
+		default:
+			return "text/plain";
+	}
+}
 
 // Electron main window
 let mainWindow;
 
 app.on("ready", () => {
+	protocol.handle("app", async (request) => {
+		const url = new URL(request.url);
+		console.log("Request received:", url.pathname);
+
+		// Handle `/Bibliotheque/getStructure`
+		if (url.pathname === "/Bibliotheque/getStructure") {
+			console.log("Handling dynamic route: /Bibliotheque/getStructure");
+
+			let responseData = null;
+
+			// Simulate Express-like req/res objects
+			const fakeReq = {}; // No query parameters needed here
+			const fakeRes = {
+				setHeader: () => {}, // No-op for headers
+				send: (data) => (responseData = data), // Capture response data
+			};
+
+			// Invoke the `getBibliothèque` callback
+			await getBibliothèque.callback(fakeReq, fakeRes);
+
+			if (responseData) {
+				return new Response(responseData, {
+					headers: {
+						"Content-Type": "application/json",
+					},
+				});
+			}
+
+			console.error("Failed to generate response for /Bibliotheque/getStructure");
+			return new Response("Internal Server Error", { status: 500 });
+		}
+
+		// Handle dynamic assets (e.g., SVGs in `/assetsDynamiques`)
+		if (url.pathname.startsWith("/assetsDynamiques")) {
+			const asset = AssetsDynamiques.find((a) => `/assetsDynamiques${a.route}` === url.pathname);
+			if (asset) {
+				// Simulate Express-like req/res objects
+				const fakeReq = { query: Object.fromEntries(url.searchParams) };
+				let responseData = null;
+
+				const fakeRes = {
+					setHeader: () => {}, // No-op since we're returning directly
+					send: (data) => (responseData = data),
+				};
+
+				// Invoke the asset's callback to generate dynamic content
+				await asset.callback(fakeReq, fakeRes);
+
+				if (responseData) {
+					console.log(`Serving dynamic asset: ${url.pathname}`);
+					return new Response(responseData, {
+						headers: {
+							"Content-Type": "image/svg+xml",
+						},
+					});
+				}
+			}
+			console.error("Dynamic asset not found:", url.pathname);
+			return new Response("Not Found", { status: 404 });
+		}
+
+		// Serve static files
+		const filePath = path.join(staticPath, url.pathname);
+		if (fs.existsSync(filePath)) {
+			console.log("Serving static file:", filePath);
+			return new Response(fs.readFileSync(filePath), {
+				headers: {
+					"Content-Type": getMimeType(filePath),
+				},
+			});
+		}
+
+		// Log missing files or unhandled routes
+		console.error("File or route not found:", url.pathname);
+		return new Response("Not Found", { status: 404 });
+	});
+
+	// Create the Electron BrowserWindow
 	mainWindow = new BrowserWindow({
 		width: 1200,
 		height: 800,
 		webPreferences: {
 			nodeIntegration: true,
+			contextIsolation: false, // Allows the renderer process to use Node.js features directly
+			webSecurity: false, // Disable certain security features to allow cookie access
+			allowRunningInsecureContent: true,
 		},
 	});
 
-	// Point to the web server URL
-	mainWindow.loadURL(`http://localhost:${port}/edit`);
+	// Point to the custom protocol URL
+	mainWindow.loadURL("app://edit/index.html");
 });
 
 app.on("window-all-closed", () => {
@@ -63,9 +156,11 @@ app.on("activate", () => {
 			height: 800,
 			webPreferences: {
 				nodeIntegration: true,
+				contextIsolation: false, // Allows the renderer process to use Node.js features directly
+				webSecurity: false, // Disable certain security features to allow cookie access
 			},
 		});
 
-		mainWindow.loadURL(`http://localhost:${port}/edit`);
+		mainWindow.loadURL("app://edit/index.html");
 	}
 });
