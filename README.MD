@@ -89,7 +89,7 @@ La version docker de l'application comprend une base de données PostgreSQL ains
 3. Renommer le fichier template.env en .env: ``mv template.env .env``
 4. Modifier le fichier .env pour ajouter les informations de connexion à la base de données.
 5. Se placer dans le dossier back-end: ``cd src/back-end``
-6. Lancer l’application avec la commande suivante: ``bun run prod``
+6. Lancer l’application avec la commande suivante: ``bun run prod``  
 _(Cette dernière va directement télécharger et installer les dépendances nécessaires)_
 
 L’application est maintenant disponible ouvre un navigateur http://localhost:3000
