@@ -48,7 +48,7 @@ Précédemment nommé I Need Algo, **AlgoForge** a changé de nom pour aborder u
 WIP
 
 ## Utilisation
-AlgoForge est utilisable de deux manières différentes: en ligne sur un navigateur ou en local sur un ordinateur (avec une installation simple docker-compose ou même manuel).
+AlgoForge est utilisable de deux manières différentes: en ligne sur un navigateur ou en local sur un ordinateur (avec une installation simple docker-compose ou même manuelle).
 
 ### Version en ligne
 Pour utiliser AlgoForge en ligne, vous pouvez vous rendre sur ce lien : https://algoforge.fr/
@@ -65,34 +65,57 @@ La version docker de l'application comprend une base de données PostgreSQL ains
 
 #### Installation
 1. Télécharger le programme grâce à la commande git suivante:  
-``git clone --depth 1 --recurse-submodules https://github.com/Bing-Chill-inc/Algoforge.git``  
-2. Se placer dans le dossier Algoforge: ``cd Algoforge``
-3. Renommer le fichier template.env en .env: ``mv template.env .env``
+```
+git clone --depth 1 --recurse-submodules https://github.com/Bing-Chill-inc/Algoforge.git
+```  
+2. Se placer dans le dossier Algoforge: 
+```
+cd Algoforge
+```
+3. Renommer le fichier template.env en .env: 
+```
+mv template.env .env
+```
 4. Modifier le fichier .env pour ajouter les informations de connexion à la base de données.
 > [!CAUTION]  
 > Si vous utilisez notre version de docker-compose, vous devez utiliser comme base de données PostgreSQL.
-5. Lancer l’application avec la commande suivante: ``docker-compose up --wait``
+5. Lancer l’application avec la commande suivante:  
+```
+docker-compose up --wait
+```
 
-L’application est maintenant disponible ouvre un navigateur http://localhost:5205
+L’application est maintenant disponible ! Ouvrez un navigateur et entrez l'adresse: http://localhost:5205
 
 ### Version manuelle
-La version docker de l'application comprend une base de données PostgreSQL ainsi que l'application PGAdmin pour la gestion de la base de données.
-
 #### Programmes requis
 - Installer [git](https://git-scm.com/downloads).
 - Installer [Bun](https://bun.sh), testé avec la version 1.1.34. 
 
 #### Installation:
 1. Télécharger le programme grâce à la commande git suivante:  
-``git clone --depth 1 --recurse-submodules https://github.com/Bing-Chill-inc/Algoforge.git``  
-2. Se placer dans le dossier Algoforge: ``cd Algoforge``
-3. Renommer le fichier template.env en .env: ``mv template.env .env``
+```
+git clone --depth 1 --recurse-submodules https://github.com/Bing-Chill-inc/Algoforge.git
+```  
+2. Se placer dans le dossier Algoforge:
+```
+cd Algoforge
+```
+3. Renommer le fichier template.env en .env: 
+```
+mv template.env .env
+```
 4. Modifier le fichier .env pour ajouter les informations de connexion à la base de données.
-5. Se placer dans le dossier back-end: ``cd src/back-end``
-6. Lancer l’application avec la commande suivante: ``bun run prod``  
+5. Se placer dans le dossier back-end: 
+```
+cd src/back-end
+```
+6. Lancer l’application avec la commande suivante: 
+```
+bun run prod
+```  
 _(Cette dernière va directement télécharger et installer les dépendances nécessaires)_
 
-L’application est maintenant disponible ouvre un navigateur http://localhost:3000
+L’application est maintenant disponible ! Ouvrez un navigateur et entrez l'adresse: http://localhost:3000
 
 ### Version de bureau
 WIP
