@@ -1,6 +1,10 @@
 import express from "express";
 import path from "path";
 import type RouteHandler from "./types/RouteHandler";
+import clic from "cli-color";
+import { Logger } from "./utils/logger";
+Logger.filePath = `../../logs/`;
+Logger.log("Starting application...");
 
 // RouteHandlers
 import AssetsDynamiques from "./assetsDynamiques";
@@ -23,14 +27,17 @@ app.use("/edit", express.static(path.join(__dirname, "../front-editeur/src")));
 // Init database connection
 import { AppDataSource } from "./db/data-source";
 
-AppDataSource.initialize().then(async () => {
-	console.log("Database connection initialized");
+Logger.log("Attempting to initialize database connection...");
+AppDataSource.initialize()
+	.then(async () => {
+		Logger.log("Database connection initialized");
 
-	// Start server
-	app.listen(port, () => {
-		console.log(`Server is running on http://localhost:${port}`);
+		// Start server
+		app.listen(port, () => {
+			Logger.log(`Server is running on http://localhost:${port}`);
+		});
+	})
+	.catch((err) => {
+		Logger.error(`Error while initializing database connection: \n${err}`);
+		process.exit(1);
 	});
-}).catch((err) => {
-	console.error("Error while initializing database connection: \n", err);
-	process.exit(1);
-});
