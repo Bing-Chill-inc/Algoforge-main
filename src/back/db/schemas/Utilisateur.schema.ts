@@ -13,6 +13,9 @@ export class Utilisateur {
 	adresseMail: string;
 
 	@Column({ type: "varchar", length: 255 })
+	pseudo: string;
+
+	@Column({ type: "varchar", length: 255 })
 	mdpHash: string;
 
 	@Column({ type: "date" })

@@ -11,9 +11,11 @@
 	"license": "ISC",
 	"description": "",
 	"dependencies": {
+		"@types/bcrypt": "^5.0.2",
+		"bcrypt": "^5.1.1",
 		"cli-color": "^2.0.4",
-		"dayjs": "^1.11.13",
 		"cors": "^2.8.5",
+		"dayjs": "^1.11.13",
 		"express": "^4.21.1",
 		"pg": "^8.13.1",
 		"reflect-metadata": "^0.2.2",
