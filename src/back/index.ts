@@ -1,7 +1,7 @@
 import express from "express";
+import cors from "cors";
 import path from "path";
 import type RouteHandler from "./types/RouteHandler";
-import clic from "cli-color";
 import { Logger } from "./utils/logger";
 Logger.filePath = `../../logs/`;
 Logger.log("Starting application...");
@@ -13,6 +13,7 @@ import { iconHandler } from "./getBibliotheques";
 
 const app = express();
 const port = 3000;
+app.use(cors());
 
 AssetsDynamiques.forEach((asset: RouteHandler) => {
 	app.get(`/edit/assetsDynamiques${asset.route}`, asset.callback);
@@ -22,7 +23,8 @@ app.get(getBibliothèque.route, getBibliothèque.callback);
 
 app.get(iconHandler.route, iconHandler.callback);
 
-app.use("/edit", express.static(path.join(__dirname, "../front-editeur/src")));
+app.use("/edit", express.static(path.join(__dirname, "/../front-editeur/src")));
+app.use("/cloud", express.static(path.join(__dirname, "/../front-cloud/dist")));
 
 // Init database connection
 import { AppDataSource } from "./db/data-source";
