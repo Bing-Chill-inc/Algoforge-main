@@ -2,7 +2,8 @@ import { app, BrowserWindow, protocol } from "electron";
 import path from "path";
 import fs from "fs";
 import AssetsDynamiques from "./assetsDynamiquesForElectron.js";
-import getBibliothèque, { iconHandler } from "./getBibliothequesForElectron.js";
+import getBibliothèque from "./getBibliothequesForElectron.js";
+import isExam from "./exam-mode.js";
 
 protocol.registerSchemesAsPrivileged([
 	{
@@ -109,6 +110,66 @@ app.on("ready", () => {
 			}
 			console.error("Dynamic asset not found:", url.pathname);
 			return new Response("Not Found", { status: 404 });
+		}
+
+		// Handle library icons
+		if (url.pathname.startsWith("/Bibliotheque/") && url.pathname.endsWith("/icone.svg")) {
+			const cheminIcone = path.join(staticPath, url.pathname);
+
+			console.log(cheminIcone);
+
+			const lireContenuFichier = (chemin) => {
+				return fs.existsSync(chemin) ? fs.readFileSync(chemin, "utf8") : "";
+			};
+
+			let fileContent = lireContenuFichier(cheminIcone);
+
+			// Replace PHP-style placeholders with query parameters
+			const regex = /<\?php echo \$_GET\[[^\]]+\] \?>/g;
+
+			const matches = fileContent.match(regex);
+
+			console.log(matches);
+			console.log("url.searchParams", url.searchParams);
+
+			if (matches) {
+				matches.forEach((match) => {
+					try {
+						const variableRegex = /\$_GET\['([^\]]+)'\]/g;
+						const variableObj = variableRegex.exec(match);
+						console.log(variableObj);
+						const variable = variableObj[1];
+						const valeur = Object.fromEntries(url.searchParams)[variable];
+						console.log(variable, valeur);
+						fileContent = fileContent.replace(match, valeur);
+					} catch (e) {
+						console.error(e);
+					}
+				});
+			}
+
+			console.log(`Serving library icon: ${url.pathname}`);
+			return new Response(fileContent, {
+				headers: {
+					"Content-Type": "image/svg+xml",
+				},
+			});
+		}
+
+		if (isExam && url.pathname === "/index.html") {
+			console.log("Serving exam index.html");
+			// On lit index.html, et on trouve la déclaration de la variable `isExam` pour la remplacer par `true`
+			const filePath = path.join(staticPath, url.pathname);
+			let fileContent = fs.readFileSync(filePath, "utf8");
+			fileContent = fileContent.replace("const isExam = false;", "const isExam = true;");
+
+			console.log("Serving exam index.html");
+
+			return new Response(fileContent, {
+				headers: {
+					"Content-Type": "text/html",
+				},
+			});
 		}
 
 		// Serve static files
