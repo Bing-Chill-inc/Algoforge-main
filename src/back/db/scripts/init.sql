@@ -27,7 +27,6 @@ CREATE TABLE IF NOT EXISTS Dossier (
 CREATE TABLE IF NOT EXISTS Algorithme (
     id SERIAL PRIMARY KEY,
     nom VARCHAR(255) NOT NULL,
-    path VARCHAR(255) NOT NULL,
     dateCreation DATE NOT NULL,
     dateModification DATE NOT NULL
 );

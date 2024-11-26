@@ -10,9 +10,6 @@ export class Algorithme {
 	@Column({ type: "varchar", length: 255 })
 	nom: string;
 
-	@Column({ type: "varchar", length: 255 })
-	path: string;
-
 	@Column({ type: "date" })
 	dateCreation: Date;
 
