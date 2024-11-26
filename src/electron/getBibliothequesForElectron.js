@@ -59,44 +59,4 @@ const routeHandler = {
 	},
 };
 
-const iconHandler = {
-	route: "/edit/Bibliotheque/**/**/icone.svg",
-	callback: (req, res) => {
-		const cheminIcone = path.join(basePath, new URL(req.url, "http://localhost").pathname.replace("/edit", ""));
-
-		console.log(cheminIcone);
-
-		let fileContent = lireContenuFichier(cheminIcone);
-
-		// Replace PHP-style placeholders with query parameters
-		const regex = /<\?php echo \$_GET\[[^\]]+\] \?>/g;
-
-		const matches = fileContent.match(regex);
-
-		console.log(matches);
-		console.log(req.query);
-
-		if (matches) {
-			matches.forEach((match) => {
-				try {
-					const variableRegex = /\$_GET\['([^\]]+)'\]/g;
-					const variableObj = variableRegex.exec(match);
-					console.log(variableObj);
-					const variable = variableObj[1];
-					const valeur = req.query[variable];
-					console.log(variable, valeur);
-					fileContent = fileContent.replace(match, valeur);
-				} catch (e) {
-					console.error(e);
-				}
-			});
-		}
-
-		res.setHeader("Content-Type", "image/svg+xml");
-		res.send(fileContent);
-	},
-};
-
 export default routeHandler;
-
-export { iconHandler };

@@ -5,7 +5,11 @@
 	"type": "module",
 	"scripts": {
 		"start": "electron-forge start",
+		"start:exam": "echo 'const isExam = true; export default isExam;' > ./exam-mode.js && electron-forge start && echo 'const isExam = false; export default isExam;' > ./exam-mode.js",
 		"package": "electron-forge package",
+		"package:exam": "echo 'const isExam = true; export default isExam;' > ./exam-mode.js && electron-forge package && echo 'const isExam = false; export default isExam;' > ./exam-mode.js",
+		"package:exam:win:x64": "echo 'const isExam = true; export default isExam;' > ./exam-mode.js && electron-forge package --arch x64 --platform win32 && echo 'const isExam = false; export default isExam;' > ./exam-mode.js",
+		"package:exam:lnx:x64": "echo 'const isExam = true; export default isExam;' > ./exam-mode.js && electron-forge package --arch x64 --platform linux && echo 'const isExam = false; export default isExam;' > ./exam-mode.js",
 		"make": "electron-forge make",
 		"publish": "electron-forge publish"
 	},
@@ -25,9 +29,12 @@
 		"@electron-forge/maker-zip": "^7.5.0",
 		"@electron-forge/plugin-auto-unpack-natives": "^7.5.0",
 		"@electron-forge/plugin-fuses": "^7.5.0",
+		"@electron-forge/plugin-webpack": "^7.5.0",
 		"@electron/fuses": "^1.8.0",
 		"@types/express": "^5.0.0",
-		"electron": "^33.2.0"
+		"electron": "^33.2.0",
+		"webpack": "^5.96.1",
+		"webpack-cli": "^5.1.4"
 	},
 	"config": {
 		"forge": {
