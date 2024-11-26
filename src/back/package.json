@@ -3,19 +3,26 @@
 	"version": "1.0.0",
 	"main": "index.ts",
 	"scripts": {
-		"prod": "bun install && bun start",
+		"prod": "bun run build:front-cloud && bun run start",
+		"build:front-cloud": "cd ../front-cloud && bun install && bun run build",
 		"start": "bun --env-file=../../.env index.ts"
 	},
 	"author": "AlgoForge inc.",
 	"license": "ISC",
 	"description": "",
 	"dependencies": {
+		"cli-color": "^2.0.4",
+		"dayjs": "^1.11.13",
+		"cors": "^2.8.5",
 		"express": "^4.21.1",
 		"pg": "^8.13.1",
 		"reflect-metadata": "^0.2.2",
 		"typeorm": "^0.3.20"
 	},
 	"devDependencies": {
+		"@types/bun": "^1.1.13",
+		"@types/cli-color": "^2.0.6",
+		"@types/cors": "^2.8.17",
 		"@types/express": "^5.0.0",
 		"tsx": "^4.19.2",
 		"typescript": "^5.6.3"
