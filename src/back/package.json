@@ -3,7 +3,7 @@
 	"version": "1.0.0",
 	"main": "index.ts",
 	"scripts": {
-		"prod": "bun run build:front-cloud && bun run start",
+		"prod": "bun install && bun run build:front-cloud && bun run start",
 		"build:front-cloud": "cd ../front-cloud && bun install && bun run build",
 		"start": "bun --env-file=../../.env index.ts"
 	},
