@@ -156,12 +156,16 @@ app.on("ready", () => {
 			});
 		}
 
-		if (isExam && url.pathname === "/index.html") {
+		if (url.pathname === "/index.html") {
 			console.log("Serving exam index.html");
 			// On lit index.html, et on trouve la déclaration de la variable `isExam` pour la remplacer par `true`
 			const filePath = path.join(staticPath, url.pathname);
 			let fileContent = fs.readFileSync(filePath, "utf8");
-			fileContent = fileContent.replace("const isExam = false;", "const isExam = true;");
+			if (isExam) {
+				fileContent = fileContent.replace("const isExam = false;", "const isExam = true;");
+			}
+
+			fileContent = fileContent.replace("const isElectron = false;", "const isElectron = true;");
 
 			console.log("Serving exam index.html");
 
@@ -197,6 +201,7 @@ app.on("ready", () => {
 			contextIsolation: false, // Allows the renderer process to use Node.js features directly
 			webSecurity: false, // Disable certain security features to allow cookie access
 			allowRunningInsecureContent: true,
+			devTools: !isExam,
 		},
 	});
 
@@ -219,6 +224,7 @@ app.on("activate", () => {
 				nodeIntegration: true,
 				contextIsolation: false, // Allows the renderer process to use Node.js features directly
 				webSecurity: false, // Disable certain security features to allow cookie access
+				devTools: !isExam,
 			},
 		});
 
