@@ -1,1 +1,2 @@
-const isExam = false; export default isExam;
+const isExam = false;
+export default isExam;

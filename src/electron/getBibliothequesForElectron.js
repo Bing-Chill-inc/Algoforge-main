@@ -32,9 +32,18 @@ const explorerDossier = (dossier) => {
 			const cheminComplet = path.join(cheminDossier, nomFichier);
 			if (fs.statSync(cheminComplet).isDirectory()) {
 				const structureFichier = {
-					nom: lireContenuFichier(path.join(cheminComplet, "nom.txt")) || nomFichier,
-					descriptif: lireContenuFichier(path.join(cheminComplet, "descriptif.html")) || "",
-					algo: lireContenuFichier(path.join(cheminComplet, "algo.json")) || "",
+					nom:
+						lireContenuFichier(
+							path.join(cheminComplet, "nom.txt"),
+						) || nomFichier,
+					descriptif:
+						lireContenuFichier(
+							path.join(cheminComplet, "descriptif.html"),
+						) || "",
+					algo:
+						lireContenuFichier(
+							path.join(cheminComplet, "algo.json"),
+						) || "",
 					path: cheminComplet.substring(dossier.length + 1),
 				};
 				structureDossier.contenu.push(structureFichier);
