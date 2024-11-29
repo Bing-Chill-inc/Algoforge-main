@@ -58,10 +58,10 @@ const explorerDossier = (dossier: string) => {
 };
 
 const routeHandler: RouteHandler = {
-	route: "/Bibliotheque/getStructure",
+	route: "/edit/Bibliotheque/getStructure",
 	callback: (req, res) => {
 		// Replace this with the actual path to the root of your library
-		const cheminBibliotheque = path.join(__dirname, "public/edit/Bibliotheque");
+		const cheminBibliotheque = path.join(__dirname, "../front-editeur/src/Bibliotheque");
 		const arborescence = explorerDossier(cheminBibliotheque);
 
 		res.setHeader("Content-Type", "application/json");
@@ -72,7 +72,13 @@ const routeHandler: RouteHandler = {
 const iconHandler: RouteHandler = {
 	route: "/edit/Bibliotheque/**/**/icone.svg",
 	callback: (req, res) => {
-		const cheminIcone = path.join(__dirname, "public", new URL(req.url, "http://localhost").pathname);
+		const cheminIcone = path.join(
+			__dirname,
+			"../front-editeur/src",
+			new URL(req.url, "http://localhost").pathname.replace("edit", "")
+		);
+
+		console.log(cheminIcone);
 
 		let fileContent = lireContenuFichier(cheminIcone);
 
