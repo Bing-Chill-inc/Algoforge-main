@@ -1,5 +1,10 @@
 node_modules/
 .DS_Store
 out/
+.vscode
 .env
-*.lockb
+*.sqlite
+
+bun.lockb
+
+logs/
