@@ -1,6 +1,4 @@
-import type RouteHandler from "./types/RouteHandler";
-
-const AssetsDynamiques: RouteHandler[] = [];
+const AssetsDynamiques = [];
 
 AssetsDynamiques.push({
 	route: "/AlgoForge.svg",
