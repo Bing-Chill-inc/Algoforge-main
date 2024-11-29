@@ -19,7 +19,7 @@ CREATE TABLE IF NOT EXISTS Dossier (
     id SERIAL PRIMARY KEY,
     nom VARCHAR(255) NOT NULL,
     dateCreation DATE NOT NULL,
-    dateModification DATE NOT NULL
+    dateModification DATE NOT NULL,
     idParent INT,
     FOREIGN KEY (idParent) REFERENCES Dossier(id)
 );
