@@ -1,3 +1,6 @@
 [submodule "src/front-editeur"]
 	path = src/front-editeur
 	url = https://github.com/Bing-Chill-inc/Algoforge.git
+[submodule "src/front-cloud"]
+	path = src/front-cloud
+	url = https://github.com/Bing-Chill-inc/algoforge-cloud.git
