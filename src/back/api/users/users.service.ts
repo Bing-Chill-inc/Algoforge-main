@@ -36,6 +36,8 @@ export class UsersService {
 				.json({ message: "Cet email est déjà utilisé" });
 		}
 
+		// TODO: Envoi du mail de confirmation
+
 		// Hashage du mot de passe
 		const salt = bcrypt.genSaltSync(10);
 		const hash = bcrypt.hashSync(password, salt);
@@ -46,8 +48,12 @@ export class UsersService {
 		newUser.mdpHash = hash;
 		newUser.pseudo = pseudo;
 
+		let savedUser: Utilisateur;
+
 		// Enregistrement de l'utilisateur
-		const savedUser = await this.utilisateurRepository.save(newUser);
+		await this.utilisateurRepository.save(newUser).then((user) => {
+			savedUser = user;
+		});
 
 		// Suppression du hash du mot de passe
 		savedUser.mdpHash = undefined;
@@ -59,23 +65,172 @@ export class UsersService {
 	}
 
 	// POST /login
-	login(req: any, res: any) {}
+	login(req: any, res: any) {
+		// Récupération des données de l'utilisateur
+		const { email, password } = req.body;
+
+		// Vérification de la présence des données
+		if (!email || !password) {
+			return res.status(400).json({ message: "Il manque des données" });
+		}
+
+		// Recherche de l'utilisateur dans la DB
+		this.utilisateurRepository
+			.findOne({ select: { adresseMail: email } })
+			.then((user) => {
+				if (!user) {
+					return res
+						.status(404)
+						.json({ message: "Utilisateur introuvable" });
+				}
+
+				// Vérification du mot de passe
+				if (!bcrypt.compareSync(password, user.mdpHash)) {
+					return res
+						.status(401)
+						.json({ message: "Mot de passe incorrect" });
+				}
+
+				// Suppression du hash du mot de passe
+				user.mdpHash = undefined;
+
+				// Retour de la réponse
+				return res
+					.status(200)
+					.json({ message: "Connexion réussie", user: user });
+			})
+			.catch((error) => {
+				return res
+					.status(500)
+					.json({ message: "Erreur serveur", error });
+			});
+	}
+
+	// TODO: Générer un token JWT pour la connexion automatique --> register et login
 
 	// POST /verify
-	verify(req: any, res: any) {}
+	verify(req: any, res: any) {
+		// TODO: Vérifier la validité du token pour les routes protégées
+	}
 
 	// POST /logout
-	logout(req: any, res: any) {}
+	logout(req: any, res: any) {
+		// TODO: Supprimer le token lors du lougout
+
+		return res.status(200).json({ message: "Déconnexion réussie" });
+	}
 
 	// POST /recover
-	recover(req: any, res: any) {}
+	recover(req: any, res: any) {
+		// TODO: Récupération du mot de passe par mail
+	}
 
 	// GET /:id
-	getUser(req: any, res: any) {}
+	getUser(req: any, res: any) {
+		// Récupération de l'id de l'utilisateur
+		const id = req.params.id;
+
+		// Recherche de l'utilisateur dans la DB
+		this.utilisateurRepository
+			.findOne({ select: { id: id } })
+			.then((user) => {
+				if (!user) {
+					return res
+						.status(404)
+						.json({ message: "Utilisateur introuvable" });
+				}
+
+				// Retour de la réponse
+				return res
+					.status(200)
+					.json({ message: "Utilisateur trouvé", user: user });
+			})
+			.catch((error) => {
+				return res
+					.status(500)
+					.json({ message: "Erreur serveur", error });
+			});
+	}
 
 	// PUT /:id
-	updateUser(req: any, res: any) {}
+	updateUser(req: any, res: any) {
+		// Récupération de l'id de l'utilisateur
+		const id = req.params.id;
+
+		// Récupération des données de l'utilisateur
+		const { email, password, pseudo, theme } = req.body;
+
+		// Recherche de l'utilisateur dans la DB
+		this.utilisateurRepository
+			.findOne({ select: { id: id } })
+			.then((user) => {
+				if (!user) {
+					return res
+						.status(404)
+						.json({ message: "Utilisateur introuvable" });
+				}
+
+				// Modification des données de l'utilisateur
+				if (email) user.adresseMail = email;
+				if (password) {
+					// Hashage du mot de passe
+					const salt = bcrypt.genSaltSync(10);
+					const hash = bcrypt.hashSync(password, salt);
+					user.mdpHash = hash;
+				}
+				if (pseudo) user.pseudo = pseudo;
+				if (theme) user.theme = theme;
+
+				let updatedUser: Utilisateur;
+
+				// Enregistrement des modifications
+				this.utilisateurRepository.save(user).then((user) => {
+					updatedUser = user;
+				});
+
+				// Suppression du hash du mot de passe
+				updatedUser.mdpHash = undefined;
+
+				// Retour de la réponse
+				return res.status(200).json({
+					message: "Utilisateur modifié",
+					user: updatedUser,
+				});
+			})
+			.catch((error) => {
+				return res
+					.status(500)
+					.json({ message: "Erreur serveur", error });
+			});
+	}
 
 	// DELETE /:id
-	deleteUser(req: any, res: any) {}
+	deleteUser(req: any, res: any) {
+		// Récupération de l'id de l'utilisateur
+		const id = req.params.id;
+
+		// Recherche de l'utilisateur dans la DB
+		this.utilisateurRepository
+			.findOne({ select: { id: id } })
+			.then((user) => {
+				if (!user) {
+					return res
+						.status(404)
+						.json({ message: "Utilisateur introuvable" });
+				}
+
+				// Suppression de l'utilisateur
+				this.utilisateurRepository.delete(user);
+
+				// Retour de la réponse
+				return res
+					.status(200)
+					.json({ message: "Utilisateur supprimé" });
+			})
+			.catch((error) => {
+				return res
+					.status(500)
+					.json({ message: "Erreur serveur", error });
+			});
+	}
 }
