@@ -175,6 +175,6 @@ WIP
 
 ## Structure des dossiers
 
-(WIP)
+(Work In Progress)
 
 -   Le dossier src héberge le Code de l'algorithme
