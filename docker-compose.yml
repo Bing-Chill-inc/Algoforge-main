@@ -12,6 +12,8 @@ services:
             - "5205:3000"
         networks:
             - algo_network
+        depends_on:
+            - db_postgres
 
     db_postgres:
         image: postgres:17
