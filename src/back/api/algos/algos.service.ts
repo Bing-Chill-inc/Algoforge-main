@@ -85,6 +85,7 @@ export class AlgosService {
 		const algoToUpdate = await algoRepository.findOne({
 			where: { id: algo.id },
 		});
+
 		if (!algoToUpdate) {
 			return null;
 		}
@@ -110,6 +111,7 @@ export class AlgosService {
 
 		// Récupération de l'algorithme.
 		const algo = await algoRepository.findOne({ where: { id: id } });
+
 		if (!algo) {
 			return null;
 		}

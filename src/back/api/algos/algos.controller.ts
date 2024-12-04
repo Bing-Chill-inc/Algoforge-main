@@ -27,8 +27,9 @@ export class AlgosController {
 
 	// GET /byUserId/:id
 	private async getAlgosOfUser(req: Request, res: Response) {
-		// Récupération des données de la requette.
+		// Récupération des données de la requête
 		const { id } = req.params;
+
 		const algos = await this.service.getAlgosOfUser(+id);
 
 		if (!algos || algos.length === 0) {
@@ -40,9 +41,11 @@ export class AlgosController {
 
 	// GET /:id
 	private async getAlgo(req: Request, res: Response) {
-		// Récupération des données de la requette.
+		// Récupération des données de la requête
 		const { id } = req.params;
+
 		const algo = await this.service.getAlgo(+id);
+
 		if (!algo) {
 			return res.status(404).json({ message: "Algorithme non trouvé" });
 		}
@@ -52,7 +55,7 @@ export class AlgosController {
 
 	// POST /
 	private async createAlgo(req: Request, res: Response) {
-		// Récupération des données de la requette.
+		// Récupération des données de la requête
 		const { idUtilisateur, nom, sourceCode } = req.body;
 		const data = new AlgoCreateDTO();
 		data.nom = nom;
@@ -60,12 +63,13 @@ export class AlgosController {
 		data.sourceCode = sourceCode;
 
 		const result = await this.service.createAlgo(data);
+
 		return res.status(201).json(result);
 	}
 
 	// PUT /:id
 	private async updateAlgo(req: Request, res: Response) {
-		// Récupération des données de la requette.
+		// Récupération des données de la requête
 		const { id } = req.params;
 		const {
 			nom,
@@ -83,18 +87,21 @@ export class AlgosController {
 		data.sourceCode = sourceCode;
 
 		const updatedAlgo = await this.service.updateAlgo(data);
+
 		if (!updatedAlgo) {
 			return res.status(404).json({ message: "Algorithme non trouvé" });
 		}
+
 		return res.status(200).json(updatedAlgo);
 	}
 
 	// DELETE /:id
 	private async deleteAlgo(req: Request, res: Response) {
-		// Récupération des données de la requette.
+		// Récupération des données de la requête
 		const { id } = req.params;
 
 		const algo = await this.service.deleteAlgo(+id);
+
 		if (!algo) {
 			return res.status(404).json({ message: "Algorithme non trouvé" });
 		}
