@@ -9,7 +9,7 @@ services:
         volumes:
             - ./:/app
         ports:
-            - "5205:3000"
+            - "${PORT:-5205}:3000"
         networks:
             - algo_network
         depends_on:
@@ -37,7 +37,7 @@ services:
             PGADMIN_DEFAULT_EMAIL: ${PGADMIN_DEFAULT_EMAIL:-admin@admin.com}
             PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_DEFAULT_PASSWORD:-admin}
         ports:
-            - "5300:80"
+            - "${PGADMIN_PORT:-5300}:80"
         networks:
             - algo_network
             - db_network
