@@ -11,11 +11,11 @@ export class PermDossier {
 	@PrimaryColumn({ type: "int" })
 	idDossier: number;
 
-    @Column({ type: "varchar", length: 255 })
-    droits: string;
+	@Column({ type: "varchar", length: 255 })
+	droits: string;
 
-    @ManyToOne(() => Utilisateur, utilisateur => utilisateur.permDossiers)
-    utilisateur: Relation<Utilisateur>;
-    @ManyToOne(() => Dossier, dossier => dossier.permDossiers)
-    dossier: Relation<Dossier>;
+	@ManyToOne(() => Utilisateur, (utilisateur) => utilisateur.permDossiers)
+	utilisateur: Relation<Utilisateur>;
+	@ManyToOne(() => Dossier, (dossier) => dossier.permDossiers)
+	dossier: Relation<Dossier>;
 }

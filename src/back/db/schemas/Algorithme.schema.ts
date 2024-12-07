@@ -16,6 +16,6 @@ export class Algorithme {
 	@Column({ type: "date" })
 	dateModification: Date;
 
-	@OneToMany(() => PermAlgorithme, permAlgo => permAlgo.idAlgorithme)
-    permAlgorithmes: Relation<PermAlgorithme[]>;
+	@OneToMany(() => PermAlgorithme, (permAlgo) => permAlgo.idAlgorithme)
+	permAlgorithmes: Relation<PermAlgorithme[]>;
 }

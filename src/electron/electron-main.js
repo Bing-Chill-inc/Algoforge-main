@@ -79,13 +79,17 @@ app.on("ready", () => {
 				});
 			}
 
-			console.error("Failed to generate response for /Bibliotheque/getStructure");
+			console.error(
+				"Failed to generate response for /Bibliotheque/getStructure",
+			);
 			return new Response("Internal Server Error", { status: 500 });
 		}
 
 		// Handle dynamic assets (e.g., SVGs in `/assetsDynamiques`)
 		if (url.pathname.startsWith("/assetsDynamiques")) {
-			const asset = AssetsDynamiques.find((a) => `/assetsDynamiques${a.route}` === url.pathname);
+			const asset = AssetsDynamiques.find(
+				(a) => `/assetsDynamiques${a.route}` === url.pathname,
+			);
 			if (asset) {
 				// Simulate Express-like req/res objects
 				const fakeReq = { query: Object.fromEntries(url.searchParams) };
@@ -113,13 +117,18 @@ app.on("ready", () => {
 		}
 
 		// Handle library icons
-		if (url.pathname.startsWith("/Bibliotheque/") && url.pathname.endsWith("/icone.svg")) {
+		if (
+			url.pathname.startsWith("/Bibliotheque/") &&
+			url.pathname.endsWith("/icone.svg")
+		) {
 			const cheminIcone = path.join(staticPath, url.pathname);
 
 			console.log(cheminIcone);
 
 			const lireContenuFichier = (chemin) => {
-				return fs.existsSync(chemin) ? fs.readFileSync(chemin, "utf8") : "";
+				return fs.existsSync(chemin)
+					? fs.readFileSync(chemin, "utf8")
+					: "";
 			};
 
 			let fileContent = lireContenuFichier(cheminIcone);
@@ -139,7 +148,9 @@ app.on("ready", () => {
 						const variableObj = variableRegex.exec(match);
 						console.log(variableObj);
 						const variable = variableObj[1];
-						const valeur = Object.fromEntries(url.searchParams)[variable];
+						const valeur = Object.fromEntries(url.searchParams)[
+							variable
+						];
 						console.log(variable, valeur);
 						fileContent = fileContent.replace(match, valeur);
 					} catch (e) {
@@ -162,10 +173,16 @@ app.on("ready", () => {
 			const filePath = path.join(staticPath, url.pathname);
 			let fileContent = fs.readFileSync(filePath, "utf8");
 			if (isExam) {
-				fileContent = fileContent.replace("const isExam = false;", "const isExam = true;");
+				fileContent = fileContent.replace(
+					"const isExam = false;",
+					"const isExam = true;",
+				);
 			}
 
-			fileContent = fileContent.replace("const isElectron = false;", "const isElectron = true;");
+			fileContent = fileContent.replace(
+				"const isElectron = false;",
+				"const isElectron = true;",
+			);
 
 			console.log("Serving exam index.html");
 

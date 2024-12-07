@@ -26,6 +26,10 @@ app.get(iconHandler.route, iconHandler.callback);
 app.use("/edit", express.static(path.join(__dirname, "/../front-editeur/src")));
 app.use("/cloud", express.static(path.join(__dirname, "/../front-cloud/dist")));
 
+app.get("/", (_, res) => {
+	res.redirect("/edit");
+});
+
 // Init database connection
 import { AppDataSource } from "./db/data-source";
 import { AlgosController } from "./api/algos/algos.controller";
