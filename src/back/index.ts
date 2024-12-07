@@ -2,6 +2,7 @@ import express from "express";
 import cors from "cors";
 import path from "path";
 import type RouteHandler from "./types/RouteHandler";
+import { errorMiddleware } from "./middlewares/error.middleware";
 import { Logger } from "./utils/logger";
 Logger.filePath = `../../logs/`;
 Logger.log("Starting application...", "main");
@@ -42,6 +43,9 @@ AppDataSource.initialize()
 
 		app.use("/api/algos", new AlgosController().router);
 		app.use("/api/users", new UsersController().router);
+
+		// Middlewares
+		app.use(errorMiddleware);
 
 		// Start server
 		app.listen(port, () => {

@@ -1,4 +1,5 @@
 import { Router, Request, Response } from "express";
+import expressAsyncHandler from "express-async-handler";
 import { AlgosService } from "./algos.service";
 import { Logger } from "../../utils/logger";
 import { AlgoCreateDTO, AlgoUpdateDTO } from "./algos.dto";
@@ -16,13 +17,22 @@ export class AlgosController {
 	}
 
 	private init() {
-		this.router.get("/byUserId/:id", this.getAlgosOfUser.bind(this));
-		this.router.get("/:id", this.getAlgo.bind(this));
+		this.router.get(
+			"/byUserId/:id",
+			expressAsyncHandler(this.getAlgosOfUser.bind(this)),
+		);
+		this.router.get("/:id", expressAsyncHandler(this.getAlgo.bind(this)));
 
-		this.router.post("/", this.createAlgo.bind(this));
-		this.router.put("/:id", this.updateAlgo.bind(this));
+		this.router.post("/", expressAsyncHandler(this.createAlgo.bind(this)));
+		this.router.put(
+			"/:id",
+			expressAsyncHandler(this.updateAlgo.bind(this)),
+		);
 
-		this.router.delete("/:id", this.deleteAlgo.bind(this));
+		this.router.delete(
+			"/:id",
+			expressAsyncHandler(this.deleteAlgo.bind(this)),
+		);
 	}
 
 	// GET /byUserId/:id
