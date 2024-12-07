@@ -2,6 +2,7 @@ import express from "express";
 import cors from "cors";
 import path from "path";
 import type RouteHandler from "./types/RouteHandler";
+import { loggerMiddleware } from "./middlewares/logger.middleware";
 import { errorMiddleware } from "./middlewares/error.middleware";
 import { Logger } from "./utils/logger";
 Logger.filePath = `../../logs/`;
@@ -40,11 +41,13 @@ Logger.log("Attempting to initialize database connection...", "main");
 AppDataSource.initialize()
 	.then(async () => {
 		Logger.log("Database connection initialized", "main");
+		// Handling API logs.
+		app.use(loggerMiddleware);
 
 		app.use("/api/algos", new AlgosController().router);
 		app.use("/api/users", new UsersController().router);
 
-		// Middlewares
+		// Handling errors
 		app.use(errorMiddleware);
 
 		// Start server
