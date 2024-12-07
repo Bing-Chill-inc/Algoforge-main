@@ -11,7 +11,7 @@ import AssetsDynamiques from "./assetsDynamiques";
 import getBibliothèque from "./getBibliotheques";
 import { iconHandler } from "./getBibliotheques";
 
-const app = express();
+export const app = express();
 const port = 3000;
 app.use(cors());
 
@@ -47,6 +47,10 @@ AppDataSource.initialize()
 		app.listen(port, () => {
 			Logger.log(`Server is running on http://localhost:${port}`, "main");
 		});
+
+		// On indique que l'application est initialisée.
+		// Cela permet de lancer les tests après que l'application soit prête.
+		app.locals.initialized = true;
 	})
 	.catch((err) => {
 		Logger.error(
