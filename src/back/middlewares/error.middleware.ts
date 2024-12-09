@@ -1,3 +1,4 @@
+import { Res } from "../types/response.entity";
 import { Logger } from "../utils/logger";
 
 /**
@@ -9,13 +10,15 @@ export const errorMiddleware = async (error, req, res, next) => {
 		process.env.BUILD === "dev" ? error.stack : error.message;
 
 	Logger.error(
-		`Une rreur est survenue lors du traitement de la requête: \n${errorMessage}`,
+		`Une erreur est survenue lors du traitement de la requête: \n${errorMessage}`,
 		"middleware: error",
 	);
 
 	const statusCode = error.statusCode || 500;
-	res.status(statusCode).json({
-		statusCode: statusCode,
-		message: "Une erreur est survenue lors du traitement de la requête.",
-	});
+	const result = new Res(
+		statusCode,
+		"Une erreur est survenue lors du traitement de la requête.",
+	);
+
+	res.status(statusCode).json(result);
 };
