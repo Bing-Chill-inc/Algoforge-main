@@ -3,6 +3,7 @@ import expressAsyncHandler from "express-async-handler";
 import { AlgosService } from "./algos.service";
 import { Logger } from "../../utils/logger";
 import { AlgoCreateDTO, AlgoUpdateDTO } from "./algos.dto";
+import { Res } from "../../types/response.entity";
 
 export class AlgosController {
 	public router: Router;
@@ -43,10 +44,12 @@ export class AlgosController {
 		const algos = await this.service.getAlgosOfUser(+id);
 
 		if (!algos || algos.length === 0) {
-			return res.status(404).json({ message: "Aucun algorithme trouvé" });
+			return res
+				.status(404)
+				.json(new Res(404, "Aucun algorithme trouvé"));
 		}
 
-		return res.status(200).json(algos);
+		return res.status(200).json(new Res(200, "Algorithmes trouvés", algos));
 	}
 
 	// GET /:id
@@ -57,10 +60,10 @@ export class AlgosController {
 		const algo = await this.service.getAlgo(+id);
 
 		if (!algo) {
-			return res.status(404).json({ message: "Algorithme non trouvé" });
+			return res.status(404).json(new Res(404, "Algorithme non trouvé"));
 		}
 
-		return res.status(200).json(algo);
+		return res.status(200).json(new Res(200, "Algorithme trouvé", algo));
 	}
 
 	// POST /
@@ -74,7 +77,7 @@ export class AlgosController {
 
 		const result = await this.service.createAlgo(data);
 
-		return res.status(201).json(result);
+		return res.status(201).json(new Res(201, "Algorithme créé", result));
 	}
 
 	// PUT /:id
@@ -99,10 +102,12 @@ export class AlgosController {
 		const updatedAlgo = await this.service.updateAlgo(data);
 
 		if (!updatedAlgo) {
-			return res.status(404).json({ message: "Algorithme non trouvé" });
+			return res.status(404).json(new Res(404, "Algorithme non trouvé"));
 		}
 
-		return res.status(200).json(updatedAlgo);
+		return res
+			.status(200)
+			.json(new Res(200, "Algorithme mis à jour", updatedAlgo));
 	}
 
 	// DELETE /:id
@@ -113,9 +118,9 @@ export class AlgosController {
 		const algo = await this.service.deleteAlgo(+id);
 
 		if (!algo) {
-			return res.status(404).json({ message: "Algorithme non trouvé" });
+			return res.status(404).json(new Res(404, "Algorithme non trouvé"));
 		}
 
-		return res.status(200).json(algo);
+		return res.status(200).json(new Res(200, "Algorithme supprimé", algo));
 	}
 }

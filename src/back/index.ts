@@ -14,7 +14,7 @@ import getBibliothèque from "./getBibliotheques";
 import { iconHandler } from "./getBibliotheques";
 
 export const app = express();
-const port = 3000;
+const port = process.env.PORT || 5205;
 app.use(cors());
 
 AssetsDynamiques.forEach((asset: RouteHandler) => {
