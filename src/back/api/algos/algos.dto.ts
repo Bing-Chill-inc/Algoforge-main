@@ -16,7 +16,7 @@ import { PermAlgorithme } from "../../db/schemas/PermAlgorithme.schema";
 export class AlgoCreateDTO {
 	@IsNumber()
 	@IsOptional()
-	id: number;
+	id?: number;
 
 	@IsString()
 	@MinLength(3)
@@ -25,17 +25,17 @@ export class AlgoCreateDTO {
 
 	@IsDate()
 	@IsOptional()
-	dateCreation: Date;
+	dateCreation?: Date;
 
 	@IsDate()
 	@IsOptional()
-	dateModification: Date;
+	dateModification?: Date;
 
 	@IsNumber()
 	ownerId: number;
 
 	@IsJSON()
-	sourceCode: string;
+	sourceCode: Object;
 }
 
 /**

@@ -34,6 +34,7 @@ switch (process.env.DATABASE_TYPE) {
 
 export const AppDataSource = new DataSource({
 	...dataSource,
+	dropSchema: process.env.BUILD == "dev" ? true : false,
 	synchronize: process.env.BUILD == "dev" ? true : false,
 	logging: false,
 	entities: [

@@ -70,6 +70,10 @@ export class AlgosController {
 	private async createAlgo(req: Request, res: Response) {
 		// Récupération des données de la requête
 		const { idUtilisateur, nom, sourceCode } = req.body;
+		if (!idUtilisateur || nom || sourceCode) {
+			return res.status(400).json(new Res(400, "Données manquantes"));
+		}
+
 		const data = new AlgoCreateDTO();
 		data.nom = nom;
 		data.ownerId = idUtilisateur;
@@ -91,6 +95,16 @@ export class AlgosController {
 			permsAlgorithme,
 			sourceCode,
 		} = req.body;
+		if (
+			!nom ||
+			!dateCreation ||
+			!dateModification ||
+			!permsAlgorithme ||
+			!sourceCode
+		) {
+			return res.status(400).json(new Res(400, "Données manquantes"));
+		}
+
 		const data = new AlgoUpdateDTO();
 		data.id = +id;
 		data.nom = nom;
