@@ -1,0 +1,41 @@
+[
+	{
+		"typeElement": "Probleme",
+		"abscisse": "33.517520215633425vw",
+		"ordonnee": "2.6253369272237173vw",
+		"libelle": "Recherche de première occurrence",
+		"listeDonnes": ["structure"],
+		"listeResultats": ["trouve"],
+		"enfants": [
+			{
+				"typeElement": "Probleme",
+				"abscisse": "18.23245550769359vw",
+				"ordonnee": "10.075494324915223vw",
+				"libelle": "Initialiser la recherche",
+				"listeDonnes": [""],
+				"listeResultats": ["trouve"],
+				"enfants": [
+					{
+						"typeElement": "Probleme",
+						"abscisse": "10.957184433891571vw",
+						"ordonnee": "17.245833604383552vw",
+						"libelle": "Se positionner en début de structure",
+						"listeDonnes": [""],
+						"listeResultats": [""],
+						"enfants": []
+					},
+					{
+						"typeElement": "Probleme",
+						"abscisse": "23.54899975393354vw",
+						"ordonnee": "17.35076539871724vw",
+						"libelle": "trouve ← faux",
+						"listeDonnes": [""],
+						"listeResultats": [""],
+						"enfants": []
+					}
+				]
+			}
+		]
+	},
+	{ "typeElement": "DictionnaireDonnee" }
+]
