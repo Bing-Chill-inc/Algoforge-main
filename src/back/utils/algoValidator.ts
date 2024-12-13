@@ -4,6 +4,7 @@ import { Logger } from "./logger";
 // Définition des types d'éléments possibles.
 enum TypeElement {
 	Probleme = "Probleme",
+	StructureIterativeBornee = "StructureIterativeBornee",
 	StructureIterativeNonBornee = "StructureIterativeNonBornee",
 	StructureSi = "StructureSi",
 	Condition = "Condition",
@@ -12,6 +13,7 @@ enum TypeElement {
 }
 const TypeElementEnum = z.enum([
 	TypeElement.Probleme,
+	TypeElement.StructureIterativeBornee,
 	TypeElement.StructureIterativeNonBornee,
 	TypeElement.StructureSi,
 	TypeElement.Condition,
@@ -20,12 +22,13 @@ const TypeElementEnum = z.enum([
 ]);
 
 // Définition des schémas de validation.
-const coordonneeSchema = z.string().endsWith("vw");
+const coordonneeSchema = z.string().nonempty().endsWith("vw");
 const enfants = z.array(
 	z.lazy(() =>
 		z.discriminatedUnion("typeElement", [
 			ProblemeSchema,
 			StructureSiSchema,
+			StructureIterativeBorneeSchema,
 			StructureIterativeNonBorneeSchema,
 			ConditionSortieSchema,
 			DictionnaireDonneeSchema,
@@ -38,7 +41,7 @@ const BaseProblemeSchema = z.object({
 	typeElement: TypeElementEnum.extract([TypeElement.Probleme]),
 	abscisse: coordonneeSchema,
 	ordonnee: coordonneeSchema,
-	libelle: z.string(),
+	libelle: z.string().nonempty(),
 	listeDonnes: z.array(z.string()).default([""]),
 	listeResultats: z.array(z.string()).default([""]),
 	estDecomposeAilleurs: z.boolean().optional(),
@@ -66,12 +69,28 @@ const StructureIterativeNonBorneeSchema =
 		enfants: enfants.default([]),
 	});
 
-// TODO: -> Structure iterative bornée
+// -> Structure iterative bornée
+const BaseStructureIterativeBorneeSchema = z.object({
+	typeElement: TypeElementEnum.extract([
+		TypeElement.StructureIterativeBornee,
+	]),
+	abscisse: coordonneeSchema,
+	ordonnee: coordonneeSchema,
+	variableAIterer: z.string().nonempty(),
+	borneInferieure: z.string().nonempty(),
+	borneSuperieure: z.string().nonempty(),
+	pas: z.string().nonempty(),
+	croissant: z.boolean(),
+});
+const StructureIterativeBorneeSchema =
+	BaseStructureIterativeBorneeSchema.extend({
+		enfants: enfants.default([]),
+	});
 
 // -> Condition
 const BaseConditionSchema = z.object({
 	typeElement: TypeElementEnum.extract([TypeElement.Condition]),
-	libelle: z.string(),
+	libelle: z.string().nonempty(),
 });
 const ConditionSchema = BaseConditionSchema.extend({
 	enfants: enfants.default([]),

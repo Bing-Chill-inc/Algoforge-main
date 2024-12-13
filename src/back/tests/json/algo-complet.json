@@ -17,21 +17,33 @@
 				"enfants": [
 					{
 						"typeElement": "Probleme",
-						"abscisse": "10.957184433891571vw",
-						"ordonnee": "17.245833604383552vw",
-						"libelle": "Se positionner en début de structure",
-						"listeDonnes": [""],
-						"listeResultats": [""],
-						"enfants": []
-					},
-					{
-						"typeElement": "Probleme",
 						"abscisse": "23.54899975393354vw",
 						"ordonnee": "17.35076539871724vw",
 						"libelle": "trouve ← faux",
 						"listeDonnes": [""],
 						"listeResultats": [""],
 						"enfants": []
+					},
+					{
+						"typeElement": "Probleme",
+						"abscisse": "10.957184433891571vw",
+						"ordonnee": "17.245833604383552vw",
+						"libelle": "Se positionner en début de structure",
+						"listeDonnes": [""],
+						"listeResultats": [""],
+						"enfants": [
+							{
+								"typeElement": "StructureIterativeBornee",
+								"abscisse": "18.18836624118856vw",
+								"ordonnee": "26.19792641858261vw",
+								"variableAIterer": "j",
+								"borneInferieure": "0",
+								"borneSuperieure": "infini",
+								"pas": "23",
+								"croissant": false,
+								"enfants": []
+							}
+						]
 					}
 				]
 			},
@@ -45,8 +57,8 @@
 				"enfants": [
 					{
 						"typeElement": "StructureIterativeNonBornee",
-						"abscisse": "62.123676214234365vw",
-						"ordonnee": "17.97690215982249vw",
+						"abscisse": "62.264150943396245vw",
+						"ordonnee": "16.981132075471702vw",
 						"enfants": [
 							{
 								"typeElement": "Probleme",
