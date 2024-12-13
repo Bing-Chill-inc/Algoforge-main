@@ -73,6 +73,12 @@ describe("Algos: Validator", () => {
 		// Vérification du résultat.
 		expect(result.error.issues).toBeArrayOfSize(8);
 	});
+	test("Algo référence n°4. -> présence de décompositions.", async () => {
+		// Validation de l'algorithme.
+		const result = validationAlgo("algo-4");
+		// Vérification du résultat.
+		expect(result).toHaveProperty("success", true);
+	});
 	test("Algo référence n°10. -> aucune erreur.", async () => {
 		// Validation de l'algorithme.
 		const result = validationAlgo("algo-complet");

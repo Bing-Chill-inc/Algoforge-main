@@ -41,6 +41,7 @@ const BaseProblemeSchema = z.object({
 	libelle: z.string(),
 	listeDonnes: z.array(z.string()).default([""]),
 	listeResultats: z.array(z.string()).default([""]),
+	estDecomposeAilleurs: z.boolean().optional(),
 });
 const ProblemeSchema = BaseProblemeSchema.extend({
 	enfants: enfants.default([]),
@@ -105,6 +106,7 @@ export class AlgoValidator {
 	 * Valide un algorithme.
 	 * @param algo Algorithme à valider.
 	 * @returns Objet contenant le résultat de la validation.
+	 * Pour sauvegarder l'algorithme conforme, utilisez la propriété `data`.
 	 * @example
 	 * // Types de retour possibles:
 	 * // { success: true, data: [{...}] }

@@ -65,7 +65,6 @@ app.post("/edit", (req, res) => {
 		);
 	}
 
-	// console.log(content);
 	res.send(content);
 });
 
