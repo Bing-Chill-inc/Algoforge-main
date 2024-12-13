@@ -1,5 +1,6 @@
-import { Entity, PrimaryGeneratedColumn, Column, OneToMany } from "typeorm";
+import { Entity, PrimaryGeneratedColumn, Column, OneToMany, ManyToOne } from "typeorm";
 import type { Relation } from "typeorm";
+import { Dossier } from "./Dossier.schema";
 import { PermAlgorithme } from "./PermAlgorithme.schema";
 
 @Entity()
@@ -15,6 +16,9 @@ export class Algorithme {
 
 	@Column({ type: "date" })
 	dateModification: Date;
+
+	@ManyToOne(() => Dossier, (dossier) => dossier.algos)
+	dossier: Relation<Dossier>;
 
 	@OneToMany(() => PermAlgorithme, (permAlgo) => permAlgo.idAlgorithme)
 	permAlgorithmes: Relation<PermAlgorithme[]>;

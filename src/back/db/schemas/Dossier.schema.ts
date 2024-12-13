@@ -7,6 +7,7 @@ import {
 } from "typeorm";
 import type { Relation } from "typeorm";
 import { PermDossier } from "./PermDossier.schema";
+import { Algorithme } from "./Algorithme.schema";
 
 @Entity()
 export class Dossier {
@@ -24,6 +25,9 @@ export class Dossier {
 
 	@Column({ type: "date" })
 	dateModification: Date;
+
+	@OneToMany(() => Algorithme, (algo) => algo.dossier)
+	algos: Algorithme[];
 
 	@OneToMany(() => PermDossier, (permDossier) => permDossier.idDossier)
 	permDossiers: Relation<PermDossier[]>;
