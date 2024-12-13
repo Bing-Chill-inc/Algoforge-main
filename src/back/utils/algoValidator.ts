@@ -4,6 +4,7 @@ import { Logger } from "./logger";
 // Définition des types d'éléments possibles.
 enum TypeElement {
 	Probleme = "Probleme",
+	Procedure = "Procedure",
 	StructureIterativeBornee = "StructureIterativeBornee",
 	StructureIterativeNonBornee = "StructureIterativeNonBornee",
 	StructureSi = "StructureSi",
@@ -13,6 +14,7 @@ enum TypeElement {
 }
 const TypeElementEnum = z.enum([
 	TypeElement.Probleme,
+	TypeElement.Procedure,
 	TypeElement.StructureIterativeBornee,
 	TypeElement.StructureIterativeNonBornee,
 	TypeElement.StructureSi,
@@ -36,9 +38,12 @@ const enfants = z.array(
 	),
 );
 
-// -> Probleme
+// -> Probleme/Procédure
 const BaseProblemeSchema = z.object({
-	typeElement: TypeElementEnum.extract([TypeElement.Probleme]),
+	typeElement: TypeElementEnum.extract([
+		TypeElement.Probleme,
+		TypeElement.Procedure,
+	]),
 	abscisse: coordonneeSchema,
 	ordonnee: coordonneeSchema,
 	libelle: z.string().nonempty(),

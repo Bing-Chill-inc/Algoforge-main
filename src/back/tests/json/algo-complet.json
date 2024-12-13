@@ -12,7 +12,7 @@
 				"abscisse": "18.23245550769359vw",
 				"ordonnee": "10.075494324915223vw",
 				"libelle": "Initialiser la recherche",
-				"listeDonnes": [""],
+				"listeDonnes": ["feur"],
 				"listeResultats": ["trouve"],
 				"enfants": [
 					{
@@ -121,9 +121,9 @@
 								]
 							},
 							{
-								"typeElement": "Probleme",
-								"abscisse": "63.84280877806782vw",
-								"ordonnee": "23.576718529182422vw",
+								"typeElement": "Procedure",
+								"abscisse": "65.5256064690027vw",
+								"ordonnee": "24.121293800539075vw",
 								"libelle": "Passer à l'élément suivant",
 								"listeDonnes": [""],
 								"listeResultats": [""],
