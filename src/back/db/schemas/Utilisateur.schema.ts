@@ -21,13 +21,13 @@ export class Utilisateur {
 	@Column({ type: "date" })
 	dateInscription: Date;
 
-	@Column({ type: "int" })
+	@Column({ type: "int", default: 0 })
 	theme: number;
 
 	@Column({ type: "varchar", length: 255 })
 	urlPfp: string;
 
-	@Column({ type: "boolean" })
+	@Column({ type: "boolean", default: false })
 	isVerified: boolean;
 
 	@OneToMany(() => Token, (token) => token.utilisateur)

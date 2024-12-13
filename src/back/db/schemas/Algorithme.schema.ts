@@ -1,4 +1,10 @@
-import { Entity, PrimaryGeneratedColumn, Column, OneToMany, ManyToOne } from "typeorm";
+import {
+	Entity,
+	PrimaryGeneratedColumn,
+	Column,
+	OneToMany,
+	ManyToOne,
+} from "typeorm";
 import type { Relation } from "typeorm";
 import { Dossier } from "./Dossier.schema";
 import { PermAlgorithme } from "./PermAlgorithme.schema";
@@ -8,7 +14,7 @@ export class Algorithme {
 	@PrimaryGeneratedColumn()
 	id: number;
 
-	@Column({ type: "varchar", length: 255 })
+	@Column({ type: "varchar", length: 255, default: "Nouvel algorithme" })
 	nom: string;
 
 	@Column({ type: "date" })

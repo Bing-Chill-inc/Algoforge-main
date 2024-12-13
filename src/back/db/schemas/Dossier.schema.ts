@@ -14,7 +14,7 @@ export class Dossier {
 	@PrimaryGeneratedColumn()
 	id: number;
 
-	@Column({ type: "varchar", length: 255 })
+	@Column({ type: "varchar", length: 255, default: "Nouveau dossier" })
 	nom: string;
 
 	@OneToOne(() => Dossier, (dossier) => dossier.id)
