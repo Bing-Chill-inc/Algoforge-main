@@ -8,6 +8,7 @@ enum TypeElement {
 	StructureIterativeBornee = "StructureIterativeBornee",
 	StructureIterativeNonBornee = "StructureIterativeNonBornee",
 	StructureSi = "StructureSi",
+	StructureSwitch = "StructureSwitch",
 	Condition = "Condition",
 	ConditionSortie = "ConditionSortie",
 	DictionnaireDonnee = "DictionnaireDonnee",
@@ -18,6 +19,7 @@ const TypeElementEnum = z.enum([
 	TypeElement.StructureIterativeBornee,
 	TypeElement.StructureIterativeNonBornee,
 	TypeElement.StructureSi,
+	TypeElement.StructureSwitch,
 	TypeElement.Condition,
 	TypeElement.ConditionSortie,
 	TypeElement.DictionnaireDonnee,
@@ -30,6 +32,7 @@ const enfants = z.array(
 		z.discriminatedUnion("typeElement", [
 			ProblemeSchema,
 			StructureSiSchema,
+			StructureSwitch,
 			StructureIterativeBorneeSchema,
 			StructureIterativeNonBorneeSchema,
 			ConditionSortieSchema,
@@ -100,11 +103,21 @@ const BaseConditionSchema = z.object({
 const ConditionSchema = BaseConditionSchema.extend({
 	enfants: enfants.default([]),
 });
+
 // -> Structure si
 const StructureSiSchema = z.object({
 	typeElement: TypeElementEnum.extract([TypeElement.StructureSi]),
 	abscisse: coordonneeSchema,
 	ordonnee: coordonneeSchema,
+	conditions: z.array(ConditionSchema).default([]),
+});
+
+// -> Structure switch
+const StructureSwitch = z.object({
+	typeElement: TypeElementEnum.extract([TypeElement.StructureSwitch]),
+	abscisse: coordonneeSchema,
+	ordonnee: coordonneeSchema,
+	expressionATester: z.string().nonempty(),
 	conditions: z.array(ConditionSchema).default([]),
 });
 

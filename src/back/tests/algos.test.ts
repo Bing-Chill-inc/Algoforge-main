@@ -55,7 +55,7 @@ describe("Algos: empty database", () => {
  * Ce qui nous intéresse ici est de vérifier que l'algorithme est bien conforme à la structure attendue.
  */
 describe("Algos: Validator", () => {
-	test("Algo référence n°1. -> aucune erreur.", async () => {
+	test("Algo référence n°1. -> aucune erreur: présence que de problèmes.", async () => {
 		// Validation de l'algorithme.
 		const result = validationAlgo("algo-1");
 		// Vérification du résultat.
@@ -73,9 +73,15 @@ describe("Algos: Validator", () => {
 		// Vérification du résultat.
 		expect(result.error.issues).toBeArrayOfSize(8);
 	});
-	test("Algo référence n°4. -> présence de décompositions.", async () => {
+	test("Algo référence n°4. -> aucune erreur: présence de décompositions.", async () => {
 		// Validation de l'algorithme.
 		const result = validationAlgo("algo-4");
+		// Vérification du résultat.
+		expect(result).toHaveProperty("success", true);
+	});
+	test("Algo référence n°5. -> aucune erreur: présence de switch.", async () => {
+		// Validation de l'algorithme.
+		const result = validationAlgo("algo-5");
 		// Vérification du résultat.
 		expect(result).toHaveProperty("success", true);
 	});
