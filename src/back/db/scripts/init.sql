@@ -3,9 +3,9 @@ CREATE TABLE IF NOT EXISTS Utilisateur (
     adresseMail VARCHAR(255) NOT NULL,
     mdpHash VARCHAR(255) NOT NULL,
     dateInscription DATE NOT NULL,
-    theme INT NOT NULL,
-    urlPfp VARCHAR(255) NOT NULL,
-    isVerified BOOLEAN NOT NULL
+    theme INT NOT NULL DEFAULT 0,
+    urlPfp VARCHAR(255),
+    isVerified BOOLEAN NOT NULL DEFAULT FALSE
 );
 
 CREATE TABLE IF NOT EXISTS Token (
@@ -18,7 +18,7 @@ CREATE TABLE IF NOT EXISTS Token (
 
 CREATE TABLE IF NOT EXISTS Dossier (
     id SERIAL PRIMARY KEY,
-    nom VARCHAR(255) NOT NULL,
+    nom VARCHAR(255) NOT NULL DEFAULT 'Nouveau dossier',
     dateCreation DATE NOT NULL,
     dateModification DATE NOT NULL,
     idParent INT,
@@ -27,7 +27,7 @@ CREATE TABLE IF NOT EXISTS Dossier (
 
 CREATE TABLE IF NOT EXISTS Algorithme (
     id SERIAL PRIMARY KEY,
-    nom VARCHAR(255) NOT NULL,
+    nom VARCHAR(255) NOT NULL DEFAULT 'Nouvel algorithme',
     dateCreation DATE NOT NULL,
     dateModification DATE NOT NULL,
     idDossier INT NOT NULL,
