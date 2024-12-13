@@ -1,3 +1,4 @@
+import { readFileSync } from "fs";
 import express from "express";
 import cors from "cors";
 import path from "path";
@@ -32,6 +33,40 @@ app.use("/cloud", express.static(path.join(__dirname, "/../front-cloud/dist")));
 
 app.get("/", (_, res) => {
 	res.redirect("/edit");
+});
+
+// Ouverture de algorithme en paramètre.
+app.post("/edit", (req, res) => {
+	const { corpAlgo, nomFichier } = req.body;
+	let content = readFileSync(
+		path.join(__dirname, "/../front-editeur/src/index.html"),
+		"utf8",
+	);
+
+	// Chargement du contenu de l'algorithme.
+	if (corpAlgo) {
+		let algoContent = JSON.parse(corpAlgo);
+		if (typeof algoContent === "string") {
+			algoContent = JSON.parse(algoContent);
+		}
+		algoContent = JSON.stringify(algoContent);
+		content = content.replace(
+			"</html>",
+			`<script>editeur._espacePrincipal.chargerDepuisJSON(${algoContent});</script></html>`,
+		);
+	}
+
+	// Chargement du titre de l'algorithme.
+	if (nomFichier) {
+		content = content.replace(
+			"</html>",
+			`<script>titreAlgo.innerText = '${nomFichier}';
+			document.title = 'Algoforge - ${nomFichier}';</script></html>`,
+		);
+	}
+
+	// console.log(content);
+	res.send(content);
 });
 
 // Init database connection
