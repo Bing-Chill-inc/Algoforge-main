@@ -11,11 +11,10 @@ import {
  */
 export class UserRegisterDTO {
 	@IsString()
-	@MinLength(1)
+	@MinLength(3)
 	@MaxLength(255)
 	pseudo: string;
 
-	@IsString()
 	@IsEmail()
 	email: string;
 
@@ -29,7 +28,6 @@ export class UserRegisterDTO {
  * Classe de validation pour la connexion d'un utilisateur.
  */
 export class UserLoginDTO {
-	@IsString()
 	@IsEmail()
 	email: string;
 
@@ -45,13 +43,12 @@ export class UserLoginDTO {
 export class UserUpdateDTO {
 	@IsString()
 	@IsOptional()
-	@MinLength(1)
+	@MinLength(3)
 	@MaxLength(255)
 	pseudo: string;
 
-	@IsString()
-	@IsOptional()
 	@IsEmail()
+	@IsOptional()
 	email: string;
 
 	@IsString()

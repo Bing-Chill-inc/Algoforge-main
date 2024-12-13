@@ -27,6 +27,9 @@ export class Utilisateur {
 	@Column({ type: "varchar", length: 255 })
 	urlPfp: string;
 
+	@Column({ type: "boolean" })
+	isVerified: boolean;
+
 	@OneToMany(() => Token, (token) => token.utilisateur)
 	tokens: Token[];
 

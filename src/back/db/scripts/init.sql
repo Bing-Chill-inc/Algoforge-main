@@ -4,7 +4,8 @@ CREATE TABLE IF NOT EXISTS Utilisateur (
     mdpHash VARCHAR(255) NOT NULL,
     dateInscription DATE NOT NULL,
     theme INT NOT NULL,
-    urlPfp VARCHAR(255) NOT NULL
+    urlPfp VARCHAR(255) NOT NULL,
+    isVerified BOOLEAN NOT NULL
 );
 
 CREATE TABLE IF NOT EXISTS Token (
