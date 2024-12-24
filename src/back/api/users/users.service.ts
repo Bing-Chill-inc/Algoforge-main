@@ -46,6 +46,7 @@ export class UsersService {
 		newUser.adresseMail = data.email;
 		newUser.mdpHash = hash;
 		newUser.pseudo = data.pseudo;
+		newUser.dateInscription = new Date();
 
 		// Enregistrement de l'utilisateur
 		const savedUser = await this.utilisateurRepository.save(newUser);
@@ -59,7 +60,10 @@ export class UsersService {
 		const mailToken = await createMailToken(savedUser.id);
 
 		if (!mailToken) {
-			return new Res(500, "Erreur lors de la création du token de confirmation");
+			return new Res(
+				500,
+				"Erreur lors de la création du token de confirmation",
+			);
 		}
 
 		// TODO: Envoi du mail de confirmation
@@ -93,9 +97,12 @@ export class UsersService {
 		user.isVerified = true;
 
 		// Enregistrement de l'utilisateur
-		if (!await this.utilisateurRepository.save(user)) {
-			return new Res(500, "Erreur lors de la confirmation de l'inscription");
-		};
+		if (!(await this.utilisateurRepository.save(user))) {
+			return new Res(
+				500,
+				"Erreur lors de la confirmation de l'inscription",
+			);
+		}
 
 		return new Res(200, "Inscription confirmée");
 	}

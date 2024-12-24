@@ -18,13 +18,13 @@ export class Utilisateur {
 	@Column({ type: "varchar", length: 255 })
 	mdpHash: string;
 
-	@Column({ type: "date" })
+	@Column({ type: "datetime" })
 	dateInscription: Date;
 
 	@Column({ type: "int", default: 0 })
 	theme: number;
 
-	@Column({ type: "varchar", length: 255 })
+	@Column({ type: "varchar", length: 255, nullable: true })
 	urlPfp: string;
 
 	@Column({ type: "boolean", default: false })

@@ -17,10 +17,10 @@ export class Algorithme {
 	@Column({ type: "varchar", length: 255, default: "Nouvel algorithme" })
 	nom: string;
 
-	@Column({ type: "date" })
+	@Column({ type: "datetime" })
 	dateCreation: Date;
 
-	@Column({ type: "date" })
+	@Column({ type: "datetime" })
 	dateModification: Date;
 
 	@ManyToOne(() => Dossier, (dossier) => dossier.algos)

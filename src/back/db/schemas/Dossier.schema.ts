@@ -20,10 +20,10 @@ export class Dossier {
 	@OneToOne(() => Dossier, (dossier) => dossier.id)
 	idParent: Dossier;
 
-	@Column({ type: "date" })
+	@Column({ type: "datetime" })
 	dateCreation: Date;
 
-	@Column({ type: "date" })
+	@Column({ type: "datetime" })
 	dateModification: Date;
 
 	@OneToMany(() => Algorithme, (algo) => algo.dossier)

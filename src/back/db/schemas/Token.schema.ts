@@ -7,10 +7,10 @@ export class Token {
 	@PrimaryColumn({ type: "varchar", length: 255 })
 	token: string;
 
-	@Column({ type: "date" })
+	@Column({ type: "datetime" })
 	dateCreation: Date;
 
-	@Column({ type: "date" })
+	@Column({ type: "datetime" })
 	dateExpiration: Date;
 
 	@ManyToOne(() => Utilisateur, (utilisateur) => utilisateur.tokens)
