@@ -7,6 +7,7 @@ import { Res } from "../../types/response.entity";
 import { createMailToken } from "../../utils/mailConfirmToken";
 
 import bcrypt from "bcrypt";
+import { Logger } from "../../utils/logger";
 
 export class UsersService {
 	utilisateurRepository: Repository<Utilisateur> =
@@ -67,6 +68,11 @@ export class UsersService {
 		}
 
 		// TODO: Envoi du mail de confirmation
+		Logger.debug(
+			`Mail de confirmation (token): ${mailToken}`,
+			"UsersService",
+			2,
+		);
 
 		// Suppression du hash du mot de passe
 		savedUser.mdpHash = undefined;

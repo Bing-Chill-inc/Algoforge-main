@@ -1,5 +1,6 @@
 import { UsersService } from "../api/users/users.service";
 import { Utilisateur } from "../db/schemas/Utilisateur.schema";
+import { Buffer } from "buffer";
 
 /** Génère un token de confirmation de mail, à partir d'infos utilisateur.
  *
@@ -25,16 +26,19 @@ export async function createMailToken(id: number) {
 	let email = userData.adresseMail.toUpperCase().substring(0, 3);
 
 	for (let i = 0; i < 3; i++) {
-		email = String.fromCharCode(email.charCodeAt(i) + (id % 26));
+		let charCode = email.charCodeAt(i) + (id % 26);
+		if (charCode > 90) charCode -= 26;
+		email =
+			email.substring(0, i) +
+			String.fromCharCode(charCode) +
+			email.substring(i + 1);
 	}
 
 	token += "_" + email;
 
-	// Date d'inscription (année)
-	token += userData.dateInscription.getFullYear().toString();
-
-	// Chiffrement en base64
-	token = atob(token);
+	// Date d'inscription
+	token += userData.dateInscription.getTime().toString();
+	token = Buffer.from(token).toString("base64");
 
 	return token;
 }
