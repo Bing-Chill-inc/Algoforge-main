@@ -89,11 +89,11 @@ AppDataSource.initialize()
 		// Start server
 		app.listen(port, () => {
 			Logger.log(`Server is running on http://localhost:${port}`, "main");
-		});
 
-		// On indique que l'application est initialisée.
-		// Cela permet de lancer les tests après que l'application soit prête.
-		app.locals.initialized = true;
+			// On indique que l'application est initialisée.
+			// Cela permet de lancer les tests après que l'application soit prête.
+			app.locals.initialized = true;
+		});
 	})
 	.catch((err) => {
 		Logger.error(
