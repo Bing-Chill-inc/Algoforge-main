@@ -32,12 +32,15 @@ export class UsersController {
 			expressAsyncHandler(this.recover.bind(this)),
 		);
 
-		this.router.get(":id", expressAsyncHandler(this.getUser.bind(this)));
+		this.router.get("/:id", expressAsyncHandler(this.getUser.bind(this)));
 
-		this.router.put(":id", expressAsyncHandler(this.updateUser.bind(this)));
+		this.router.put(
+			"/:id",
+			expressAsyncHandler(this.updateUser.bind(this)),
+		);
 
 		this.router.delete(
-			":id",
+			"/:id",
 			expressAsyncHandler(this.deleteUser.bind(this)),
 		);
 	}
@@ -45,6 +48,10 @@ export class UsersController {
 	// Fonction privée pour vérifier l'utilisateur à partir de son token et de l'id
 	private async verifyUser(req: Request, res: Response, id: number) {
 		const verify = await this.service.verify(req.headers.authorization);
+		if (verify.statut === 401) {
+			res.status(verify.statut).json(verify);
+			return false;
+		}
 
 		if (verify.data.tokenDB.utilisateur.id !== id) {
 			res.status(403).json({
@@ -131,7 +138,8 @@ export class UsersController {
 		const id = +req.params.id;
 
 		// On vérifie que l'utilisateur qui fait la requête est bien celui qu'il veut récupérer
-		if (!(await this.verifyUser(req, res, id))) return;
+		const isVerified = await this.verifyUser(req, res, id);
+		if (!isVerified) return res;
 
 		// S'il a les droits, on récupère l'utilisateur
 		const reponse = await this.service.getUser(id);

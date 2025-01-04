@@ -29,16 +29,44 @@ describe("Users: new user", () => {
 			expect(response.status).toBe(201);
 			expect(response.body).toHaveProperty("message", "Utilisateur créé");
 		});
-		test.todo("POST /api/users/register -> erreur: Email déjà utilisé.");
+		test("POST /api/users/register -> erreur: Email déjà utilisé.", async () => {
+			const payload = new UserRegisterDTO();
+			payload.email = "test@toxykaubleu.fr";
+			payload.password = "test";
+			payload.pseudo = "Test de ToxykAuBleu";
 
-		// TODO: Go dans users.controller.ts réaliser le tag avec FIXME.
-		test.todo(
-			"GET /api/users/1 -> erreur: <insert error from #users.controller.ts",
-		);
+			const response = await request
+				.post("/api/users/register")
+				.send(payload);
+			Logger.debug(JSON.stringify(response.body), "test: users", 5);
+			expect(response.status).toBe(409);
+			expect(response.body).toHaveProperty(
+				"message",
+				"Email déjà utilisé",
+			);
+		});
+
+		// L'utilisateur n'est toujours pas connecté après son inscription.
+		test("GET /api/users/1 -> erreur: Token invalide.", async () => {
+			const response = await request.get("/api/users/1");
+			Logger.debug(JSON.stringify(response.body), "test: users", 5);
+			expect(response.status).toBe(401);
+			expect(response.body).toHaveProperty("message", "Token invalide");
+		});
 	});
 
 	describe("login", () => {
-		test.todo("POST /api/users/login -> erreur: Il manque des données.");
+		let token: string;
+
+		test("POST /api/users/login -> erreur: Il manque des données.", async () => {
+			const response = await request.post("/api/users/login").send({});
+			Logger.debug(JSON.stringify(response.body), "test: users", 5);
+			expect(response.status).toBe(400);
+			expect(response.body).toHaveProperty(
+				"message",
+				"Il manque des données",
+			);
+		});
 		test.todo("POST /api/users/login -> erreur: Utilisateur introuvable.");
 		test.todo("POST /api/users/login -> erreur: Mot de passe incorrect.");
 		test.todo("POST /api/users/login -> Connexion réussie.");
