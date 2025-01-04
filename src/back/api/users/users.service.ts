@@ -160,7 +160,7 @@ export class UsersService {
 			token: token,
 		});
 
-		if (!deletedToken) {
+		if (deletedToken.affected <= 0) {
 			return new Res(404, "Token introuvable");
 		}
 

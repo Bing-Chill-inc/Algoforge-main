@@ -155,7 +155,8 @@ export class UsersController {
 		const id = +req.params.id;
 
 		// On vérifie que l'utilisateur qui fait la requête est bien celui qu'il veut récupérer
-		if (!(await this.verifyUser(req, res, id))) return;
+		const isVerified = await this.verifyUser(req, res, id);
+		if (!isVerified) return res;
 
 		// S'il a les droits, on met à jour l'utilisateur
 
@@ -181,7 +182,8 @@ export class UsersController {
 		const id = +req.params.id;
 
 		// On vérifie que l'utilisateur qui fait la requête est bien celui qu'il veut récupérer
-		if (!(await this.verifyUser(req, res, id))) return;
+		const isVerified = await this.verifyUser(req, res, id);
+		if (!isVerified) return res;
 
 		// S'il a les droits, on supprime l'utilisateur
 		const reponse = await this.service.deleteUser(id);
