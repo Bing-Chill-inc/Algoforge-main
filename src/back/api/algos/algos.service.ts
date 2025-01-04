@@ -1,10 +1,20 @@
+import { existsSync, mkdirSync, unlink, unlinkSync, writeFileSync } from "fs";
 import { Algorithme } from "../../db/schemas/Algorithme.schema";
 import { AppDataSource } from "../../db/data-source";
 import { PermAlgorithme } from "../../db/schemas/PermAlgorithme.schema";
 import { Droits } from "../../types/droits.enum";
 import { AlgoCreateDTO, AlgoUpdateDTO } from "./algos.dto";
+import { AlgoValidator } from "../../utils/algoValidator";
+import { Res } from "../../types/response.entity";
+import path from "path";
+import { Logger } from "../../utils/logger";
 
 export class AlgosService {
+	public static readonly dataPath: string = path.join(
+		__dirname,
+		"../../../../data/algos/",
+	);
+
 	/**
 	 * Récupère les algorithmes que l'utilisateur a le droit de voir (propriétaire, écriture+lecture, lecture seule).
 	 * @param id Id de l'utilisateur.
@@ -45,6 +55,12 @@ export class AlgosService {
 	 * @returns L'algorithme créé.
 	 */
 	async createAlgo(algo: AlgoCreateDTO) {
+		// Validation de l'algorithme.
+		const validationResult = AlgoValidator.validateAlgo(algo.sourceCode);
+		if (!validationResult.success) {
+			return new Res(400, "Algorithme invalide", validationResult);
+		}
+
 		const algoRepository = AppDataSource.manager.getRepository(Algorithme);
 		const permAlgoRepository =
 			AppDataSource.manager.getRepository(PermAlgorithme);
@@ -67,7 +83,8 @@ export class AlgosService {
 		savedAlgo.permAlgorithmes = [savedPerm];
 
 		// Enregistrement de l'algorithme dans le système de fichiers.
-		// TODO: à implémenter. utiliser algo.sourceCode.
+		this.writeAlgoToDisk(savedAlgo.id, algo.sourceCode);
+
 		return savedAlgo;
 	}
 
@@ -77,25 +94,29 @@ export class AlgosService {
 	 * @returns L'algorithme mis à jour.
 	 */
 	// TODO: vérifier si l'utilisateur de la requête a le droit de modifier l'algorithme.
-	// TODO: mettre à jour l'algorithme dans le système de fichiers.
+	// TODO: mettre à jour les permissions de l'algorithme.
 	async updateAlgo(algo: AlgoUpdateDTO) {
+		// Validation de l'algorithme.
+		const validationResult = AlgoValidator.validateAlgo(algo.sourceCode);
+		if (!validationResult.success) {
+			return new Res(400, "Algorithme invalide", validationResult);
+		}
+		algo.sourceCode = JSON.parse(JSON.stringify(validationResult.data));
+
 		const algoRepository = AppDataSource.manager.getRepository(Algorithme);
 
 		// Récupération de l'algorithme.
-		const algoToUpdate = await algoRepository.findOne({
-			where: { id: algo.id },
-		});
-
-		if (!algoToUpdate) {
-			return null;
-		}
+		const algoToUpdate = await this.getAlgo(algo.id);
+		if (!algoToUpdate) return null;
 
 		// Mise à jour de l'algorithme.
 		algoToUpdate.nom = algo.nom;
 		algoToUpdate.dateModification = new Date();
-
 		// Enregistrement de l'algorithme.
 		const savedAlgo = await algoRepository.save(algoToUpdate);
+
+		// Mise à jour de l'algorithme dans le système de fichiers.
+		this.writeAlgoToDisk(savedAlgo.id, algo.sourceCode);
 
 		return savedAlgo;
 	}
@@ -121,5 +142,23 @@ export class AlgosService {
 		// TODO: supprimer l'algorithme du système de fichiers.
 
 		return deletedAlgo;
+	}
+
+	private writeAlgoToDisk(id: number, algo: Object) {
+		const algoPath = path.normalize(AlgosService.dataPath + id + ".json");
+		try {
+			if (!existsSync(algoPath))
+				mkdirSync(path.dirname(algoPath), { recursive: true });
+
+			writeFileSync(algoPath, JSON.stringify(algo), {
+				encoding: "utf8",
+				flag: "w",
+			});
+			return true;
+		} catch (error) {
+			if (error instanceof Error)
+				Logger.error(error.message, "AlgosService: writeAlgoToDisk");
+			throw error;
+		}
 	}
 }

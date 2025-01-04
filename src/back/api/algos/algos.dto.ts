@@ -50,14 +50,6 @@ export class AlgoUpdateDTO {
 	@MaxLength(255)
 	nom: string;
 
-	@IsDate()
-	@IsOptional()
-	dateCreation: Date;
-
-	@IsDate()
-	@IsOptional()
-	dateModification: Date;
-
 	@IsArray()
 	@IsOptional()
 	permsAlgorithme: PermAlgorithme[];

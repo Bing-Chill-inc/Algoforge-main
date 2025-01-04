@@ -69,17 +69,20 @@ export class AlgosController {
 	// POST /
 	private async createAlgo(req: Request, res: Response) {
 		// Récupération des données de la requête
-		const { idUtilisateur, nom, sourceCode } = req.body;
-		if (!idUtilisateur || nom || sourceCode) {
+		const { ownerId, nom, sourceCode } = req.body;
+		if (!ownerId || !nom || !sourceCode) {
 			return res.status(400).json(new Res(400, "Données manquantes"));
 		}
 
 		const data = new AlgoCreateDTO();
 		data.nom = nom;
-		data.ownerId = idUtilisateur;
+		data.ownerId = ownerId;
 		data.sourceCode = sourceCode;
 
 		const result = await this.service.createAlgo(data);
+		if (result instanceof Res) {
+			return res.status(result.statut).json(result);
+		}
 
 		return res.status(201).json(new Res(201, "Algorithme créé", result));
 	}
@@ -88,30 +91,19 @@ export class AlgosController {
 	private async updateAlgo(req: Request, res: Response) {
 		// Récupération des données de la requête
 		const { id } = req.params;
-		const {
-			nom,
-			dateCreation,
-			dateModification,
-			permsAlgorithme,
-			sourceCode,
-		} = req.body;
-		if (
-			!nom ||
-			!dateCreation ||
-			!dateModification ||
-			!permsAlgorithme ||
-			!sourceCode
-		) {
+		const { nom, permsAlgorithme, sourceCode } = req.body;
+		if (!id || !nom || !permsAlgorithme || !sourceCode) {
+			console.log(id, nom, permsAlgorithme);
 			return res.status(400).json(new Res(400, "Données manquantes"));
 		}
 
 		const data = new AlgoUpdateDTO();
 		data.id = +id;
 		data.nom = nom;
-		data.dateCreation = dateCreation;
-		data.dateModification = dateModification;
-		data.permsAlgorithme = permsAlgorithme;
 		data.sourceCode = sourceCode;
+		if (Array.isArray(permsAlgorithme) && permsAlgorithme?.length > 0) {
+			data.permsAlgorithme = permsAlgorithme;
+		}
 
 		const updatedAlgo = await this.service.updateAlgo(data);
 

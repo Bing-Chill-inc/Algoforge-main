@@ -3,127 +3,229 @@
 import { Logger } from "../utils/logger";
 import { server, request } from "./setup";
 import { AlgoValidator } from "../utils/algoValidator";
-import { readFileSync } from "fs";
+import { readFileSync, rmdirSync, existsSync } from "fs";
 
-import { describe, expect, test } from "bun:test";
+import { beforeAll, describe, expect, test } from "bun:test";
 import path from "path";
+import { AlgoCreateDTO, AlgoUpdateDTO } from "../api/algos/algos.dto";
+import { AlgosService } from "../api/algos/algos.service";
 
-/**
- * Tests des routes de l'API des algorithmes.
- * Nous considérons que la base de données est vide.
- */
-describe("Algos: empty database", () => {
-	test("GET /api/algos/byUserId/:id -> Aucun algorithme trouvé.", async () => {
-		const response = await request.get("/api/algos/byUserId/1");
-		Logger.debug(JSON.stringify(response.body), "test: algos", 5);
-		expect(response.status).toBe(404);
-		expect(response.body).toHaveProperty("message");
+export const algosTest = () => {
+	beforeAll(() => {
+		Logger.log("Clearing data/algos folder...", "test: algos");
+		rmdirSync(AlgosService.dataPath, { recursive: true });
+		Logger.log("Cleared !", "test: algos");
 	});
 
-	test("GET /api/algos/:id -> Algorithme non trouvé.", async () => {
-		const response = await request.get("/api/algos/1");
-		Logger.debug(JSON.stringify(response.body), "test: algos", 5);
-		expect(response.status).toBe(404);
-		expect(response.body).toHaveProperty("message");
+	/**
+	 * Tests des routes de l'API des algorithmes.
+	 * Nous considérons que la base de données est vide.
+	 */
+	describe("Algos: empty database", () => {
+		test("GET /api/algos/byUserId/:id -> erreur: Aucun algorithme trouvé.", async () => {
+			const response = await request.get("/api/algos/byUserId/1");
+			Logger.debug(JSON.stringify(response.body), "test: algos", 5);
+			expect(response.status).toBe(404);
+			expect(response.body).toHaveProperty(
+				"message",
+				"Aucun algorithme trouvé",
+			);
+		});
+
+		test("GET /api/algos/:id -> erreur: Algorithme non trouvé.", async () => {
+			const response = await request.get("/api/algos/1");
+			Logger.debug(JSON.stringify(response.body), "test: algos", 5);
+			expect(response.status).toBe(404);
+			expect(response.body).toHaveProperty(
+				"message",
+				"Algorithme non trouvé",
+			);
+		});
+
+		test("POST /api/algos/ -> erreur: Données manquantes.", async () => {
+			const response = await request.post("/api/algos").send({});
+			Logger.debug(JSON.stringify(response.body), "test: algos", 5);
+			expect(response.status).toBe(400);
+			expect(response.body).toHaveProperty(
+				"message",
+				"Données manquantes",
+			);
+		});
+
+		test("PUT /api/algos/:id -> erreur: Données manquantes.", async () => {
+			const response = await request.put("/api/algos/1").send({});
+			Logger.debug(JSON.stringify(response.body), "test: algos", 5);
+			expect(response.status).toBe(400);
+			expect(response.body).toHaveProperty(
+				"message",
+				"Données manquantes",
+			);
+		});
+
+		test("DELETE /api/algos/:id -> erreur: Algorithme non trouvé.", async () => {
+			const response = await request.delete("/api/algos/1");
+			Logger.debug(JSON.stringify(response.body), "test: algos", 5);
+			expect(response.status).toBe(404);
+			expect(response.body).toHaveProperty(
+				"message",
+				"Algorithme non trouvé",
+			);
+		});
 	});
 
-	test("POST /api/algos/ -> Données manquantes.", async () => {
-		const response = await request.post("/api/algos").send({});
-		Logger.debug(JSON.stringify(response.body), "test: algos", 5);
-		expect(response.status).toBe(400);
-		expect(response.body).toHaveProperty("message");
+	/**
+	 * Tests des routes de l'API des algorithmes, avec la manipulation de plusieurs algorithmes.
+	 */
+	describe("Algos: creating data", () => {
+		// TODO: se connecter avec un utilisateur.
+
+		test("POST /api/algos/ -> erreur: Algorithme invalide.", async () => {
+			const payload = new AlgoCreateDTO();
+			payload.nom = "Algorithme test";
+			payload.ownerId = 1;
+			payload.sourceCode = readAlgo("algo-3");
+
+			const response = await request.post("/api/algos").send(payload);
+			Logger.debug(JSON.stringify(response.body), "test: algos", 5);
+			// Vérification de la réponse.
+			expect(response.status).toBe(400);
+			expect(response.body).toHaveProperty(
+				"message",
+				"Algorithme invalide",
+			);
+
+			// Vérification de la non-création de l'algorithme.
+			const filePath = AlgosService.dataPath + "1.json";
+			expect(existsSync(filePath)).toBe(false);
+		});
+		test("POST /api/algos/ -> succès: Algorithme créé.", async () => {
+			const payload = new AlgoCreateDTO();
+			payload.nom = "Algorithme test";
+			payload.ownerId = 1;
+			payload.sourceCode = readAlgo("algo-complet");
+
+			const response = await request.post("/api/algos").send(payload);
+			Logger.debug(JSON.stringify(response.body), "test: algos", 5);
+			// Vérification de la réponse.
+			expect(response.status).toBe(201);
+			expect(response.body).toHaveProperty("message", "Algorithme créé");
+
+			// Vérification de la création de l'algorithme.
+			const filePath = AlgosService.dataPath + "1.json";
+			expect(existsSync(filePath)).toBe(true);
+		});
+		test("PUT /api/algos/:id -> succès: Algorithme mis à jour.", async () => {
+			const payload = new AlgoUpdateDTO();
+			payload.id = 1;
+			payload.nom = "Algorithme test mis à jour";
+			payload.permsAlgorithme = []; // On ne change pas les permissions.
+			payload.sourceCode = readAlgo("algo-1");
+
+			const response = await request.put("/api/algos/1").send(payload);
+			Logger.debug(JSON.stringify(response.body), "test: algos", 5);
+			// Vérification de la réponse.
+			expect(response.status).toBe(200);
+			expect(response.body).toHaveProperty(
+				"message",
+				"Algorithme mis à jour",
+			);
+
+			// Vérification de la mise à jour de l'algorithme.
+			const filePath = AlgosService.dataPath + "1.json";
+			expect(existsSync(filePath)).toBe(true);
+		});
+		test("GET /api/algos/byUserId/:id -> succès: Algorithme trouvé.", async () => {
+			const response = await request.get("/api/algos/byUserId/1");
+			Logger.debug(JSON.stringify(response.body), "test: algos", 5);
+			expect(response.status).toBe(200);
+			expect(response.body).toHaveProperty(
+				"message",
+				"Algorithmes trouvés",
+			);
+			expect(response.body.data).toBeArrayOfSize(1);
+		});
+		test.todo("DELETE /api/algos/:id -> succès: Algorithme supprimé.");
 	});
 
-	test("PUT /api/algos/:id -> Données manquantes.", async () => {
-		const response = await request.put("/api/algos/1").send({});
-		Logger.debug(JSON.stringify(response.body), "test: algos", 5);
-		expect(response.status).toBe(400);
-		expect(response.body).toHaveProperty("message");
+	/**
+	 * Tests du service de la validation des algorithmes.
+	 * Nous considérons que les algorithmes en input de test sont des objets json valides.
+	 * Ce qui nous intéresse ici est de vérifier que l'algorithme est bien conforme à la structure attendue.
+	 */
+	describe("Algos: Validator", () => {
+		test("Algo référence n°1. -> aucune erreur: présence que de problèmes.", async () => {
+			// Validation de l'algorithme.
+			const result = validationAlgo("algo-1");
+			// Vérification du résultat.
+			expect(result).toHaveProperty("success", true);
+		});
+		test("Algo référence n°2. -> manquant: listeDonnes, listeResultats.", async () => {
+			// Validation de l'algorithme.
+			const result = validationAlgo("algo-2");
+			// Vérification du résultat.
+			expect(result).toHaveProperty("success", true);
+		});
+		test("Algo référence n°3. -> 8 erreurs: mauvais format de abscisse/ordonnee.", async () => {
+			// Validation de l'algorithme.
+			const result = validationAlgo("algo-3");
+			// Vérification du résultat.
+			expect(result.error.issues).toBeArrayOfSize(8);
+		});
+		test("Algo référence n°4. -> aucune erreur: présence de décompositions.", async () => {
+			// Validation de l'algorithme.
+			const result = validationAlgo("algo-4");
+			// Vérification du résultat.
+			expect(result).toHaveProperty("success", true);
+		});
+		test("Algo référence n°5. -> aucune erreur: présence de switch.", async () => {
+			// Validation de l'algorithme.
+			const result = validationAlgo("algo-5");
+			// Vérification du résultat.
+			expect(result).toHaveProperty("success", true);
+		});
+		test("Algo référence n°10. -> aucune erreur.", async () => {
+			// Validation de l'algorithme.
+			const result = validationAlgo("algo-complet");
+			// Vérification du résultat.
+			expect(result).toHaveProperty("success", true);
+		});
 	});
 
-	test("DELETE /api/algos/:id -> Données manquantes.", async () => {
-		const response = await request.delete("/api/algos/1");
-		Logger.debug(JSON.stringify(response.body), "test: algos", 5);
-		expect(response.status).toBe(404);
-		expect(response.body).toHaveProperty("message");
-	});
-});
-
-/**
- * Tests du service de la validation des algorithmes.
- * Nous considérons que les algorithmes en input de test sont des objets json valides.
- * Ce qui nous intéresse ici est de vérifier que l'algorithme est bien conforme à la structure attendue.
- */
-describe("Algos: Validator", () => {
-	test("Algo référence n°1. -> aucune erreur: présence que de problèmes.", async () => {
-		// Validation de l'algorithme.
-		const result = validationAlgo("algo-1");
-		// Vérification du résultat.
-		expect(result).toHaveProperty("success", true);
-	});
-	test("Algo référence n°2. -> manquant: listeDonnes, listeResultats.", async () => {
-		// Validation de l'algorithme.
-		const result = validationAlgo("algo-2");
-		// Vérification du résultat.
-		expect(result).toHaveProperty("success", true);
-	});
-	test("Algo référence n°3. -> 8 erreurs: mauvais format de abscisse/ordonnee.", async () => {
-		// Validation de l'algorithme.
-		const result = validationAlgo("algo-3");
-		// Vérification du résultat.
-		expect(result.error.issues).toBeArrayOfSize(8);
-	});
-	test("Algo référence n°4. -> aucune erreur: présence de décompositions.", async () => {
-		// Validation de l'algorithme.
-		const result = validationAlgo("algo-4");
-		// Vérification du résultat.
-		expect(result).toHaveProperty("success", true);
-	});
-	test("Algo référence n°5. -> aucune erreur: présence de switch.", async () => {
-		// Validation de l'algorithme.
-		const result = validationAlgo("algo-5");
-		// Vérification du résultat.
-		expect(result).toHaveProperty("success", true);
-	});
-	test("Algo référence n°10. -> aucune erreur.", async () => {
-		// Validation de l'algorithme.
-		const result = validationAlgo("algo-complet");
-		// Vérification du résultat.
-		expect(result).toHaveProperty("success", true);
-	});
-});
-
-/**
- * Valide un algorithme.
- * @param algoName Nom/chemin de l'algorithme.
- * @returns Objet contenant le résultat de la validation.
- * @example
- * const result = validationAlgo("algo-1");
- * // => { success: true, data: [{...}] }
- */
-function validationAlgo(algoName: string) {
-	let result;
-	try {
-		// Récupération de l'algorithme de référence.
-		const algo = readAlgo(algoName);
-		// Validation de l'algorithme.
-		result = AlgoValidator.validateAlgo(algo);
-	} catch (error) {
-		Logger.error(`${error.stack}`, "test: algos");
+	/**
+	 * Valide un algorithme.
+	 * @param algoName Nom/chemin de l'algorithme.
+	 * @returns Objet contenant le résultat de la validation.
+	 * @example
+	 * const result = validationAlgo("algo-1");
+	 * // => { success: true, data: [{...}] }
+	 */
+	function validationAlgo(algoName: string) {
+		let result;
+		try {
+			// Récupération de l'algorithme de référence.
+			const algo = readAlgo(algoName);
+			// Validation de l'algorithme.
+			result = AlgoValidator.validateAlgo(algo);
+		} catch (error) {
+			Logger.error(`${error.stack}`, "test: algos");
+		}
+		return result;
 	}
-	return result;
-}
 
-/**
- * Lit un algorithme depuis un fichier json.
- * @param algoName Nom/chemin de l'algorithme.
- * @returns L'algorithme sous forme d'objet json.
- * @example
- * const algo = readAlgo("algo-1");
- * // => [{ typeElement: "Probleme", ... }]
- */
-function readAlgo(algoName: string) {
-	return JSON.parse(
-		readFileSync(path.join(__dirname, `./json/${algoName}.json`), "utf-8"),
-	);
-}
+	/**
+	 * Lit un algorithme depuis un fichier json.
+	 * @param algoName Nom/chemin de l'algorithme.
+	 * @returns L'algorithme sous forme d'objet json.
+	 * @example
+	 * const algo = readAlgo("algo-1");
+	 * // => [{ typeElement: "Probleme", ... }]
+	 */
+	function readAlgo(algoName: string) {
+		return JSON.parse(
+			readFileSync(
+				path.join(__dirname, `./json/${algoName}.json`),
+				"utf-8",
+			),
+		);
+	}
+};
