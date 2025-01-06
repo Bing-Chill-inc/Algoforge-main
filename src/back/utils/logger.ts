@@ -96,7 +96,8 @@ export class Logger {
 	 * @param {number} level Niveau de debug du message.
 	 */
 	static debug(message: string, exec: string, level: number = 1): void {
-		if (process.env.DEBUG && Number(process.env.DEBUG_LEVEL) >= level) {
+		const isDebug: boolean = process.env.DEBUG === "true";
+		if (isDebug && Number(process.env.DEBUG_LEVEL) >= level) {
 			readline.cursorTo(process.stdout, 0);
 			readline.clearLine(process.stdout, -1);
 			console.debug(parsingConsole(message, clic.white, "🔧", exec));
