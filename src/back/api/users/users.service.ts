@@ -8,6 +8,7 @@ import { createMailToken } from "../../utils/mailConfirmToken";
 
 import bcrypt from "bcrypt";
 import { Logger } from "../../utils/logger";
+import { validateClass } from "../../utils/classValidator";
 
 export class UsersService {
 	utilisateurRepository: Repository<Utilisateur> =
@@ -27,6 +28,10 @@ export class UsersService {
 		// Vérification de la présence des données
 		if (!data.email || !data.password || !data.pseudo) {
 			return new Res(400, "Il manque des données");
+		}
+		const validationErrors = await validateClass(data);
+		if (validationErrors) {
+			return new Res(400, "Données invalides", validationErrors);
 		}
 
 		// Vérification de l'unicité de l'email, requête à la DB avec TypeORM
@@ -124,6 +129,10 @@ export class UsersService {
 		if (!data.email || !data.password) {
 			return new Res(400, "Il manque des données");
 		}
+		const validationErrors = await validateClass(data);
+		if (validationErrors) {
+			return new Res(400, "Données invalides", validationErrors);
+		}
 
 		// Recherche de l'utilisateur dans la DB
 		const user = await this.utilisateurRepository.findOne({
@@ -204,6 +213,11 @@ export class UsersService {
 
 	// PUT /:id
 	async updateUser(id: number, data: UserUpdateDTO) {
+		const validationErrors = await validateClass(data);
+		if (validationErrors) {
+			return new Res(400, "Données invalides", validationErrors);
+		}
+
 		// Récupération de l'utilisateur dans la DB
 		const user = await this.utilisateurRepository.findOne({
 			where: { id: id },

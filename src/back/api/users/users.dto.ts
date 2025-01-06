@@ -1,26 +1,25 @@
 import {
 	IsEmail,
+	IsNotEmpty,
 	IsOptional,
 	IsString,
-	MaxLength,
-	MinLength,
+	Length,
 } from "class-validator";
 
 /**
  * Classe de validation pour la création d'un utilisateur.
  */
 export class UserRegisterDTO {
-	@IsString()
-	@MinLength(3)
-	@MaxLength(255)
+	@Length(3, 255)
+	@IsNotEmpty()
 	pseudo: string;
 
 	@IsEmail()
+	@IsNotEmpty()
 	email: string;
 
-	@IsString()
-	@MinLength(8)
-	@MaxLength(255)
+	@Length(8, 255)
+	@IsNotEmpty()
 	password: string;
 }
 
@@ -29,11 +28,11 @@ export class UserRegisterDTO {
  */
 export class UserLoginDTO {
 	@IsEmail()
+	@IsNotEmpty()
 	email: string;
 
 	@IsString()
-	@MinLength(8)
-	@MaxLength(255)
+	@IsNotEmpty()
 	password: string;
 }
 
@@ -41,24 +40,18 @@ export class UserLoginDTO {
  * Classe de validation pour la récupération de mot de passe d'un utilisateur.
  */
 export class UserUpdateDTO {
-	@IsString()
 	@IsOptional()
-	@MinLength(3)
-	@MaxLength(255)
-	pseudo: string;
+	@Length(3, 255)
+	pseudo?: string;
 
 	@IsEmail()
 	@IsOptional()
-	email: string;
+	email?: string;
 
-	@IsString()
-	@MinLength(8)
-	@MaxLength(255)
+	@IsNotEmpty()
 	currentPassword: string;
 
-	@IsString()
 	@IsOptional()
-	@MinLength(8)
-	@MaxLength(255)
-	newPassword: string;
+	@Length(8, 255)
+	newPassword?: string;
 }

@@ -21,7 +21,7 @@ export class UsersController {
 			"/register",
 			expressAsyncHandler(this.register.bind(this)),
 		);
-		this.router.post(
+		this.router.get(
 			"/confirm/:token",
 			expressAsyncHandler(this.confirm.bind(this)),
 		);
