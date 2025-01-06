@@ -1,5 +1,3 @@
-const AssetsDynamiques = [];
-
 AssetsDynamiques.push({
 	route: "/AlgoForge.svg",
 	callback: (req, res) => {
@@ -259,7 +257,7 @@ AssetsDynamiques.push({
 		const svgContent = `
 	<svg version="1.1" id="DictionnaireDonnee" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
 	 viewBox="0 0 448 512" style="enable-background:new 0 0 448 512;" xml:space="preserve">
-<path fill="white" d="M439.1,453.3c-4.2-15.4-4.2-59.3,0-74.7c5.4-4.3,8.9-11.1,8.9-18.6V24c0-13.3-10.7-24-24-24H96C43,0,0,43,0,96v320
+<path fill="#${fgColor}" d="M439.1,453.3c-4.2-15.4-4.2-59.3,0-74.7c5.4-4.3,8.9-11.1,8.9-18.6V24c0-13.3-10.7-24-24-24H96C43,0,0,43,0,96v320
 	c0,53,43,96,96,96h328c13.3,0,24-10.7,24-24C448.1,476.4,449.7,460.8,439.1,453.3z M147.5,231.8c7.8-6.6,9.3-11,16.3-14.8
 	c8.9-2.7,9,1.3,17.2,2.4c5.1-0.3,23.4-19.8,34.8-41.8c-5.1-12.8-13-37.4-21.2-47c-1.1,0.9-2.9,3.3-4.8,8.5
 	c-4.3,13.3-25.4,9.8-25.1-4.2c0-8.8,4.3-17.8,13.2-27.7c25.6-29.4,50.5-12.2,65.3,28.8c18.3-25.6,34.5-49.6,65.2-41.6
@@ -283,18 +281,14 @@ AssetsDynamiques.push({
 		const svgContent = `
 	<svg version="1.1" id="Erreur" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
 	 viewBox="0 0 558.5 558.5" style="enable-background:new 0 0 558.5 558.5;" xml:space="preserve">
-<style type="text/css">
-	.st0{stroke:#${fgColor};stroke-width:20.9821;stroke-miterlimit:10;}
-	.st1{stroke:#${fgColor};stroke-width:25;stroke-miterlimit:10;}
-</style>
-<g fill="#${fgColor}$; ?>">
+<g fill="#${fgColor}">
 	<path d="M554.4,159.5L399,4.1c-2.6-2.6-6.2-4.1-9.9-4.1H169.4c-3.7,0-7.3,1.5-9.9,4.1L4.1,159.5c-2.6,2.6-4.1,6.2-4.1,9.9v219.7
 		c0,3.7,1.5,7.3,4.1,10l155.4,155.3c2.6,2.6,6.2,4.1,9.9,4.1h219.7c3.7,0,7.3-1.5,9.9-4.1l155.4-155.3c2.6-2.6,4.1-6.2,4.1-9.9
 		V169.4C558.5,165.7,557,162.1,554.4,159.5z M499.4,388.3L388.2,499.4c-8.1,8.1-19,12.6-30.4,12.6H200.6c-11.4,0-22.4-4.5-30.4-12.6
 		L59.1,388.3c-8.1-8.1-12.6-19-12.6-30.4V200.6c0-11.4,4.5-22.4,12.6-30.4L170.2,59.1c8.1-8.1,19-12.6,30.4-12.6h157.2
 		c11.4,0,22.3,4.5,30.4,12.6l111.2,111.1c8.1,8.1,12.6,19,12.6,30.4v157.2C512,369.3,507.5,380.2,499.4,388.3z"/>
 </g>
-<g fill="#${fgColor}$; ?>">
+<g fill="#${fgColor}">
 	<path class="st0" d="M307.8,344.4h-55.6c-5.6,0-10.3-4.3-10.8-9.9l-20.1-235c-0.5-5.9,3.9-11.2,9.8-11.7c0.3,0,0.6,0,0.9,0h94.4
 		c6,0,10.8,4.8,10.8,10.8c0,0.3,0,0.6,0,0.9l-18.6,235C318.2,340.1,313.5,344.4,307.8,344.4z"/>
 	<path class="st1" d="M259.1,398.7h40.2c11.3,0,20.4,9.1,20.4,20.4v31.2c0,11.3-9.1,20.4-20.4,20.4h-40.2
@@ -316,21 +310,15 @@ AssetsDynamiques.push({
 		const svgContent = `
 	<svg version="1.1" id="ConditionSortie" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
 	 viewBox="0 0 320.3 319.9" style="enable-background:new 0 0 320.3 319.9;" xml:space="preserve" width="32" height="32">
-<style type="text/css">
-	.st0{stroke:#${fgColor};;stroke-width:27;stroke-linecap:round;stroke-miterlimit:10;}
-	.st1{fill:none;stroke:#${fgColor};;stroke-width:15;stroke-linecap:round;stroke-miterlimit:10;}
-	.st2{stroke:#${fgColor};;stroke-width:27;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:1;}
-	.st3{fill:none;stroke:#${fgColor};;stroke-width:27;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:1;}
-</style>
 <g fill="#${fgColor}">
 	<path d="M277.5,26.9c8.6,0,15.6,7,15.6,15.6v234.9c0,8.6-7,15.6-15.6,15.6H42.6c-8.6,0-15.6-7-15.6-15.6V42.5
 		c0-8.6,7-15.6,15.6-15.6H277.5 M277.5-0.1H42.5C19-0.1,0,19,0,42.5v234.9c0,23.5,19.1,42.6,42.6,42.6h234.9
 		c23.5,0,42.6-19.1,42.6-42.6V42.5C320,19,301-0.1,277.5-0.1L277.5-0.1z"/>
 </g>
-<polyline fill="#${fgColor}$; ?>" class="st0" points="107.4,184.6 107.4,16.3 213.4,15.6 213.4,184.6 "/>
-<path fill="#${fgColor}$; ?>" class="st1" d="M59,197.6"/>
-<path fill="#${fgColor}$; ?>" class="st2" d="M264.5,184.6L163,249.3c-1.5,1-3.5,1-5.1,0L56.4,184.6H264.5z"/>
-<path fill="#${fgColor}$; ?>" class="st3" d="M106.6,138.6"/>
+<polyline fill="#${fgColor}" points="107.4,184.6 107.4,16.3 213.4,15.6 213.4,184.6 "/>
+<path fill="#${fgColor}" d="M59,197.6"/>
+<path fill="#${fgColor}" d="M264.5,184.6L163,249.3c-1.5,1-3.5,1-5.1,0L56.4,184.6H264.5z"/>
+<path fill="#${fgColor}" d="M106.6,138.6"/>
 </svg>
 	`;
 
