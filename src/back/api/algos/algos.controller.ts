@@ -4,15 +4,19 @@ import { AlgosService } from "./algos.service";
 import { Logger } from "../../utils/logger";
 import { AlgoCreateDTO, AlgoUpdateDTO } from "./algos.dto";
 import { Res } from "../../types/response.entity";
+import { AuthService } from "../auth/auth.service";
+import { Utilisateur } from "../../db/schemas/Utilisateur.schema";
 
 export class AlgosController {
 	public router: Router;
-	private service: AlgosService;
+	private usersService: AlgosService;
+	private authService: AuthService;
 
 	constructor() {
 		Logger.debug("Initializing...", "AlgosController");
 		this.router = Router();
-		this.service = new AlgosService();
+		this.usersService = new AlgosService();
+		this.authService = new AuthService();
 		this.init();
 		Logger.debug("Done !", "AlgosController");
 	}
@@ -38,10 +42,14 @@ export class AlgosController {
 
 	// GET /byUserId/:id
 	private async getAlgosOfUser(req: Request, res: Response) {
+		// Vérification des droits de l'utilisateur
+		const hasRights = await this.authService.verifyUser(req, res);
+		if (!hasRights) return res;
+
 		// Récupération des données de la requête
 		const { id } = req.params;
 
-		const algos = await this.service.getAlgosOfUser(+id);
+		const algos = await this.usersService.getAlgosOfUser(+id);
 
 		if (!algos || algos.length === 0) {
 			return res
@@ -54,10 +62,14 @@ export class AlgosController {
 
 	// GET /:id
 	private async getAlgo(req: Request, res: Response) {
+		// Vérification des droits de l'utilisateur
+		const hasRights = await this.authService.verifyUser(req, res);
+		if (!hasRights) return res;
+
 		// Récupération des données de la requête
 		const { id } = req.params;
 
-		const algo = await this.service.getAlgo(+id);
+		const algo = await this.usersService.getAlgo(+id);
 
 		if (!algo) {
 			return res.status(404).json(new Res(404, "Algorithme non trouvé"));
@@ -68,6 +80,10 @@ export class AlgosController {
 
 	// POST /
 	private async createAlgo(req: Request, res: Response) {
+		// Vérification des droits de l'utilisateur
+		const hasRights = await this.authService.verifyUser(req, res);
+		if (!hasRights) return res;
+
 		// Récupération des données de la requête
 		const { ownerId, nom, sourceCode } = req.body;
 		if (!ownerId || !nom || !sourceCode) {
@@ -78,8 +94,9 @@ export class AlgosController {
 		data.nom = nom;
 		data.ownerId = ownerId;
 		data.sourceCode = sourceCode;
+		data.requestedUserId = (res.locals.user as Utilisateur).id;
 
-		const result = await this.service.createAlgo(data);
+		const result = await this.usersService.createAlgo(data);
 		if (result instanceof Res) {
 			return res.status(result.statut).json(result);
 		}
@@ -89,11 +106,14 @@ export class AlgosController {
 
 	// PUT /:id
 	private async updateAlgo(req: Request, res: Response) {
+		// Vérification des droits de l'utilisateur
+		const hasRights = await this.authService.verifyUser(req, res);
+		if (!hasRights) return res;
+
 		// Récupération des données de la requête
 		const { id } = req.params;
 		const { nom, permsAlgorithme, sourceCode } = req.body;
 		if (!id || !nom || !permsAlgorithme || !sourceCode) {
-			console.log(id, nom, permsAlgorithme);
 			return res.status(400).json(new Res(400, "Données manquantes"));
 		}
 
@@ -101,11 +121,12 @@ export class AlgosController {
 		data.id = +id;
 		data.nom = nom;
 		data.sourceCode = sourceCode;
+		data.requestedUserId = (res.locals.user as Utilisateur).id;
 		if (Array.isArray(permsAlgorithme) && permsAlgorithme?.length > 0) {
 			data.permsAlgorithme = permsAlgorithme;
 		}
 
-		const updatedAlgo = await this.service.updateAlgo(data);
+		const updatedAlgo = await this.usersService.updateAlgo(data);
 
 		if (!updatedAlgo) {
 			return res.status(404).json(new Res(404, "Algorithme non trouvé"));
@@ -118,10 +139,14 @@ export class AlgosController {
 
 	// DELETE /:id
 	private async deleteAlgo(req: Request, res: Response) {
+		// Vérification des droits de l'utilisateur
+		const hasRights = await this.authService.verifyUser(req, res);
+		if (!hasRights) return res;
+
 		// Récupération des données de la requête
 		const { id } = req.params;
 
-		const algo = await this.service.deleteAlgo(+id);
+		const algo = await this.usersService.deleteAlgo(+id);
 
 		if (!algo) {
 			return res.status(404).json(new Res(404, "Algorithme non trouvé"));

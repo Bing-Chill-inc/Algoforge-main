@@ -34,6 +34,9 @@ export class AlgoCreateDTO {
 	@IsNumber()
 	ownerId: number;
 
+	@IsNumber()
+	requestedUserId: number;
+
 	@IsJSON()
 	sourceCode: Object;
 }
@@ -50,9 +53,12 @@ export class AlgoUpdateDTO {
 	@MaxLength(255)
 	nom: string;
 
+	@IsNumber()
+	requestedUserId: number;
+
 	@IsArray()
 	@IsOptional()
-	permsAlgorithme: PermAlgorithme[];
+	permsAlgorithme?: PermAlgorithme[];
 
 	@IsJSON()
 	sourceCode: string;

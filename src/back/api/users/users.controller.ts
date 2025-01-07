@@ -3,15 +3,18 @@ import expressAsyncHandler from "express-async-handler";
 import { UsersService } from "./users.service";
 import { Logger } from "../../utils/logger";
 import { UserRegisterDTO, UserLoginDTO, UserUpdateDTO } from "./users.dto";
+import { AuthService } from "../auth/auth.service";
 
 export class UsersController {
 	public router: Router;
-	private service: UsersService;
+	private usersService: UsersService;
+	private authService: AuthService;
 
 	constructor() {
 		Logger.debug("Initializing...", "UsersController");
 		this.router = Router();
-		this.service = new UsersService();
+		this.usersService = new UsersService();
+		this.authService = new AuthService();
 		this.init();
 		Logger.debug("Done !", "UsersController");
 	}
@@ -45,24 +48,6 @@ export class UsersController {
 		);
 	}
 
-	// Fonction privée pour vérifier l'utilisateur à partir de son token et de l'id
-	private async verifyUser(req: Request, res: Response, id: number) {
-		const verify = await this.service.verify(req.headers.authorization);
-		if (verify.statut === 401) {
-			res.status(verify.statut).json(verify);
-			return false;
-		}
-
-		if (verify.data.tokenDB.utilisateur.id !== id) {
-			res.status(403).json({
-				message:
-					"Vous n'avez pas les droits pour effectuer cette action",
-			});
-			return false;
-		}
-		return true;
-	}
-
 	// POST /register
 	private async register(req: Request, res: Response) {
 		// Récupération des données de la requête
@@ -73,7 +58,7 @@ export class UsersController {
 		data.email = email;
 		data.password = password;
 
-		const reponse = await this.service.register(data);
+		const reponse = await this.usersService.register(data);
 
 		return res
 			.status(reponse.statut)
@@ -85,7 +70,7 @@ export class UsersController {
 		// Récupération des données de la requête
 		const token = req.params.token;
 
-		const reponse = await this.service.confirm(token);
+		const reponse = await this.usersService.confirm(token);
 
 		return res
 			.status(reponse.statut)
@@ -101,7 +86,7 @@ export class UsersController {
 		data.email = email;
 		data.password = password;
 
-		const reponse = await this.service.login(data);
+		const reponse = await this.usersService.login(data);
 
 		return res
 			.status(reponse.statut)
@@ -113,7 +98,7 @@ export class UsersController {
 		// Récupération des données de la requête
 		const token = req.headers.authorization;
 
-		const reponse = await this.service.logout(token);
+		const reponse = await this.usersService.logout(token);
 
 		return res
 			.status(reponse.statut)
@@ -125,7 +110,7 @@ export class UsersController {
 		// Récupération des données de la requête
 		const { email } = req.body;
 
-		const reponse = await this.service.recover(email);
+		const reponse = await this.usersService.recover(email);
 
 		return res
 			.status(reponse.statut)
@@ -134,15 +119,15 @@ export class UsersController {
 
 	// GET /:id
 	private async getUser(req: Request, res: Response) {
+		// Vérification des droits de l'utilisateur
+		const hasRights = await this.authService.verifyUser(req, res);
+		if (!hasRights) return res;
+
 		// Récupération de l'id de l'utilisateur
 		const id = +req.params.id;
 
-		// On vérifie que l'utilisateur qui fait la requête est bien celui qu'il veut récupérer
-		const isVerified = await this.verifyUser(req, res, id);
-		if (!isVerified) return res;
-
 		// S'il a les droits, on récupère l'utilisateur
-		const reponse = await this.service.getUser(id);
+		const reponse = await this.usersService.getUser(id);
 
 		return res
 			.status(reponse.statut)
@@ -151,14 +136,12 @@ export class UsersController {
 
 	// PUT /:id
 	private async updateUser(req: Request, res: Response) {
+		// Vérification des droits de l'utilisateur
+		const hasRights = await this.authService.verifyUser(req, res);
+		if (!hasRights) return res;
+
 		// Récupération de l'id de l'utilisateur
 		const id = +req.params.id;
-
-		// On vérifie que l'utilisateur qui fait la requête est bien celui qu'il veut récupérer
-		const isVerified = await this.verifyUser(req, res, id);
-		if (!isVerified) return res;
-
-		// S'il a les droits, on met à jour l'utilisateur
 
 		// Récupération des données de la requête
 		const { pseudo, email, currentPassword, newPassword } = req.body;
@@ -169,7 +152,7 @@ export class UsersController {
 		data.currentPassword = currentPassword;
 		data.newPassword = newPassword;
 
-		const reponse = await this.service.updateUser(id, data);
+		const reponse = await this.usersService.updateUser(id, data);
 
 		return res
 			.status(reponse.statut)
@@ -178,15 +161,15 @@ export class UsersController {
 
 	// DELETE /:id
 	private async deleteUser(req: Request, res: Response) {
+		// Vérification des droits de l'utilisateur
+		const hasRights = await this.authService.verifyUser(req, res);
+		if (!hasRights) return res;
+
 		// Récupération de l'id de l'utilisateur
 		const id = +req.params.id;
 
-		// On vérifie que l'utilisateur qui fait la requête est bien celui qu'il veut récupérer
-		const isVerified = await this.verifyUser(req, res, id);
-		if (!isVerified) return res;
-
 		// S'il a les droits, on supprime l'utilisateur
-		const reponse = await this.service.deleteUser(id);
+		const reponse = await this.usersService.deleteUser(id);
 
 		return res
 			.status(reponse.statut)

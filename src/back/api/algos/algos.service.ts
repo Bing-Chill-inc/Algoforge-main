@@ -55,6 +55,14 @@ export class AlgosService {
 	 * @returns L'algorithme créé.
 	 */
 	async createAlgo(algo: AlgoCreateDTO) {
+		// Vérification des droits de l'utilisateur.
+		if (algo.requestedUserId !== algo.ownerId) {
+			return new Res(
+				403,
+				"Vous n'avez pas les droits pour créer cet algorithme",
+			);
+		}
+
 		// Validation de l'algorithme.
 		const validationResult = AlgoValidator.validateAlgo(algo.sourceCode);
 		if (!validationResult.success) {
@@ -93,9 +101,26 @@ export class AlgosService {
 	 * @param algo Données de l'algorithme à mettre à jour.
 	 * @returns L'algorithme mis à jour.
 	 */
-	// TODO: vérifier si l'utilisateur de la requête a le droit de modifier l'algorithme.
 	// TODO: mettre à jour les permissions de l'algorithme.
 	async updateAlgo(algo: AlgoUpdateDTO) {
+		// Récupération de l'algorithme.
+		const algoToUpdate = await this.getAlgo(algo.id);
+		if (!algoToUpdate) return null;
+
+		// Vérification des droits de l'utilisateur.
+		for (const perm of algoToUpdate.permAlgorithmes) {
+			if (
+				perm.idUtilisateur === algo.requestedUserId &&
+				(perm.droits === Droits.Owner ||
+					perm.droits === Droits.ReadWrite)
+			) {
+				return new Res(
+					403,
+					"Vous n'avez pas les droits pour modifier cet algorithme",
+				);
+			}
+		}
+
 		// Validation de l'algorithme.
 		const validationResult = AlgoValidator.validateAlgo(algo.sourceCode);
 		if (!validationResult.success) {
@@ -104,10 +129,6 @@ export class AlgosService {
 		algo.sourceCode = JSON.parse(JSON.stringify(validationResult.data));
 
 		const algoRepository = AppDataSource.manager.getRepository(Algorithme);
-
-		// Récupération de l'algorithme.
-		const algoToUpdate = await this.getAlgo(algo.id);
-		if (!algoToUpdate) return null;
 
 		// Mise à jour de l'algorithme.
 		algoToUpdate.nom = algo.nom;
