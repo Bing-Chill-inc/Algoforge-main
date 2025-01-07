@@ -1,6 +1,7 @@
 import {
 	IsEmail,
 	IsNotEmpty,
+	IsNumber,
 	IsOptional,
 	IsString,
 	Length,
@@ -54,4 +55,7 @@ export class UserUpdateDTO {
 	@IsOptional()
 	@Length(8, 255)
 	newPassword?: string;
+
+	@IsNumber()
+	requestedUserId: number;
 }

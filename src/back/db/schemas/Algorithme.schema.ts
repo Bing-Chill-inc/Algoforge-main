@@ -26,6 +26,6 @@ export class Algorithme {
 	@ManyToOne(() => Dossier, (dossier) => dossier.algos)
 	dossier: Relation<Dossier>;
 
-	@OneToMany(() => PermAlgorithme, (permAlgo) => permAlgo.idAlgorithme)
+	@OneToMany(() => PermAlgorithme, (permAlgo) => permAlgo.algorithme)
 	permAlgorithmes: Relation<PermAlgorithme[]>;
 }

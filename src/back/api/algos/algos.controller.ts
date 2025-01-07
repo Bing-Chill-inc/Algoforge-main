@@ -146,12 +146,19 @@ export class AlgosController {
 		// Récupération des données de la requête
 		const { id } = req.params;
 
-		const algo = await this.usersService.deleteAlgo(+id);
+		const result = await this.usersService.deleteAlgo(
+			+id,
+			res.locals.user.id,
+		);
 
-		if (!algo) {
+		if (!result) {
 			return res.status(404).json(new Res(404, "Algorithme non trouvé"));
+		} else if (result instanceof Res) {
+			return res.status(result.statut).json(result);
 		}
 
-		return res.status(200).json(new Res(200, "Algorithme supprimé", algo));
+		return res
+			.status(200)
+			.json(new Res(200, "Algorithme supprimé", result));
 	}
 }

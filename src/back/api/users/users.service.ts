@@ -94,14 +94,27 @@ export class UsersService {
 	 */
 	async confirm(mailToken: string) {
 		// Récupérer l'id de l'utilisateur à partir du token (déchiffrer puis split par "_")
-		const id = btoa(mailToken).split("_")[0];
+		let id: string;
+		let dateInscription: string;
+		try {
+			const decoded = atob(mailToken);
+			id = decoded.split("_")[0];
+			dateInscription = decoded.split("_")[1].slice(3);
+		} catch (err) {
+			return new Res(400, "Token invalide");
+		}
 
 		// On récupère l'utilisateur dans la DB
-		const user = (await this.getUser(parseInt(id))).data;
+		const user = (await this.getUser(parseInt(id))).data as Utilisateur;
 
 		// Vérification de l'utilisateur (s'il existe et s'il n'est pas déjà vérifié)
 		if (!user || user.isVerified) {
 			return new Res(404, "Utilisateur introuvable ou déjà vérifié");
+		}
+
+		// Vérification de la date d'inscription
+		if (user.dateInscription.getTime().toString() !== dateInscription) {
+			return new Res(400, "Token invalide");
 		}
 
 		// Mise à jour du statut "vérfié" de l'utilisateur
@@ -150,6 +163,17 @@ export class UsersService {
 
 		// Suppression du hash du mot de passe avant renvoi
 		user.mdpHash = undefined;
+
+		// TODO: Générer un token JWT pour la connexion automatique
+		const token = new Token();
+		token.dateCreation = new Date();
+		token.dateExpiration = new Date(Date.now() + 48 * 60 * 60 * 1000);
+		token.utilisateur = user;
+		token.token = user.id.toString() + "_" + Date.now().toString();
+		// Enregistrement du token dans la DB
+		const savedToken = await this.tokensRepository.save(token);
+		savedToken.utilisateur = undefined;
+		user.tokens = [savedToken];
 
 		// Retour de la réponse
 		return new Res(200, "Connexion réussie", user);
@@ -213,6 +237,16 @@ export class UsersService {
 
 	// PUT /:id
 	async updateUser(id: number, data: UserUpdateDTO) {
+		// Vérification des droits de l'utilisateur.
+		if (data.requestedUserId !== id) {
+			return new Res(403, "Permission refusée");
+		}
+
+		// Vérification de la présence des données
+		if (!data.currentPassword) {
+			return new Res(400, "Il manque des données");
+		}
+
 		const validationErrors = await validateClass(data);
 		if (validationErrors) {
 			return new Res(400, "Données invalides", validationErrors);
@@ -232,15 +266,13 @@ export class UsersService {
 		// Mise à jour de l'utilisateur
 		if (data.email) {
 			user.adresseMail = data.email;
-		}
-
-		if (data.pseudo) {
+		} else if (data.pseudo) {
 			user.pseudo = data.pseudo;
-		}
-
-		if (data.newPassword) {
+		} else if (data.newPassword) {
 			const salt = bcrypt.genSaltSync(10);
 			user.mdpHash = bcrypt.hashSync(data.newPassword, salt);
+		} else {
+			return new Res(400, "Il manque des données");
 		}
 
 		// Enregistrement de l'utilisateur
@@ -280,6 +312,8 @@ export class UsersService {
 	 * @returns Réponse de la vérification du token.
 	 */
 	async verify(token: string) {
+		if (!token) return new Res(400, "Token manquant");
+
 		// On compare le token avec la DB
 		const tokenDB = await this.tokensRepository.findOne({
 			where: { token: token },
@@ -288,6 +322,8 @@ export class UsersService {
 
 		if (!tokenDB) {
 			return new Res(401, "Token invalide");
+		} else if (tokenDB.utilisateur.isVerified === false) {
+			return new Res(401, "Utilisateur non vérifié");
 		} else if (tokenDB.dateExpiration < new Date()) {
 			// Suppression du token expiré
 			await this.tokensRepository.delete(tokenDB);

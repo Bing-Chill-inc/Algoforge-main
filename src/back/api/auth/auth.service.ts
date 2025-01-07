@@ -1,4 +1,4 @@
-import e, { Request, Response } from "express";
+import { Request, Response } from "express";
 import { UsersService } from "../users/users.service";
 
 export class AuthService {
@@ -11,33 +11,26 @@ export class AuthService {
 	/**
 	 * Vérification des droits de l'utilisateur sur une ressource.
 	 * La requête req peut être modifié par la fonction pour ajouter des informations.
+	 * Elles sont accessibles avec req.locals.user.
 	 * @param req Requête Express
 	 * @param res Réponse Express
 	 * @returns true si l'utilisateur a les droits, false sinon.
 	 */
 	public async verifyUser(req: Request, res: Response) {
 		const verify = await this.usersService.verify(this.extractToken(req));
-		if (verify.statut === 401) {
+		if ([400, 401].includes(verify.statut)) {
 			res.status(verify.statut).json(verify);
 			return false;
 		}
 
-		/**
-		 * Vérification des droits de l'utilisateur sur la ressource
-		 * @deprecated
-		 */
-		// if (verify.data.tokenDB.utilisateur.id !== id) {
-		// 	res.status(403).json({
-		// 		message:
-		// 			"Vous n'avez pas les droits pour effectuer cette action",
-		// 	});
-		// 	return false;
-		// }
-		res.locals.user = verify.data.tokenDB.utilisateur;
+		// Ajout de l'utilisateur dans les informations de la requête.
+		res.locals.user = verify.data.utilisateur;
 		return true;
 	}
 
 	public extractToken(req: Request) {
-		return req.headers.authorization;
+		return req.headers.authorization
+			? req.headers.authorization.split(" ")[1]
+			: "";
 	}
 }

@@ -3,7 +3,7 @@ import { server, request } from "./setup";
 import { AlgoValidator } from "../utils/algoValidator";
 import { readFileSync, rmdirSync, existsSync } from "fs";
 
-import { beforeAll, beforeEach, describe, expect, test } from "bun:test";
+import { beforeAll, describe, expect, test } from "bun:test";
 import path from "path";
 import { AlgoCreateDTO, AlgoUpdateDTO } from "../api/algos/algos.dto";
 import { AlgosService } from "../api/algos/algos.service";
@@ -16,20 +16,26 @@ beforeAll(async () => {
 	rmdirSync(AlgosService.dataPath, { recursive: true });
 	Logger.log("Cleared !", "test: algos");
 
+	Logger.log("Logging in with user (ID: 1)...", "test: algos");
 	const payload = new UserLoginDTO();
 	payload.email = "test@toxykaubleu.fr";
-	payload.password = "testtest";
+	payload.password = "testtest2";
 	const response = await request.post("/api/users/login").send(payload);
-	token = response.body.data.token;
+	Logger.debug(JSON.stringify(response.body), "test: algos", 5);
+	token = response.body.data.tokens[0].token;
+	Logger.log(`Logged in ! Token: ${token}`, "test: algos");
 });
 
 /**
  * Tests des routes de l'API des algorithmes.
- * Nous considérons que la base de données est vide.
+ * Nous considérons que la base de données est vide,
+ * et que l'utilisateur est vérifié et connecté.
  */
 describe("Algos: empty database", async () => {
 	test("GET /api/algos/byUserId/:id -> erreur: Aucun algorithme trouvé.", async () => {
-		const response = await request.get("/api/algos/byUserId/1");
+		const response = await request
+			.get("/api/algos/byUserId/1")
+			.auth(token, { type: "bearer" });
 		Logger.debug(JSON.stringify(response.body), "test: algos", 5);
 		expect(response.status).toBe(404);
 		expect(response.body).toHaveProperty(
@@ -39,7 +45,9 @@ describe("Algos: empty database", async () => {
 	});
 
 	test("GET /api/algos/:id -> erreur: Algorithme non trouvé.", async () => {
-		const response = await request.get("/api/algos/1");
+		const response = await request
+			.get("/api/algos/1")
+			.auth(token, { type: "bearer" });
 		Logger.debug(JSON.stringify(response.body), "test: algos", 5);
 		expect(response.status).toBe(404);
 		expect(response.body).toHaveProperty(
@@ -85,8 +93,6 @@ describe("Algos: empty database", async () => {
  * Tests des routes de l'API des algorithmes, avec la manipulation de plusieurs algorithmes.
  */
 describe("Algos: creating data", () => {
-	// TODO: se connecter avec un utilisateur.
-
 	test("POST /api/algos/ -> erreur: Algorithme invalide.", async () => {
 		const payload = new AlgoCreateDTO();
 		payload.nom = "Algorithme test";
@@ -157,7 +163,27 @@ describe("Algos: creating data", () => {
 		expect(response.body).toHaveProperty("message", "Algorithmes trouvés");
 		expect(response.body.data).toBeArrayOfSize(1);
 	});
-	test.todo("DELETE /api/algos/:id -> succès: Algorithme supprimé.");
+
+	test("DELETE /api/algos/:id -> erreur: Algorithme non trouvé.", async () => {
+		const response = await request
+			.delete("/api/algos/2")
+			.auth(token, { type: "bearer" });
+		Logger.debug(JSON.stringify(response.body), "test: algos", 5);
+		expect(response.status).toBe(404);
+		expect(response.body).toHaveProperty(
+			"message",
+			"Algorithme non trouvé",
+		);
+	});
+	test("DELETE /api/algos/:id -> succès: Algorithme supprimé.", async () => {
+		const response = await request
+			.delete("/api/algos/1")
+			.auth(token, { type: "bearer" });
+		Logger.debug(JSON.stringify(response.body), "test: algos", 5);
+		expect(response.status).toBe(200);
+		expect(response.body).toHaveProperty("message", "Algorithme supprimé");
+		expect(existsSync(AlgosService.dataPath + "1.json")).toBe(false);
+	});
 });
 
 /**

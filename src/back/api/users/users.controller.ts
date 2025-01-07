@@ -1,9 +1,10 @@
-import { Router, Request, Response } from "express";
+import { Router, Request, Response, response } from "express";
 import expressAsyncHandler from "express-async-handler";
 import { UsersService } from "./users.service";
 import { Logger } from "../../utils/logger";
 import { UserRegisterDTO, UserLoginDTO, UserUpdateDTO } from "./users.dto";
 import { AuthService } from "../auth/auth.service";
+import { Utilisateur } from "../../db/schemas/Utilisateur.schema";
 
 export class UsersController {
 	public router: Router;
@@ -69,6 +70,7 @@ export class UsersController {
 	private async confirm(req: Request, res: Response) {
 		// Récupération des données de la requête
 		const token = req.params.token;
+		if (!token) return res.status(400).json({ message: "Token manquant" });
 
 		const reponse = await this.usersService.confirm(token);
 
@@ -96,7 +98,7 @@ export class UsersController {
 	// GET /logout
 	private async logout(req: Request, res: Response) {
 		// Récupération des données de la requête
-		const token = req.headers.authorization;
+		const token = this.authService.extractToken(req);
 
 		const reponse = await this.usersService.logout(token);
 
@@ -151,6 +153,7 @@ export class UsersController {
 		data.email = email;
 		data.currentPassword = currentPassword;
 		data.newPassword = newPassword;
+		data.requestedUserId = (res.locals.user as Utilisateur).id;
 
 		const reponse = await this.usersService.updateUser(id, data);
 

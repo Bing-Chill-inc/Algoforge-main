@@ -8,6 +8,7 @@ import { AlgoValidator } from "../../utils/algoValidator";
 import { Res } from "../../types/response.entity";
 import path from "path";
 import { Logger } from "../../utils/logger";
+import { getOwnerOfAlgo } from "../../utils/queries";
 
 export class AlgosService {
 	public static readonly dataPath: string = path.join(
@@ -108,6 +109,21 @@ export class AlgosService {
 		if (!algoToUpdate) return null;
 
 		// Vérification des droits de l'utilisateur.
+		const ownerAlgo = await getOwnerOfAlgo(algoToUpdate.id);
+		if (!ownerAlgo) return null;
+		const ownerPerm = new PermAlgorithme();
+		ownerPerm.idUtilisateur = ownerAlgo.id;
+		ownerPerm.idAlgorithme = algoToUpdate.id;
+		ownerPerm.droits = Droits.Owner;
+		if (
+			!algoToUpdate.permAlgorithmes ||
+			algoToUpdate.permAlgorithmes.length === 0
+		) {
+			algoToUpdate.permAlgorithmes = [ownerPerm];
+		} else {
+			algoToUpdate.permAlgorithmes.push(ownerPerm);
+		}
+
 		for (const perm of algoToUpdate.permAlgorithmes) {
 			if (
 				perm.idUtilisateur === algo.requestedUserId &&
@@ -143,26 +159,52 @@ export class AlgosService {
 	}
 
 	/**
-	 * Supprime un algorithme.
+	 * Supprime un algorithme. Seul le propriétaire de l'algorithme peut le supprimer.
 	 * @param id Id de l'algorithme à supprimer.
+	 * @param requestedUserId Id de l'utilisateur qui demande la suppression.
 	 * @returns L'algorithme supprimé.
 	 */
-	// TODO: vérifier si l'utilisateur de la requête a le droit de supprimer l'algorithme.
-	async deleteAlgo(id: number) {
+	async deleteAlgo(id: number, requestedUserId: number) {
 		const algoRepository = AppDataSource.manager.getRepository(Algorithme);
 
 		// Récupération de l'algorithme.
-		const algo = await algoRepository.findOne({ where: { id: id } });
+		const algo = await algoRepository.findOne({
+			where: { id: id },
+			relations: {
+				permAlgorithmes: true,
+			},
+		});
+		if (!algo) return null;
 
-		if (!algo) {
-			return null;
-		}
+		// Vérification des droits de l'utilisateur.
+		const ownerAlgo = await getOwnerOfAlgo(id);
+		if (ownerAlgo.id != requestedUserId)
+			return new Res(403, "Permission refusée");
 
 		// Suppression de l'algorithme.
-		const deletedAlgo = await algoRepository.delete(algo);
-		// TODO: supprimer l'algorithme du système de fichiers.
+		try {
+			// Suppression des permissions de l'algorithme.
+			algo.permAlgorithmes.forEach(async (perm) => {
+				await AppDataSource.manager
+					.getRepository(PermAlgorithme)
+					.delete(perm);
+			});
+			delete algo.permAlgorithmes;
+			// Suppression de l'algorithme en base de données.
+			const deletedAlgo = await algoRepository.delete(algo);
 
-		return deletedAlgo;
+			// Suppression de l'algorithme du système de fichiers.
+			const result = this.deleteAlgoFromDisk(id);
+			if (!result) return new Res(404, "Algorithme non trouvé");
+			return new Res(200, "Algorithme supprimé", deletedAlgo);
+		} catch (error) {
+			if (error instanceof Error)
+				Logger.error(error.stack, "AlgosService: deleteAlgo");
+			return new Res(
+				500,
+				"Erreur lors de la suppression de l'algorithme",
+			);
+		}
 	}
 
 	private writeAlgoToDisk(id: number, algo: Object) {
@@ -179,6 +221,21 @@ export class AlgosService {
 		} catch (error) {
 			if (error instanceof Error)
 				Logger.error(error.message, "AlgosService: writeAlgoToDisk");
+			throw error;
+		}
+	}
+
+	private deleteAlgoFromDisk(id: number) {
+		const algoPath = path.normalize(AlgosService.dataPath + id + ".json");
+		try {
+			if (existsSync(algoPath)) {
+				unlinkSync(algoPath);
+				return true;
+			}
+			return false;
+		} catch (error) {
+			if (error instanceof Error)
+				Logger.error(error.message, "AlgosService: deleteAlgoFromDisk");
 			throw error;
 		}
 	}

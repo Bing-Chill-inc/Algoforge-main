@@ -29,6 +29,6 @@ export class Dossier {
 	@OneToMany(() => Algorithme, (algo) => algo.dossier)
 	algos: Algorithme[];
 
-	@OneToMany(() => PermDossier, (permDossier) => permDossier.idDossier)
+	@OneToMany(() => PermDossier, (permDossier) => permDossier.dossier)
 	permDossiers: Relation<PermDossier[]>;
 }
