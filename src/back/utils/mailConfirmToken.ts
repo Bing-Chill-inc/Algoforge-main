@@ -37,7 +37,7 @@ export async function createMailToken(id: number) {
 	token += "_" + email;
 
 	// Date d'inscription
-	token += userData.dateInscription.getTime().toString();
+	token += userData.dateInscription.toString();
 	token = Buffer.from(token).toString("base64");
 
 	return token;

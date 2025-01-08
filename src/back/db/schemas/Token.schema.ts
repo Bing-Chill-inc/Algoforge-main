@@ -22,19 +22,21 @@ export class Token {
 
 	/**
 	 * Date de création du token.
+	 * Date sous forme de timestamp en raison de la diversité des SGBD.
 	 * @public
-	 * @type {Date}
+	 * @type {number}
 	 */
-	@Column({ type: "datetime" })
-	dateCreation: Date;
+	@Column({ type: "bigint" })
+	dateCreation: number;
 
 	/**
 	 * Date d'expiration du token.
+	 * Date sous forme de timestamp en raison de la diversité des SGBD.
 	 * @public
-	 * @type {Date}
+	 * @type {number}
 	 */
-	@Column({ type: "datetime" })
-	dateExpiration: Date;
+	@Column({ type: "bigint" })
+	dateExpiration: number;
 
 	/**
 	 * Utilisateur associé au token.

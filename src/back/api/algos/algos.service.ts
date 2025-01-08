@@ -77,8 +77,8 @@ export class AlgosService {
 		// Création de l'algorithme.
 		const newAlgo = new Algorithme();
 		newAlgo.nom = algo.nom;
-		newAlgo.dateCreation = new Date();
-		newAlgo.dateModification = new Date();
+		newAlgo.dateCreation = new Date().getTime();
+		newAlgo.dateModification = new Date().getTime();
 		// Enregistrement de l'algorithme en base de données.
 		const savedAlgo = await algoRepository.save(newAlgo);
 
@@ -148,7 +148,7 @@ export class AlgosService {
 
 		// Mise à jour de l'algorithme.
 		algoToUpdate.nom = algo.nom;
-		algoToUpdate.dateModification = new Date();
+		algoToUpdate.dateModification = new Date().getTime();
 		// Enregistrement de l'algorithme.
 		const savedAlgo = await algoRepository.save(algoToUpdate);
 

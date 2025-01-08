@@ -48,11 +48,12 @@ export class Utilisateur {
 
 	/**
 	 * Date d'inscription de l'utilisateur.
+	 * Date sous forme de timestamp en raison de la diversité des SGBD.
 	 * @public
-	 * @type {Date}
+	 * @type {number}
 	 */
-	@Column({ type: "datetime" })
-	dateInscription: Date;
+	@Column({ type: "bigint" })
+	dateInscription: number;
 
 	/**
 	 * Identifiant du thème de l'utilisateur dans l'éditeur.

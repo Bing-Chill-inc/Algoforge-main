@@ -37,19 +37,21 @@ export class Algorithme {
 
 	/**
 	 * Date de création de l'algorithme.
+	 * Date sous forme de timestamp en raison de la diversité des SGBD.
 	 * @public
-	 * @type {Date}
+	 * @type {number}
 	 */
-	@Column({ type: "datetime" })
-	dateCreation: Date;
+	@Column({ type: "bigint" })
+	dateCreation: number;
 
 	/**
 	 * Date de modification de l'algorithme.
+	 * Date sous forme de timestamp en raison de la diversité des SGBD.
 	 * @public
-	 * @type {Date}
+	 * @type {number}
 	 */
-	@Column({ type: "datetime" })
-	dateModification: Date;
+	@Column({ type: "bigint" })
+	dateModification: number;
 
 	/**
 	 * Dossier dans lequel se trouve l'algorithme.

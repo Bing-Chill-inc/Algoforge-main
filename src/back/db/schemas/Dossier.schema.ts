@@ -46,19 +46,21 @@ export class Dossier {
 
 	/**
 	 * Date de création du dossier.
+	 * Date sous forme de timestamp en raison de la diversité des SGBD.
 	 * @public
-	 * @type {Date}
+	 * @type {number}
 	 */
-	@Column({ type: "datetime" })
-	dateCreation: Date;
+	@Column({ type: "bigint" })
+	dateCreation: number;
 
 	/**
 	 * Date de modification du dossier.
+	 * Date sous forme de timestamp en raison de la diversité des SGBD.
 	 * @public
-	 * @type {Date}
+	 * @type {number}
 	 */
-	@Column({ type: "datetime" })
-	dateModification: Date;
+	@Column({ type: "bigint" })
+	dateModification: number;
 
 	/**
 	 * Algorithmes contenus dans le dossier.

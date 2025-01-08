@@ -6,7 +6,7 @@ import { UserLoginDTO, UserRegisterDTO, UserUpdateDTO } from "./users.dto";
 import { Res } from "../../types/response.entity";
 import { createMailToken } from "../../utils/mailConfirmToken";
 
-import bcrypt from "bcrypt";
+import bcrypt from "bcrypt-nodejs";
 import { Logger } from "../../utils/logger";
 import { validateClass } from "../../utils/classValidator";
 
@@ -52,7 +52,7 @@ export class UsersService {
 		newUser.adresseMail = data.email;
 		newUser.mdpHash = hash;
 		newUser.pseudo = data.pseudo;
-		newUser.dateInscription = new Date();
+		newUser.dateInscription = new Date().getTime();
 
 		// Enregistrement de l'utilisateur
 		const savedUser = await this.utilisateurRepository.save(newUser);
@@ -113,7 +113,7 @@ export class UsersService {
 		}
 
 		// Vérification de la date d'inscription
-		if (user.dateInscription.getTime().toString() !== dateInscription) {
+		if (user.dateInscription.toString() !== dateInscription) {
 			return new Res(400, "Token invalide");
 		}
 
@@ -166,8 +166,10 @@ export class UsersService {
 
 		// TODO: Générer un token JWT pour la connexion automatique
 		const token = new Token();
-		token.dateCreation = new Date();
-		token.dateExpiration = new Date(Date.now() + 48 * 60 * 60 * 1000);
+		token.dateCreation = new Date().getTime();
+		token.dateExpiration = new Date(
+			Date.now() + 48 * 60 * 60 * 1000,
+		).getTime();
 		token.utilisateur = user;
 		token.token = user.id.toString() + "_" + Date.now().toString();
 		// Enregistrement du token dans la DB
@@ -324,14 +326,16 @@ export class UsersService {
 			return new Res(401, "Token invalide");
 		} else if (tokenDB.utilisateur.isVerified === false) {
 			return new Res(401, "Utilisateur non vérifié");
-		} else if (tokenDB.dateExpiration < new Date()) {
+		} else if (tokenDB.dateExpiration < new Date().getTime()) {
 			// Suppression du token expiré
 			await this.tokensRepository.delete(tokenDB);
 
 			return new Res(401, "Token expiré");
 		} else {
 			// Prologation de la date d'expiration de 48h
-			tokenDB.dateExpiration = new Date(Date.now() + 48 * 60 * 60 * 1000);
+			tokenDB.dateExpiration = new Date(
+				Date.now() + 48 * 60 * 60 * 1000,
+			).getTime();
 			await this.tokensRepository.save(tokenDB);
 
 			tokenDB.utilisateur.mdpHash = undefined;

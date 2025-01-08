@@ -7,14 +7,14 @@
 		"build:front-cloud": "cd ../front-cloud && bun install && bun run build",
 		"start": "bun --env-file=../../.env index.ts",
 		"test": "bun test --env-file=../../.env",
+		"test:docker": "bun install && bun run build:front-cloud && bun run test",
 		"doc": "typedoc"
 	},
 	"author": "AlgoForge inc.",
 	"license": "ISC",
 	"description": "",
 	"dependencies": {
-		"@types/bcrypt": "^5.0.2",
-		"bcrypt": "^5.1.1",
+		"bcrypt-nodejs": "^0.0.3",
 		"class-transformer": "^0.5.1",
 		"class-validator": "^0.14.1",
 		"cli-color": "^2.0.4",
@@ -29,6 +29,7 @@
 		"zod": "^3.24.1"
 	},
 	"devDependencies": {
+		"@types/bcrypt-nodejs": "^0.0.31",
 		"@types/bun": "^1.1.13",
 		"@types/cli-color": "^2.0.6",
 		"@types/cors": "^2.8.17",

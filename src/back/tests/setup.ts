@@ -11,7 +11,7 @@ if (process.env.BUILD !== "dev") {
 }
 
 // Démarrage des tests.
-import { afterAll, beforeAll } from "bun:test";
+import { beforeAll } from "bun:test";
 import { app } from "../index";
 import supertest from "supertest";
 import { AppDataSource } from "../db/data-source";
@@ -32,22 +32,37 @@ beforeAll((done) => {
 	}, 100);
 });
 
+import { Utilisateur } from "../db/schemas/Utilisateur.schema";
+import { Token } from "../db/schemas/Token.schema";
+import { Algorithme } from "../db/schemas/Algorithme.schema";
+import { PermAlgorithme } from "../db/schemas/PermAlgorithme.schema";
+import { Dossier } from "../db/schemas/Dossier.schema";
+import { PermDossier } from "../db/schemas/PermDossier.schema";
 // Suppression de toutes les données de la base de données.
 async function clearAllTables() {
 	Logger.debug("Cleaning database...", "test: setup", 2);
 	// Récupération de toutes les entités de l'application.
-	const entities = AppDataSource.entityMetadatas;
+	const entities = [
+		PermAlgorithme,
+		PermDossier,
+		Dossier,
+		Algorithme,
+		Token,
+		Utilisateur,
+	];
 
 	for (const entity of entities) {
 		const repository = AppDataSource.getRepository(entity.name);
 		Logger.debug(
-			`Clearing table: ⏳ ${entity.tableName}`,
+			`Clearing table: ⏳ ${repository.metadata.tableName}`,
 			"test: setup",
 			5,
 		);
-		await repository.clear();
+		await AppDataSource.query(
+			`DELETE FROM ${repository.metadata.tableName}`,
+		);
 		Logger.debug(
-			`Clearing table: 🧹 ${entity.tableName} `,
+			`Clearing table: 🧹 ${repository.metadata.tableName} `,
 			"test: setup",
 			5,
 		);
