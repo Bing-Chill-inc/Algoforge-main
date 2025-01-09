@@ -7,6 +7,18 @@ import { Res } from "../../types/response.entity";
 import { AuthService } from "../auth/auth.service";
 import { Utilisateur } from "../../db/schemas/Utilisateur.schema";
 
+/**
+ * Contrôleur pour les algorithmes.
+ * Routes disponibles :
+ * - GET /byUserId/:id -> Récupérer les algorithmes d'un utilisateur.
+ * - GET /:id -> Récupérer un algorithme.
+ * - POST / -> Créer un algorithme.
+ * - PUT /:id -> Mettre à jour un algorithme.
+ * - DELETE /:id -> Supprimer un algorithme.
+ * @hideconstructor
+ * @category Controllers
+ * @category Algorithmes
+ */
 export class AlgosController {
 	public router: Router;
 	private usersService: AlgosService;

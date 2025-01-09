@@ -28,6 +28,7 @@
 			"./types/**/*.ts",
 			"./db/**/*.ts"
 		],
+		"excludeInternal": true,
 		"out": "docs",
 		"name": "Algoforge/Back-end",
 		"lang": "fr",

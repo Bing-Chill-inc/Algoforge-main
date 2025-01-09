@@ -15,6 +15,7 @@ import { validate, ValidationError } from "class-validator";
  *      .status(400)
  *     .json(new Res(400, "Données invalides", validationErrors));
  * }
+ * @category Utils
  */
 export async function validateClass(
 	data: any,

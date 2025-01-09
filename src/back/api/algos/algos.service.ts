@@ -1,4 +1,4 @@
-import { existsSync, mkdirSync, unlink, unlinkSync, writeFileSync } from "fs";
+import { existsSync, mkdirSync, unlinkSync, writeFileSync } from "fs";
 import { Algorithme } from "../../db/schemas/Algorithme.schema";
 import { AppDataSource } from "../../db/data-source";
 import { PermAlgorithme } from "../../db/schemas/PermAlgorithme.schema";
@@ -10,7 +10,19 @@ import path from "path";
 import { Logger } from "../../utils/logger";
 import { getOwnerOfAlgo } from "../../utils/queries";
 
+/**
+ * Service pour les algorithmes.
+ * @hideconstructor
+ * @category Services
+ * @category Algorithmes
+ */
 export class AlgosService {
+	/**
+	 * Chemin vers le dossier contenant les algorithmes.
+	 * @public
+	 * @type {string}
+	 * @readonly
+	 */
 	public static readonly dataPath: string = path.join(
 		__dirname,
 		"../../../../data/algos/",

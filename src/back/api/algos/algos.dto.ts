@@ -12,6 +12,8 @@ import { PermAlgorithme } from "../../db/schemas/PermAlgorithme.schema";
 
 /**
  * Classe de validation pour la création d'un algorithme.
+ * @category DTOs
+ * @category Algorithmes
  */
 export class AlgoCreateDTO {
 	@IsNumber()
@@ -43,6 +45,8 @@ export class AlgoCreateDTO {
 
 /**
  * Classe de validation pour la mise à jour d'un algorithme.
+ * @category DTOs
+ * @category Algorithmes
  */
 export class AlgoUpdateDTO {
 	@IsNumber()

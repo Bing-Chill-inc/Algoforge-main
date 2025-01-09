@@ -133,6 +133,9 @@ const AlgoSchema = enfants;
 
 /**
  * Classe de validation des algorithmes.
+ * @hideconstructor
+ * @category Utils
+ * @category Algorithmes
  */
 export class AlgoValidator {
 	constructor() {

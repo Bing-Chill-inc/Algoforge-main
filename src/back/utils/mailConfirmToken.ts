@@ -2,9 +2,10 @@ import { UsersService } from "../api/users/users.service";
 import { Utilisateur } from "../db/schemas/Utilisateur.schema";
 import { Buffer } from "buffer";
 
-/** Génère un token de confirmation de mail, à partir d'infos utilisateur.
- *
+/**
+ * Génère un token de confirmation de mail, à partir d'infos utilisateur.
  * @returns Token de confirmation de mail.
+ * @category Utils
  */
 export async function createMailToken(id: number) {
 	let token = "";

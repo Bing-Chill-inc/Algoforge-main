@@ -6,6 +6,21 @@ import { UserRegisterDTO, UserLoginDTO, UserUpdateDTO } from "./users.dto";
 import { AuthService } from "../auth/auth.service";
 import { Utilisateur } from "../../db/schemas/Utilisateur.schema";
 
+/**
+ * Contrôleur pour les utilisateurs.
+ * Routes disponibles :
+ * - POST /register -> Inscription d'un utilisateur.
+ * - GET /confirm/:token -> Confirmation de l'inscription.
+ * - POST /login -> Connexion d'un utilisateur.
+ * - GET /logout -> Déconnexion d'un utilisateur.
+ * - POST /recover -> Récupération du mot de passe.
+ * - GET /:id -> Récupérer un utilisateur.
+ * - PUT /:id -> Mettre à jour un utilisateur.
+ * - DELETE /:id -> Supprimer un utilisateur.
+ * @hideconstructor
+ * @category Controllers
+ * @category Utilisateurs
+ */
 export class UsersController {
 	public router: Router;
 	private usersService: UsersService;

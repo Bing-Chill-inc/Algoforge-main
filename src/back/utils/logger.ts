@@ -40,6 +40,8 @@ function writeLog(message: string, style: string, exec = "", file: string) {
  * Le dosiser logs/ sera automatique créé s'il n'existe pas, au chemin filePath.
  * Elle est à utiliser en priorité, au lieu des console.log()...
  * La classe n'a pas besoin d'être instanciée, car ses méthodes sont statiques.
+ * @hideconstructor
+ * @category Utils
  */
 export class Logger {
 	static filePath: string = `${process.cwd()}/logs/`;

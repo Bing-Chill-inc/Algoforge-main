@@ -10,6 +10,12 @@ import bcrypt from "bcrypt-nodejs";
 import { Logger } from "../../utils/logger";
 import { validateClass } from "../../utils/classValidator";
 
+/**
+ * Service pour les utilisateurs.
+ * @hideconstructor
+ * @category Services
+ * @category Utilisateurs
+ */
 export class UsersService {
 	utilisateurRepository: Repository<Utilisateur> =
 		AppDataSource.getRepository(Utilisateur);

@@ -1,6 +1,11 @@
 import { Request, Response } from "express";
 import { UsersService } from "../users/users.service";
 
+/**
+ * Service pour l'authentification de l'utilisateur.
+ * @hideconstructor
+ * @category Services
+ */
 export class AuthService {
 	private usersService: UsersService;
 

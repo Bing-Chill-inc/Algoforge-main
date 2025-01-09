@@ -3,6 +3,7 @@ import { Logger } from "../utils/logger";
 
 /**
  * Ce middleware permet de journaliser les requêtes entrantes.
+ * @category Middlewares
  */
 export const loggerMiddleware = async (req: Request, res, next) => {
 	if (process.env.IS_IP_LOGGED === "true") {

@@ -9,6 +9,8 @@ import {
 
 /**
  * Classe de validation pour la création d'un utilisateur.
+ * @category DTOs
+ * @category Utilisateurs
  */
 export class UserRegisterDTO {
 	@Length(3, 255)
@@ -26,6 +28,8 @@ export class UserRegisterDTO {
 
 /**
  * Classe de validation pour la connexion d'un utilisateur.
+ * @category DTOs
+ * @category Utilisateurs
  */
 export class UserLoginDTO {
 	@IsEmail()
@@ -39,6 +43,8 @@ export class UserLoginDTO {
 
 /**
  * Classe de validation pour la récupération de mot de passe d'un utilisateur.
+ * @category DTOs
+ * @category Utilisateurs
  */
 export class UserUpdateDTO {
 	@IsOptional()
