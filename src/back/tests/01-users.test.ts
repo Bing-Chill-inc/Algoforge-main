@@ -7,7 +7,26 @@ import { Logger } from "../utils/logger";
 import { createMailToken } from "../utils/mailConfirmToken";
 import { server, request } from "./setup";
 
-import { describe, expect, test } from "bun:test";
+import { afterAll, describe, expect, test } from "bun:test";
+import { UserSet } from "./user.set";
+
+// Création de 2 utilisateurs pour les tests suivants.
+afterAll(async () => {
+	Logger.log("Generating 2 other users...", "test: users");
+	const payload1 = new UserRegisterDTO();
+	payload1.email = UserSet.test1.email;
+	payload1.pseudo = UserSet.test1.pseudo;
+	payload1.password = UserSet.test1.password;
+
+	const payload2 = new UserRegisterDTO();
+	payload1.email = UserSet.test2.email;
+	payload1.pseudo = UserSet.test2.pseudo;
+	payload1.password = UserSet.test2.password;
+	[payload1, payload2].forEach(async (payload) => {
+		await request.post("/api/users/register").send(payload);
+	});
+	Logger.log("Generated !", "test: users");
+});
 
 describe("Users: new user", () => {
 	let token: string = "";
@@ -27,8 +46,8 @@ describe("Users: new user", () => {
 		test("POST /api/users/register -> erreur: Email invalide.", async () => {
 			const payload = new UserRegisterDTO();
 			payload.email = "test@@";
-			payload.password = "testtest";
-			payload.pseudo = "Test de ToxykAuBleu";
+			payload.password = UserSet.example.password;
+			payload.pseudo = UserSet.example.pseudo;
 
 			const response = await request
 				.post("/api/users/register")
@@ -44,9 +63,9 @@ describe("Users: new user", () => {
 
 		test("POST /api/users/register -> erreur: Mot de passe trop court.", async () => {
 			const payload = new UserRegisterDTO();
-			payload.email = "test@toxykaubleu.fr";
+			payload.email = UserSet.example.email;
 			payload.password = "test";
-			payload.pseudo = "Test de ToxykAuBleu";
+			payload.pseudo = UserSet.example.pseudo;
 
 			const response = await request
 				.post("/api/users/register")
@@ -65,9 +84,9 @@ describe("Users: new user", () => {
 
 		test("POST /api/users/register -> nouveau utilisateur.", async () => {
 			const payload = new UserRegisterDTO();
-			payload.email = "test@toxykaubleu.fr";
-			payload.password = "testtest";
-			payload.pseudo = "Test de ToxykAuBleu";
+			payload.email = UserSet.example.email;
+			payload.password = UserSet.example.password;
+			payload.pseudo = UserSet.example.pseudo;
 
 			const response = await request
 				.post("/api/users/register")
@@ -86,9 +105,9 @@ describe("Users: new user", () => {
 		});
 		test("POST /api/users/register -> erreur: Email déjà utilisé.", async () => {
 			const payload = new UserRegisterDTO();
-			payload.email = "test@toxykaubleu.fr";
-			payload.password = "testtest";
-			payload.pseudo = "Test de ToxykAuBleu";
+			payload.email = UserSet.example.email;
+			payload.password = UserSet.example.password;
+			payload.pseudo = UserSet.example.pseudo;
 
 			const response = await request
 				.post("/api/users/register")
@@ -158,7 +177,7 @@ describe("Users: new user", () => {
 		test("POST /api/users/login -> erreur: Utilisateur introuvable.", async () => {
 			const payload = new UserLoginDTO();
 			payload.email = "test@example.com";
-			payload.password = "testtest";
+			payload.password = UserSet.example.password;
 
 			const response = await request
 				.post("/api/users/login")
@@ -172,7 +191,7 @@ describe("Users: new user", () => {
 		});
 		test("POST /api/users/login -> erreur: Mot de passe incorrect.", async () => {
 			const payload = new UserLoginDTO();
-			payload.email = "test@toxykaubleu.fr";
+			payload.email = UserSet.example.email;
 			payload.password = "wrong";
 
 			const response = await request
@@ -187,8 +206,8 @@ describe("Users: new user", () => {
 		});
 		test("POST /api/users/login -> Connexion réussie.", async () => {
 			const payload = new UserLoginDTO();
-			payload.email = "test@toxykaubleu.fr";
-			payload.password = "testtest";
+			payload.email = UserSet.example.email;
+			payload.password = UserSet.example.password;
 
 			const response = await request
 				.post("/api/users/login")
@@ -245,8 +264,8 @@ describe("Users: new user", () => {
 		});
 		test("PUT /api/users/1 -> Pseudonyme modifié.", async () => {
 			const payload = new UserUpdateDTO();
-			payload.pseudo = "Nouveau pseudo !";
-			payload.currentPassword = "testtest";
+			payload.pseudo = UserSet.example.newPseudo;
+			payload.currentPassword = UserSet.example.password;
 
 			const response = await request
 				.put("/api/users/1")
@@ -261,8 +280,8 @@ describe("Users: new user", () => {
 		});
 		test("PUT /api/users/1 -> Mot de passe modifié.", async () => {
 			const payload = new UserUpdateDTO();
-			payload.currentPassword = "testtest";
-			payload.newPassword = "testtest2";
+			payload.currentPassword = UserSet.example.password;
+			payload.newPassword = UserSet.example.newPassword;
 
 			const response = await request
 				.put("/api/users/1")

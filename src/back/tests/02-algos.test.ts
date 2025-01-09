@@ -8,6 +8,7 @@ import path from "path";
 import { AlgoCreateDTO, AlgoUpdateDTO } from "../api/algos/algos.dto";
 import { AlgosService } from "../api/algos/algos.service";
 import { UserLoginDTO } from "../api/users/users.dto";
+import { UserSet } from "./user.set";
 
 let token: string;
 
@@ -18,8 +19,8 @@ beforeAll(async () => {
 
 	Logger.log("Logging in with user (ID: 1)...", "test: algos");
 	const payload = new UserLoginDTO();
-	payload.email = "test@toxykaubleu.fr";
-	payload.password = "testtest2";
+	payload.email = UserSet.example.email;
+	payload.password = UserSet.example.newPassword;
 	const response = await request.post("/api/users/login").send(payload);
 	Logger.debug(JSON.stringify(response.body), "test: algos", 5);
 	token = response.body.data.tokens[0].token;
@@ -185,6 +186,8 @@ describe("Algos: creating data", () => {
 		expect(existsSync(AlgosService.dataPath + "1.json")).toBe(false);
 	});
 });
+
+describe("Algos: cheking perms", () => {});
 
 /**
  * Tests du service de la validation des algorithmes.
