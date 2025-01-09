@@ -64,6 +64,23 @@ if %errorlevel% neq 0 (
     goto del_repository
 )
 
+:: Génération d'une clé secrète pour l'application.
+:generate_secret_key
+echo ⚙️ Génération d'une clé secrète pour l'application...
+setlocal enabledelayedexpansion
+set "chars=abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*()-_+="
+set "secret_key="
+for /l %%i in (1,1,50) do (
+    set /a "index=!random! %% 72"
+    for %%j in (!index!) do set "secret_key=!secret_key!!chars:~%%j,1!"
+)
+echo ⚙️ Remplacement de la clé secrète dans le fichier .env...
+powershell -Command "(Get-Content .env) -replace 'SECRET_KEY=template_key','SECRET_KEY=%secret_key%' | Set-Content .env"
+if %errorlevel% neq 0 (
+    echo ⚠️ Échec du remplacement de la clé secrète dans le fichier .env.
+    goto del_repository
+)
+
 :: Lancer l'application avec docker compose.
 :start_application
 echo ⚙️ Démarrage de l'application avec Docker Compose...

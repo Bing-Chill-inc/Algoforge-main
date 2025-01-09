@@ -5,10 +5,11 @@ import { AppDataSource } from "../../db/data-source";
 import { UserLoginDTO, UserRegisterDTO, UserUpdateDTO } from "./users.dto";
 import { Res } from "../../types/response.entity";
 import { createMailToken } from "../../utils/mailConfirmToken";
+import { validateClass } from "../../utils/classValidator";
+import { Logger } from "../../utils/logger";
 
 import bcrypt from "bcrypt-nodejs";
-import { Logger } from "../../utils/logger";
-import { validateClass } from "../../utils/classValidator";
+import jwt from "jsonwebtoken";
 
 /**
  * Service pour les utilisateurs.
@@ -177,7 +178,10 @@ export class UsersService {
 			Date.now() + 48 * 60 * 60 * 1000,
 		).getTime();
 		token.utilisateur = user;
-		token.token = user.id.toString() + "_" + Date.now().toString();
+
+		// Générer un token JWT
+		token.token = jwt.sign({ id: user.id }, process.env.SECRET_KEY, { expiresIn: '48h' });
+
 		// Enregistrement du token dans la DB
 		const savedToken = await this.tokensRepository.save(token);
 		savedToken.utilisateur = undefined;
@@ -337,16 +341,23 @@ export class UsersService {
 			await this.tokensRepository.delete(tokenDB);
 
 			return new Res(401, "Token expiré");
-		} else {
-			// Prologation de la date d'expiration de 48h
-			tokenDB.dateExpiration = new Date(
+		} else { // NOTE: ATTENTION, quand on vérifie, pour prolonger le token, on doit maintenant renvoyer un nouveau token, ce qui pose des problèmes potentiels, à voir
+			// Prolongation de la date d'expiration de 48h
+			const token = new Token();
+			token.dateCreation = new Date().getTime();
+			token.dateExpiration = new Date(
 				Date.now() + 48 * 60 * 60 * 1000,
 			).getTime();
-			await this.tokensRepository.save(tokenDB);
+			token.utilisateur = tokenDB.utilisateur;
 
-			tokenDB.utilisateur.mdpHash = undefined;
+			token.token = jwt.sign({ id: tokenDB.utilisateur.id }, process.env.SECRET_KEY, { expiresIn: '48h' });
 
-			return new Res(200, "Token valide", tokenDB);
+			await this.tokensRepository.save(token);
+			await this.tokensRepository.delete(tokenDB);
+
+			token.utilisateur.mdpHash = undefined;
+
+			return new Res(200, "Token valide", token);
 		}
 	}
 
