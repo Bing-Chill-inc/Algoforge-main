@@ -1,3 +1,5 @@
+const AssetsDynamiques = [];
+
 AssetsDynamiques.push({
 	route: "/AlgoForge.svg",
 	callback: (req, res) => {
