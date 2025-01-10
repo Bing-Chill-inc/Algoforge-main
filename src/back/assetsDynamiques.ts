@@ -206,13 +206,15 @@ AssetsDynamiques.push({
 		const svgContent = `
 	<svg version="1.1" id="Boucle" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
 	 viewBox="0 0 550.4 512" style="enable-background:new 0 0 550.4 512;" xml:space="preserve">
-<g>
-	<path fill="#${fgColor}" d="M546.8,312.6c-4.7,7.8-13.1,12.6-22.2,12.6h-22c-1.9,6.8-4.1,13.5-6.5,20C459.8,442.6,366,512,256,512
-		C114.6,512,0,397.4,0,256C0,114.6,114.6,0,256,0c108.8,0,201.8,67.9,238.8,163.6c-6.5-3.3-13.7-5.1-21-5.1c-10.2,0-20,3.4-28,9.5
-		c-10.2-22-24.3-42.3-42-59.9c-39.5-39.5-92-61.2-147.9-61.2c-55.9,0-108.4,21.8-147.9,61.2s-61.2,92-61.2,147.9
-		c0,55.8,21.8,108.4,61.2,147.9s92,61.2,147.9,61.2c55.8,0,108.4-21.8,147.9-61.2c17.3-17.3,31.2-37.1,41.4-58.7
-		c3.1-6.5,5.8-13.2,8.2-20h-30.4c-9.1,0-17.5-4.8-22.2-12.6c-4.7-7.8-4.9-17.5-0.6-25.5l50.8-94.9c0.8-1.5,1.8-2.9,2.8-4.2
-		c4.9-5.9,12.2-9.4,20-9.4c4.8,0,9.3,1.3,13.3,3.7s7.3,5.8,9.5,10l12.1,22.6l38.7,72.3C551.7,295.1,551.4,304.8,546.8,312.6z"/>
+<g fill="#${fgColor}">
+	<g>
+		<path d="M547.5,319.1c-3.7,6.1-10.3,9.9-17.4,9.9h-79.5c-7.1,0-13.7-3.8-17.4-9.9c-3.7-6.1-3.8-13.7-0.5-20l39.8-74.3
+			c0.6-1.2,1.4-2.3,2.2-3.3c3.8-4.6,9.5-7.4,15.7-7.4c3.8,0,7.3,1,10.4,2.9c3.1,1.9,5.7,4.5,7.4,7.8l9.5,17.7l30.3,56.6
+			C551.4,305.4,551.1,313,547.5,319.1z"/>
+	</g>
+	<path d="M502.6,325.2c-1.9,6.8-4.1,13.5-6.5,20C459.8,442.6,366,512,256,512C114.6,512,0,397.4,0,256S114.6,0,256,0
+		c108.8,0,201.8,67.9,238.8,163.6c-6.5-3.3-13.7-5.1-21-5.1c-1,0-2,0-3,0.1C433.7,76.8,351.3,19.9,255.6,19.9
+		C125.2,19.9,19.5,125.6,19.5,256s105.7,236.1,236.1,236.1c106.3,0,196.2-70.3,225.8-166.9H502.6z"/>
 </g>
 </svg>
 	`;
@@ -228,24 +230,23 @@ AssetsDynamiques.push({
 		const fgColor = req.query.fgColor || "000000";
 
 		const svgContent = `
-	<svg version="1.1" id="ConditionSortie" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
-        viewBox="0 0 320.3 319.9" style="enable-background:new 0 0 320.3 319.9;" xml:space="preserve">
-    <style type="text/css">
+		<svg version="1.1" id="Calque_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
+	 viewBox="0 0 320.3 319.9" style="enable-background:new 0 0 320.3 319.9;" xml:space="preserve">
+<style type="text/css">
         .st0{stroke:#${fgColor};;stroke-width:27;stroke-linecap:round;stroke-miterlimit:10;}
         .st1{fill:none;stroke:#${fgColor};;stroke-width:15;stroke-linecap:round;stroke-miterlimit:10;}
         .st2{stroke:#${fgColor};;stroke-width:27;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:1;}
         .st3{fill:none;stroke:#${fgColor};;stroke-width:27;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:1;}
-    </style>
-    <g fill="#${fgColor}">
-        <path d="M277.5,26.9c8.6,0,15.6,7,15.6,15.6v234.9c0,8.6-7,15.6-15.6,15.6H42.6c-8.6,0-15.6-7-15.6-15.6V42.5
-            c0-8.6,7-15.6,15.6-15.6H277.5 M277.5-0.1H42.5C19-0.1,0,19,0,42.5v234.9c0,23.5,19.1,42.6,42.6,42.6h234.9
-            c23.5,0,42.6-19.1,42.6-42.6V42.5C320,19,301-0.1,277.5-0.1L277.5-0.1z"/>
-    </g>
-    <polyline fill="#${fgColor}" class="st0" points="107.4,184.6 107.4,16.3 213.4,15.6 213.4,184.6 "/>
-    <path fill="#${fgColor}" class="st1" d="M59,197.6"/>
-    <path fill="#${fgColor}" class="st2" d="M264.5,184.6L163,249.3c-1.5,1-3.5,1-5.1,0L56.4,184.6H264.5z"/>
-    <path fill="#${fgColor}" class="st3" d="M106.6,138.6"/>
-    </svg>
+</style>
+<polyline fill="#${fgColor}" class="st0" points="130.7,157.6 130.7,17.5 189.6,16.9 189.6,157.6 "/>
+<path fill="#${fgColor}" class="st1" d="M59,170.8"/>
+<path fill="#${fgColor}" class="st2" d="M217.9,157.6l-56.3,58.8c-0.8,0.9-2,0.9-2.9,0l-56.4-58.8H217.9z"/>
+<path fill="#${fgColor}" class="st3" d="M106.6,120.5"/>
+	<path fill="#${fgColor}" d="M283.4,8c15.9,0,28.9,12.9,28.9,28.9V283c0,15.9-12.9,28.9-28.9,28.9H36.9C20.9,311.9,8,299,8,283V36.9
+		C8,20.9,20.9,8,36.9,8H283.4 M283.4,0H36.9C16.5,0,0,16.5,0,36.9V283c0,20.4,16.5,36.9,36.9,36.9h246.6c20.4,0,36.9-16.5,36.9-36.9
+		V36.9C320.3,16.5,303.8,0,283.4,0L283.4,0z"/>
+
+</svg>
 	`;
 
 		res.setHeader("Content-Type", "image/svg+xml");
@@ -557,7 +558,7 @@ AssetsDynamiques.push({
 
 		const svgContent = `
 	<svg version="1.1" id="Calque_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
-	 viewBox="0 0 508.2 508.1" style="enable-background:new 0 0 508.2 508.1;" xml:space="preserve" width="32px" height="32px">
+	 viewBox="0 0 508.2 508.1" style="enable-background:new 0 0 508.2 508.1;" xml:space="preserve" width="64px" height="32px">
 <style type="text/css">
 	.st0{stroke:#${fgColor};stroke-width:27;stroke-linecap:round;stroke-miterlimit:10;}
 	.st1{fill:none;stroke:#${fgColor};stroke-width:15;stroke-linecap:round;stroke-miterlimit:10;}
@@ -634,7 +635,7 @@ AssetsDynamiques.push({
 
 		const svgContent = `
 <svg version="1.1" id="ProcedureCursor" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
-	 viewBox="0 0 779.3 536.8" style="enable-background:new 0 0 779.3 536.8;" xml:space="preserve" width="32px" height="32px">
+	 viewBox="0 0 779.3 536.8" style="enable-background:new 0 0 779.3 536.8;" xml:space="preserve" width="64px" height="32px">
 <g fill="#${fgColor}" id="Calque_1_00000034057056868085137710000009322341118287881886_">
 	<path d="M288.7,509c0.8,0.3,1.7,0.4,2.6,0.4H696c0.9,0,1.8-0.1,2.6-0.4H288.7z"/>
 	<path d="M254.5,509h-3c-8.9,0-16.2-7.2-16.2-16.2V251.5c0-8.9,7.2-16.2,16.2-16.2h3c1.7,0,3.2,1.4,3.2,3.2v267.3
