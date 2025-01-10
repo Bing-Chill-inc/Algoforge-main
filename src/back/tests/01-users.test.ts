@@ -294,7 +294,6 @@ describe("Users: new user", () => {
 				"Utilisateur mis à jour",
 			);
 		});
-		test.todo("PUT /api/users/1 -> Email modifié.");
 	});
 
 	describe("logout", () => {

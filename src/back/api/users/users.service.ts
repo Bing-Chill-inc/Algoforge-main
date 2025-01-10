@@ -272,9 +272,7 @@ export class UsersService {
 		}
 
 		// Mise à jour de l'utilisateur
-		if (data.email) {
-			user.adresseMail = data.email;
-		} else if (data.pseudo) {
+		if (data.pseudo) {
 			user.pseudo = data.pseudo;
 		} else if (data.newPassword) {
 			const salt = bcrypt.genSaltSync(10);

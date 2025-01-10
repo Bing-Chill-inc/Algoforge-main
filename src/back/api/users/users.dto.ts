@@ -51,10 +51,6 @@ export class UserUpdateDTO {
 	@Length(3, 255)
 	pseudo?: string;
 
-	@IsEmail()
-	@IsOptional()
-	email?: string;
-
 	@IsNotEmpty()
 	currentPassword: string;
 

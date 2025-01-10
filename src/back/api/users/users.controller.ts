@@ -161,11 +161,10 @@ export class UsersController {
 		const id = +req.params.id;
 
 		// Récupération des données de la requête
-		const { pseudo, email, currentPassword, newPassword } = req.body;
+		const { pseudo, currentPassword, newPassword } = req.body;
 
 		const data = new UserUpdateDTO();
 		data.pseudo = pseudo;
-		data.email = email;
 		data.currentPassword = currentPassword;
 		data.newPassword = newPassword;
 		data.requestedUserId = (res.locals.user as Utilisateur).id;
