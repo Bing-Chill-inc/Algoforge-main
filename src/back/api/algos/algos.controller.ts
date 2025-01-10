@@ -80,8 +80,9 @@ export class AlgosController {
 
 		// Récupération des données de la requête
 		const { id } = req.params;
+		const user = res.locals.user as Utilisateur;
 
-		const algo = await this.usersService.getAlgo(+id);
+		const algo = await this.usersService.getAlgo(+id, user.id);
 
 		if (!algo) {
 			return res.status(404).json(new Res(404, "Algorithme non trouvé"));

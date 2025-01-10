@@ -1,4 +1,10 @@
-import { existsSync, mkdirSync, unlinkSync, writeFileSync } from "fs";
+import {
+	existsSync,
+	mkdirSync,
+	readFileSync,
+	unlinkSync,
+	writeFileSync,
+} from "fs";
 import { Algorithme } from "../../db/schemas/Algorithme.schema";
 import { AppDataSource } from "../../db/data-source";
 import { PermAlgorithme } from "../../db/schemas/PermAlgorithme.schema";
@@ -51,15 +57,36 @@ export class AlgosService {
 	 * @param id Id de l'algorithme.
 	 * @returns L'algorithme.
 	 */
-	// TODO: vérifier si l'utilisateur de la requête a le droit de voir l'algorithme.
-	async getAlgo(id: number) {
+	async getAlgo(id: number, requestedUserId: number) {
 		const algoRepository = AppDataSource.manager.getRepository(Algorithme);
 
 		// Récupération de l'algorithme.
-		return await algoRepository.findOne({
+		const algo = await algoRepository.findOne({
 			where: { id: id },
-			// relations: { permAlgorithmes: true },
+			relations: { permAlgorithmes: true },
 		});
+		if (!algo) return null;
+
+		// Vérification des droits de l'utilisateur.
+		let hasRights = false;
+		for (const perm of algo.permAlgorithmes) {
+			if (
+				perm.idUtilisateur === requestedUserId &&
+				(perm.droits === Droits.Owner ||
+					perm.droits === Droits.ReadWrite ||
+					perm.droits === Droits.ReadOnly)
+			) {
+				hasRights = true;
+				break;
+			}
+		}
+		if (!hasRights) return null;
+
+		// Récupération de l'algorithme dans le système de fichiers.
+		const algoData = this.readAlgoFromDisk(id);
+		if (!algoData) return null;
+
+		return { ...algo, sourceCode: algoData };
 	}
 
 	/**
@@ -117,7 +144,7 @@ export class AlgosService {
 	// TODO: mettre à jour les permissions de l'algorithme.
 	async updateAlgo(algo: AlgoUpdateDTO) {
 		// Récupération de l'algorithme.
-		const algoToUpdate = await this.getAlgo(algo.id);
+		const algoToUpdate = await this.getAlgo(algo.id, algo.requestedUserId);
 		if (!algoToUpdate) return null;
 
 		// Vérification des droits de l'utilisateur.
@@ -216,6 +243,23 @@ export class AlgosService {
 				500,
 				"Erreur lors de la suppression de l'algorithme",
 			);
+		}
+	}
+
+	private readAlgoFromDisk(id: number) {
+		const algoPath = path.normalize(AlgosService.dataPath + id + ".json");
+		try {
+			if (existsSync(algoPath)) {
+				const algo = JSON.parse(
+					readFileSync(algoPath, { encoding: "utf8" }),
+				);
+				return algo;
+			}
+			return null;
+		} catch (error) {
+			if (error instanceof Error)
+				Logger.error(error.message, "AlgosService: readAlgoFromDisk");
+			throw error;
 		}
 	}
 

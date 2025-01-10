@@ -165,6 +165,16 @@ describe("Algos: creating data", () => {
 		expect(response.body.data).toBeArrayOfSize(1);
 	});
 
+	test("GET /api/algos/:id -> succès: Algorithme trouvé.", async () => {
+		const response = await request
+			.get("/api/algos/1")
+			.auth(token, { type: "bearer" });
+		Logger.debug(JSON.stringify(response.body), "test: algos", 5);
+		expect(response.status).toBe(200);
+		expect(response.body).toHaveProperty("message", "Algorithme trouvé");
+		expect(response.body.data.sourceCode).toEqual(readAlgo("algo-complet"));
+	});
+
 	test("DELETE /api/algos/:id -> erreur: Algorithme non trouvé.", async () => {
 		const response = await request
 			.delete("/api/algos/2")

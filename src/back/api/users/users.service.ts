@@ -327,7 +327,6 @@ export class UsersService {
 
 		// // Suppression des tokens de l'utilisateur.
 		for (const token of user.tokens) {
-			console.log(token);
 			await this.tokensRepository.delete(token.token);
 		}
 		// Suppression des dossiers et des permissions associées de l'utilisateur.

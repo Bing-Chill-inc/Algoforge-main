@@ -1,6 +1,6 @@
 {
-	"name": "algoforge-source",
-	"version": "1.0.0",
+	"name": "algoforge-back",
+	"version": "5.0.0",
 	"main": "index.ts",
 	"scripts": {
 		"prod": "bun install && bun run build:front-cloud && bun run start",
