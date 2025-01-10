@@ -1,3 +1,4 @@
+import { Logger } from "../utils/logger";
 /**
  * Ce fichier permet d'initialiser l'environnement de test
  * de l'application avant de démarrer les tests.
@@ -5,9 +6,12 @@
 
 // Vérification du mode de l'application.
 if (process.env.BUILD !== "dev") {
-	throw new Error(
-		"Le mode de l'application doit être 'dev'. \nATTENTION: ceci supprime toutes les données de la base de données.",
+	Logger.error("Le mode de l'application doit être 'dev'.", "test: setup");
+	Logger.warn(
+		"ATTENTION: ceci supprime toutes les données de la base de données.",
+		"test: setup",
 	);
+	process.exit(1);
 }
 
 // Démarrage des tests.
@@ -15,7 +19,6 @@ import { beforeAll } from "bun:test";
 import { app } from "../index";
 import supertest from "supertest";
 import { AppDataSource } from "../db/data-source";
-import { Logger } from "../utils/logger";
 
 export const request = supertest(app);
 export const server = app;
