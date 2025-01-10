@@ -37,13 +37,6 @@ rename_env_file() {
     mv template.env .env || { echo "⚠️ Échec du renommage du fichier 'template.env' en '.env'."; del_repository; exit 1; }
 }
 
-# Génération d'une clé secrète pour l'application.
-generate_secret_key() {
-    echo "⚙️ Génération d'une clé secrète pour l'application...\n"
-    secret_key=$(openssl rand -base64 32)
-    sed -i 's/SECRET_KEY=template_key/SECRET_KEY='$secret_key'/g' .env
-}
-
 # Lancer l'application avec docker compose.
 start_application() {
     echo "⚙️ Démarrage de l'application avec Docker Compose...\n"

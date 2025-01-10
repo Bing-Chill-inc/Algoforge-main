@@ -65,20 +65,6 @@ function Rename-Env-File {
     }
 }
 
-# Génération d'une clé secrète pour l'application.
-function Generate-Secret-Key {
-    Write-Host "⚙️ Génération d'une clé secrète pour l'application..."
-    $chars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*()-_+="
-    $secret_key = -join ((1..50) | ForEach-Object { $chars[(Get-Random -Maximum $chars.Length)] })
-    
-    Write-Host "⚙️ Remplacement de la clé secrète dans le fichier .env..."
-    (Get-Content .env) -replace 'SECRET_KEY=template_key', "SECRET_KEY=$secret_key" | Set-Content .env
-    if ($LASTEXITCODE -ne 0) {
-        Write-Error "⚠️ Échec du remplacement de la clé secrète dans le fichier .env."
-        exit 1
-    }
-}
-
 # Lancer l'application avec docker-compose.
 function Start-Application {
     Write-Host "⚙️ Démarrage de l'application avec Docker Compose..."

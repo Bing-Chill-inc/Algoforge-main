@@ -9,7 +9,6 @@ import { validateClass } from "../../utils/classValidator";
 import { Logger } from "../../utils/logger";
 
 import bcrypt from "bcrypt-nodejs";
-import jwt from "jsonwebtoken";
 
 /**
  * Service pour les utilisateurs.
@@ -171,7 +170,6 @@ export class UsersService {
 		// Suppression du hash du mot de passe avant renvoi
 		user.mdpHash = undefined;
 
-		// TODO: Générer un token JWT pour la connexion automatique
 		const token = new Token();
 		token.dateCreation = new Date().getTime();
 		token.dateExpiration = new Date(
@@ -179,8 +177,11 @@ export class UsersService {
 		).getTime();
 		token.utilisateur = user;
 
-		// Générer un token JWT
-		token.token = jwt.sign({ id: user.id }, process.env.SECRET_KEY, { expiresIn: '48h' });
+		// Générer un token unique
+		token.token = bcrypt.hashSync(
+			`${user.id}_${token.dateCreation}_${crypto.randomUUID()}`,
+			bcrypt.genSaltSync(10),
+		);
 
 		// Enregistrement du token dans la DB
 		const savedToken = await this.tokensRepository.save(token);
@@ -190,8 +191,6 @@ export class UsersService {
 		// Retour de la réponse
 		return new Res(200, "Connexion réussie", user);
 	}
-
-	// TODO: Générer un token JWT pour la connexion automatique --> register et login
 
 	// POST /logout
 	/** Déconnexion de l'utilisateur, utilisé lors de sa déconnexion.
@@ -309,13 +308,10 @@ export class UsersService {
 		}
 
 		// Suppression de l'utilisateur
-		const deletedUser = await this.utilisateurRepository.delete(user);
+		await this.utilisateurRepository.delete(user.id);
 		// TODO: Supprimer les données de l'utilisateur (algos, ...)
 
-		// Suppression du hash du mot de passe
-		user.mdpHash = undefined;
-
-		return new Res(200, "Utilisateur supprimé", deletedUser);
+		return new Res(200, "Utilisateur supprimé");
 	}
 
 	/** Vérification de la validité du token.
@@ -338,26 +334,19 @@ export class UsersService {
 			return new Res(401, "Utilisateur non vérifié");
 		} else if (tokenDB.dateExpiration < new Date().getTime()) {
 			// Suppression du token expiré
-			await this.tokensRepository.delete(tokenDB);
+			await this.tokensRepository.delete(tokenDB.token);
 
 			return new Res(401, "Token expiré");
-		} else { // NOTE: ATTENTION, quand on vérifie, pour prolonger le token, on doit maintenant renvoyer un nouveau token, ce qui pose des problèmes potentiels, à voir
+		} else {
 			// Prolongation de la date d'expiration de 48h
-			const token = new Token();
-			token.dateCreation = new Date().getTime();
-			token.dateExpiration = new Date(
+			tokenDB.dateExpiration = new Date(
 				Date.now() + 48 * 60 * 60 * 1000,
 			).getTime();
-			token.utilisateur = tokenDB.utilisateur;
+			await this.tokensRepository.save(tokenDB);
 
-			token.token = jwt.sign({ id: tokenDB.utilisateur.id }, process.env.SECRET_KEY, { expiresIn: '48h' });
+			tokenDB.utilisateur.mdpHash = undefined;
 
-			await this.tokensRepository.save(token);
-			await this.tokensRepository.delete(tokenDB);
-
-			token.utilisateur.mdpHash = undefined;
-
-			return new Res(200, "Token valide", token);
+			return new Res(200, "Token valide", tokenDB);
 		}
 	}
 

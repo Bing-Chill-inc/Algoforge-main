@@ -22,7 +22,6 @@
 		"dayjs": "^1.11.13",
 		"express": "^4.21.1",
 		"express-async-handler": "^1.2.0",
-		"jsonwebtoken": "^9.0.2",
 		"pg": "^8.13.1",
 		"reflect-metadata": "^0.2.2",
 		"supertest": "^7.0.0",
