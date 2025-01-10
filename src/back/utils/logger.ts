@@ -40,6 +40,8 @@ function writeLog(message: string, style: string, exec = "", file: string) {
  * Le dosiser logs/ sera automatique créé s'il n'existe pas, au chemin filePath.
  * Elle est à utiliser en priorité, au lieu des console.log()...
  * La classe n'a pas besoin d'être instanciée, car ses méthodes sont statiques.
+ * @hideconstructor
+ * @category Utils
  */
 export class Logger {
 	static filePath: string = `${process.cwd()}/logs/`;
@@ -96,7 +98,8 @@ export class Logger {
 	 * @param {number} level Niveau de debug du message.
 	 */
 	static debug(message: string, exec: string, level: number = 1): void {
-		if (process.env.DEBUG && Number(process.env.DEBUG_LEVEL) >= level) {
+		const isDebug: boolean = process.env.DEBUG === "true";
+		if (isDebug && Number(process.env.DEBUG_LEVEL) >= level) {
 			readline.cursorTo(process.stdout, 0);
 			readline.clearLine(process.stdout, -1);
 			console.debug(parsingConsole(message, clic.white, "🔧", exec));

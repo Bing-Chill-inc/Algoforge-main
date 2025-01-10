@@ -1,3 +1,6 @@
+/**
+ * @internal
+ */
 interface RouteHandler {
 	route: string;
 	callback: (req, res) => void;

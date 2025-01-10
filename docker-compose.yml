@@ -1,15 +1,14 @@
-version: "3.8"
-
 services:
     backend:
         container_name: algoforge-backend
+        restart: unless-stopped
         build:
             context: .
             dockerfile: src/back/Dockerfile
         volumes:
             - ./:/app
         ports:
-            - "${PORT:-5205}:3000"
+            - "${PORT:-5205}:${PORT:-5205}"
         networks:
             - algo_network
         depends_on:
@@ -18,6 +17,7 @@ services:
     db_postgres:
         image: postgres:17
         container_name: algoforge-db-postgres
+        restart: unless-stopped
         environment:
             POSTGRES_USER: ${DATABASE_USER:-postgres}
             POSTGRES_PASSWORD: ${DATABASE_PASSWORD:-postgres}

@@ -1,6 +1,9 @@
-# Algoforge
-
-![Le logo d'AlgoForge](logo.png)
+<div align=center>
+    <img src="logo.png" style="width:128px" alt="Le logo d'AlgoForge"/>
+    </br>
+    </br>
+    <h1>AlgoForge</h1>
+</div>
 
 ## Table des matières
 
@@ -56,9 +59,8 @@ Précédemment nommé I Need Algo, **AlgoForge** a changé de nom pour aborder u
     -   Plusieurs thèmes.
     -   Importation d'algorithmes.
     -   Exportation d'algorithmes sous différent formats, avec une sélection ou tout l'algorithme.
-    -   Détection d'anomalies dans l'algorithme.
     -   Bibliotheque d'algorithmes, privée et publique.
-    -   Imbrication des algorithmes dans d'autres algorithmes pour une meilleure lisibilité.
+    -   Décomposition des algorithmes sur un autre plan de travail pour une meilleure lisibilité.
     -   Zoom dynamique, raccourcis clavier, menu contextuel complet.
 
 ## Utilisation / Installation
@@ -85,28 +87,36 @@ La version docker de l'application comprend par défaut une base de données Pos
 #### Installation Windows
 
 1. Télécharger l'installateur de l'application. Nous vous proposons 2 méthodes pour cela:
-- Sans Powershell:
-    - installation rapide en un clic: ``run-installer-minimal.bat``
-    - installation complète (personnalisation possible): ``run-installer-full.bat``
-- Avec Powershell:
-    - installation rapide en un clic: ``run-installer-minimal.ps1``
-    - installation complète (personnalisation possible): ``run-installer-full.ps1`` 
+
+-   Sans Powershell:
+    -   installation rapide en un clic: `run-installer-minimal.bat`
+    -   installation complète (personnalisation possible): `run-installer-full.bat`
+-   Avec Powershell:
+    -   installation rapide en un clic: `run-installer-minimal.ps1`
+    -   installation complète (personnalisation possible): `run-installer-full.ps1`
 
 2. Exécuter le programme depuis une invite de commande avec l'une des commandes suivantes:
-- Bash (minimal):
+
+-   Bash (minimal):
+
 ```bash
 $ ./run-installer-minimal.bat
 ```
-- Bash (complet):
+
+-   Bash (complet):
+
 ```bash
 $ ./run-installer-complet.bat
 ```
 
-- Powershell (minimal):
+-   Powershell (minimal):
+
 ```powershell
 PS > ./run-installer-minimal.ps1
 ```
-- Powershell (complet):
+
+-   Powershell (complet):
+
 ```powershell
 PS > ./run-installer-complet.ps1
 ```
@@ -114,15 +124,20 @@ PS > ./run-installer-complet.ps1
 #### Installation UNIX
 
 1. Télécharger l'installateur de l'application.
-    - Installation rapide : ``run-installer-minimal.sh``
-    - Installation complète (personnalisation possible) : ``run-installer-complet.sh``
+
+    - Installation rapide : `run-installer-minimal.sh`
+    - Installation complète (personnalisation possible) : `run-installer-complet.sh`
 
 2. Exécuter le programme depuis une invite de commande:
-- Bash (minimal):
+
+-   Bash (minimal):
+
 ```bash
 $ ./run-installer-minimal.sh
 ```
-- Bash (complet):
+
+-   Bash (complet):
+
 ```bash
 $ ./run-installer-complet.sh
 ```
@@ -200,6 +215,3 @@ WIP
 (Work In Progress)
 
 -   Le dossier src héberge le Code de l'algorithme
-
-
-```
