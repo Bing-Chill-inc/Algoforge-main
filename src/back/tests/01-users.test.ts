@@ -10,25 +10,38 @@ import { server, request } from "./setup";
 import { afterAll, describe, expect, test } from "bun:test";
 import { UserSet } from "./user.set";
 
-// Création de 2 utilisateurs pour les tests suivants.
-afterAll(async () => {
-	Logger.log("Generating 2 other users...", "test: users");
-	const payload1 = new UserRegisterDTO();
-	payload1.email = UserSet.test1.email;
-	payload1.pseudo = UserSet.test1.pseudo;
-	payload1.password = UserSet.test1.password;
-
-	const payload2 = new UserRegisterDTO();
-	payload1.email = UserSet.test2.email;
-	payload1.pseudo = UserSet.test2.pseudo;
-	payload1.password = UserSet.test2.password;
-	[payload1, payload2].forEach(async (payload) => {
-		await request.post("/api/users/register").send(payload);
-	});
-	Logger.log("Generated !", "test: users");
-});
-
 describe("Users: new user", () => {
+	// Création de 2 utilisateurs pour les tests suivants.
+	afterAll(async () => {
+		Logger.log("Generating 2 other users...", "test: users");
+		const payload1 = new UserRegisterDTO();
+		payload1.email = UserSet.test1.email;
+		payload1.pseudo = UserSet.test1.pseudo;
+		payload1.password = UserSet.test1.password;
+
+		const payload2 = new UserRegisterDTO();
+		payload2.email = UserSet.test2.email;
+		payload2.pseudo = UserSet.test2.pseudo;
+		payload2.password = UserSet.test2.password;
+		for (const payload of [payload1, payload2]) {
+			const response = await request
+				.post("/api/users/register")
+				.send(payload);
+			const mailToken = await createMailToken(response.body.data.id);
+			const mailConfirmResponse = await request.get(
+				`/api/users/confirm/${mailToken}`,
+			);
+			Logger.debug(
+				JSON.stringify(mailConfirmResponse.body),
+				"test: users",
+				5,
+			);
+		}
+
+		// Vérification des emails.
+		Logger.log("Generated !", "test: users");
+	});
+
 	let token: string = "";
 	let confirmToken: string = "";
 
@@ -324,5 +337,3 @@ describe("Users: new user", () => {
 		test.todo("POST /api/users/recover -> Mail de récupération envoyé");
 	});
 });
-
-describe.todo("Users: delete user", () => {});
