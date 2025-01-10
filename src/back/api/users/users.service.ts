@@ -5,10 +5,10 @@ import { AppDataSource } from "../../db/data-source";
 import { UserLoginDTO, UserRegisterDTO, UserUpdateDTO } from "./users.dto";
 import { Res } from "../../types/response.entity";
 import { createMailToken } from "../../utils/mailConfirmToken";
+import { validateClass } from "../../utils/classValidator";
+import { Logger } from "../../utils/logger";
 
 import bcrypt from "bcrypt-nodejs";
-import { Logger } from "../../utils/logger";
-import { validateClass } from "../../utils/classValidator";
 
 /**
  * Service pour les utilisateurs.
@@ -170,14 +170,19 @@ export class UsersService {
 		// Suppression du hash du mot de passe avant renvoi
 		user.mdpHash = undefined;
 
-		// TODO: Générer un token JWT pour la connexion automatique
 		const token = new Token();
 		token.dateCreation = new Date().getTime();
 		token.dateExpiration = new Date(
 			Date.now() + 48 * 60 * 60 * 1000,
 		).getTime();
 		token.utilisateur = user;
-		token.token = user.id.toString() + "_" + Date.now().toString();
+
+		// Générer un token unique
+		token.token = bcrypt.hashSync(
+			`${user.id}_${token.dateCreation}_${crypto.randomUUID()}`,
+			bcrypt.genSaltSync(10),
+		);
+
 		// Enregistrement du token dans la DB
 		const savedToken = await this.tokensRepository.save(token);
 		savedToken.utilisateur = undefined;
@@ -186,8 +191,6 @@ export class UsersService {
 		// Retour de la réponse
 		return new Res(200, "Connexion réussie", user);
 	}
-
-	// TODO: Générer un token JWT pour la connexion automatique --> register et login
 
 	// POST /logout
 	/** Déconnexion de l'utilisateur, utilisé lors de sa déconnexion.
@@ -303,13 +306,10 @@ export class UsersService {
 		}
 
 		// Suppression de l'utilisateur
-		const deletedUser = await this.utilisateurRepository.delete(user);
+		await this.utilisateurRepository.delete(user.id);
 		// TODO: Supprimer les données de l'utilisateur (algos, ...)
 
-		// Suppression du hash du mot de passe
-		user.mdpHash = undefined;
-
-		return new Res(200, "Utilisateur supprimé", deletedUser);
+		return new Res(200, "Utilisateur supprimé");
 	}
 
 	/** Vérification de la validité du token.
@@ -332,11 +332,11 @@ export class UsersService {
 			return new Res(401, "Utilisateur non vérifié");
 		} else if (tokenDB.dateExpiration < new Date().getTime()) {
 			// Suppression du token expiré
-			await this.tokensRepository.delete(tokenDB);
+			await this.tokensRepository.delete(tokenDB.token);
 
 			return new Res(401, "Token expiré");
 		} else {
-			// Prologation de la date d'expiration de 48h
+			// Prolongation de la date d'expiration de 48h
 			tokenDB.dateExpiration = new Date(
 				Date.now() + 48 * 60 * 60 * 1000,
 			).getTime();

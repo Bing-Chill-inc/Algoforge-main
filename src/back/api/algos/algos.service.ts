@@ -203,7 +203,7 @@ export class AlgosService {
 			});
 			delete algo.permAlgorithmes;
 			// Suppression de l'algorithme en base de données.
-			const deletedAlgo = await algoRepository.delete(algo);
+			const deletedAlgo = await algoRepository.delete(algo.id);
 
 			// Suppression de l'algorithme du système de fichiers.
 			const result = this.deleteAlgoFromDisk(id);
