@@ -70,13 +70,23 @@ app.post("/edit", (req, res) => {
 
 // Init database connection
 import { AppDataSource } from "./db/data-source";
+const dbConnexion = new Promise((resolve, reject) => {
+	Logger.log("Attempting to initialize database connection...", "main: db");
+	AppDataSource.initialize()
+		.then(() => {
+			Logger.log("Database connected.", "main: db");
+			resolve(null);
+		})
+		.catch((err) => {
+			reject(err);
+		});
+});
+
+// Starting application
 import { AlgosController } from "./api/algos/algos.controller";
 import { UsersController } from "./api/users/users.controller";
-
-Logger.log("Attempting to initialize database connection...", "main");
-AppDataSource.initialize()
+Promise.all([dbConnexion])
 	.then(async () => {
-		Logger.log("Database connection initialized", "main");
 		// Handling API logs.
 		app.use(loggerMiddleware);
 
@@ -97,7 +107,7 @@ AppDataSource.initialize()
 	})
 	.catch((err) => {
 		Logger.error(
-			`Error while initializing database connection: \n${err}`,
+			`Error while initialising application: \n${JSON.stringify(err)}`,
 			"main",
 		);
 		process.exit(1);
