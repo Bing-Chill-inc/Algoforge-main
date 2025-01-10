@@ -1,0 +1,139 @@
+[
+	{
+		"typeElement": "Probleme",
+		"abscisse": "33.517520215633425vw",
+		"ordonnee": "2.6253369272237173vw",
+		"libelle": "Recherche de première occurrence",
+		"listeDonnes": ["structure"],
+		"listeResultats": ["trouve"],
+		"enfants": [
+			{
+				"typeElement": "Probleme",
+				"abscisse": "18.23245550769359vw",
+				"ordonnee": "10.075494324915223vw",
+				"libelle": "Initialiser la recherche",
+				"listeDonnes": ["feur"],
+				"listeResultats": ["trouve"],
+				"enfants": [
+					{
+						"typeElement": "Probleme",
+						"abscisse": "23.54899975393354vw",
+						"ordonnee": "17.35076539871724vw",
+						"libelle": "trouve ← faux",
+						"listeDonnes": [""],
+						"listeResultats": [""],
+						"enfants": []
+					},
+					{
+						"typeElement": "Probleme",
+						"abscisse": "10.957184433891571vw",
+						"ordonnee": "17.245833604383552vw",
+						"libelle": "Se positionner en début de structure",
+						"listeDonnes": [""],
+						"listeResultats": [""],
+						"enfants": [
+							{
+								"typeElement": "StructureIterativeBornee",
+								"abscisse": "18.18836624118856vw",
+								"ordonnee": "26.19792641858261vw",
+								"variableAIterer": "j",
+								"borneInferieure": "0",
+								"borneSuperieure": "infini",
+								"pas": "23",
+								"croissant": false,
+								"enfants": []
+							}
+						]
+					}
+				]
+			},
+			{
+				"typeElement": "Probleme",
+				"abscisse": "49.15235757135221vw",
+				"ordonnee": "9.970562530581521vw",
+				"libelle": "Effectuer la recherche",
+				"listeDonnes": ["trouve"],
+				"listeResultats": ["trouve"],
+				"enfants": [
+					{
+						"typeElement": "StructureIterativeNonBornee",
+						"abscisse": "62.264150943396245vw",
+						"ordonnee": "16.981132075471702vw",
+						"enfants": [
+							{
+								"typeElement": "Probleme",
+								"abscisse": "32.11842962451762vw",
+								"ordonnee": "23.681650323516124vw",
+								"libelle": "Déterminer si on a analysé tous les éléments de la structure",
+								"listeDonnes": [""],
+								"listeResultats": [""],
+								"enfants": [
+									{
+										"typeElement": "StructureSi",
+										"abscisse": "42.08170349650076vw",
+										"ordonnee": "28.91849012764344vw",
+										"conditions": [
+											{
+												"typeElement": "Condition",
+												"libelle": "Tous les éléments ont été analysés = vrai ou trouve = vrai",
+												"enfants": [
+													{
+														"typeElement": "ConditionSortie",
+														"abscisse": "45.05477100262178vw",
+														"ordonnee": "34.626080194100304vw"
+													}
+												]
+											}
+										]
+									}
+								]
+							},
+							{
+								"typeElement": "Probleme",
+								"abscisse": "49.152357571352134vw",
+								"ordonnee": "23.8915139121835vw",
+								"libelle": "Vérifier si on a trouvé ce qu'on cherche",
+								"listeDonnes": [""],
+								"listeResultats": [""],
+								"enfants": [
+									{
+										"typeElement": "StructureSi",
+										"abscisse": "59.11563144333538vw",
+										"ordonnee": "29.862876276646556vw",
+										"conditions": [
+											{
+												"typeElement": "Condition",
+												"libelle": "L'élément courant vérifie la propriété recherchée",
+												"enfants": [
+													{
+														"typeElement": "Probleme",
+														"abscisse": "49.11738030657417vw",
+														"ordonnee": "35.71382940711185vw",
+														"libelle": "trouve ← vrai",
+														"listeDonnes": [""],
+														"listeResultats": [""],
+														"enfants": []
+													}
+												]
+											}
+										]
+									}
+								]
+							},
+							{
+								"typeElement": "Procedure",
+								"abscisse": "65.5256064690027vw",
+								"ordonnee": "24.121293800539075vw",
+								"libelle": "Passer à l'élément suivant",
+								"listeDonnes": [""],
+								"listeResultats": [""],
+								"enfants": []
+							}
+						]
+					}
+				]
+			}
+		]
+	},
+	{ "typeElement": "DictionnaireDonnee" }
+]

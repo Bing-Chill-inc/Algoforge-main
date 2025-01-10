@@ -1,0 +1,35 @@
+[
+	{
+		"typeElement": "Probleme",
+		"abscisse": "37.42587601078166vw",
+		"ordonnee": "11.924528301886786vw",
+		"libelle": "Test du switch",
+		"listeDonnes": [""],
+		"listeResultats": [""],
+		"enfants": [
+			{
+				"typeElement": "StructureSwitch",
+				"abscisse": "37.38565215628711vw",
+				"ordonnee": "16.706663663901463vw",
+				"expressionATester": "expression",
+				"conditions": [
+					{
+						"typeElement": "Condition",
+						"libelle": "valeur1",
+						"enfants": []
+					},
+					{
+						"typeElement": "Condition",
+						"libelle": "valeur2",
+						"enfants": []
+					},
+					{
+						"typeElement": "Condition",
+						"libelle": "sinon",
+						"enfants": []
+					}
+				]
+			}
+		]
+	}
+]

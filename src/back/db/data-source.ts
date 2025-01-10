@@ -32,8 +32,16 @@ switch (process.env.DATABASE_TYPE) {
 		break;
 }
 
+/**
+ * Source de données de l'application.
+ * @example
+ * import { AppDataSource } from "./db/data-source";
+ * AppDataSource.getRepository(Utilisateur).find();
+ * @category Database
+ */
 export const AppDataSource = new DataSource({
 	...dataSource,
+	dropSchema: process.env.BUILD == "dev" ? true : false,
 	synchronize: process.env.BUILD == "dev" ? true : false,
 	logging: false,
 	entities: [

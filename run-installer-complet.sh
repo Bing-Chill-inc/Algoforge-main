@@ -62,6 +62,7 @@ edit_env_file() {
 
     sed -i 's/5300/'$pgadmin_port'/g' .env
 
+    # Demander à l'utilisateur s'il souhaite modifier les informations de connexion à la base de données.
     echo "Souhaitez-vous modifier les informations de connexion à la base de données (modifier le .env) ? (o/n)"
     read response
     if [ "$response" = "o" ]; then
