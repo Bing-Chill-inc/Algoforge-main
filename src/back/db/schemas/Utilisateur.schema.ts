@@ -97,7 +97,7 @@ export class Utilisateur {
 	 * @type {PermDossier[]}
 	 * @see {@link PermDossier}
 	 */
-	@OneToMany(() => PermDossier, (permDossier) => permDossier.idUtilisateur)
+	@OneToMany(() => PermDossier, (permDossier) => permDossier.utilisateur)
 	permDossiers: Relation<PermDossier[]>;
 
 	/**
@@ -106,6 +106,6 @@ export class Utilisateur {
 	 * @type {PermAlgorithme[]}
 	 * @see {@link PermAlgorithme}
 	 */
-	@OneToMany(() => PermAlgorithme, (permAlgo) => permAlgo.idUtilisateur)
+	@OneToMany(() => PermAlgorithme, (permAlgo) => permAlgo.utilisateur)
 	permAlgorithmes: Relation<PermAlgorithme[]>;
 }
