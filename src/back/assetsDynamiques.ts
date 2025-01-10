@@ -9,9 +9,9 @@ AssetsDynamiques.push({
 
 		const svgContent = `
 <svg version="1.1" id="Calque_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
-	 viewBox="0 0 791.3 809.2" style="enable-background:new 0 0 791.3 809.2;" xml:space="preserve">
+	 viewBox="0 0 791.3 809.2" style="enable-background:new 0 0 791.3 809.2;" xml:space="preserve" fill="#${fgColor}">
 <style type="text/css">
-	.st0{stroke:#${fgColor};stroke-miterlimit:10;}
+	.st0{stroke-miterlimit:10;}
 	.st1{fill:none;}
 	.st2{enable-background:new    ;}
 </style>
