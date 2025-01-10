@@ -9,6 +9,12 @@ import { validateClass } from "../../utils/classValidator";
 import { Logger } from "../../utils/logger";
 
 import bcrypt from "bcrypt-nodejs";
+import { Dossier } from "../../db/schemas/Dossier.schema";
+import { Algorithme } from "../../db/schemas/Algorithme.schema";
+import { Droits } from "../../types/droits.enum";
+import { PermDossier } from "../../db/schemas/PermDossier.schema";
+import { PermAlgorithme } from "../../db/schemas/PermAlgorithme.schema";
+import { AlgosService } from "../algos/algos.service";
 
 /**
  * Service pour les utilisateurs.
@@ -17,12 +23,19 @@ import bcrypt from "bcrypt-nodejs";
  * @category Utilisateurs
  */
 export class UsersService {
-	utilisateurRepository: Repository<Utilisateur> =
+	utilisateursRepository: Repository<Utilisateur> =
 		AppDataSource.getRepository(Utilisateur);
-
 	tokensRepository: Repository<Token> = AppDataSource.getRepository(Token);
+	algorithmesRepository: Repository<Algorithme> =
+		AppDataSource.getRepository(Algorithme);
+	dossiersRepository: Repository<Dossier> =
+		AppDataSource.getRepository(Dossier);
+	permsDossierRepository: Repository<PermDossier> =
+		AppDataSource.getRepository(PermDossier);
+	permsAlgorithmesRepository: Repository<PermAlgorithme> =
+		AppDataSource.getRepository(PermAlgorithme);
 
-	constructor() {}
+	algoService: AlgosService = new AlgosService();
 
 	// POST /register
 	/** Création et enregistrement d'un nouvel utilisateur, utilisé lors de son inscription.
@@ -41,7 +54,7 @@ export class UsersService {
 		}
 
 		// Vérification de l'unicité de l'email, requête à la DB avec TypeORM
-		const userMails = await this.utilisateurRepository.find({
+		const userMails = await this.utilisateursRepository.find({
 			select: { adresseMail: true },
 		});
 
@@ -61,7 +74,7 @@ export class UsersService {
 		newUser.dateInscription = new Date().getTime();
 
 		// Enregistrement de l'utilisateur
-		const savedUser = await this.utilisateurRepository.save(newUser);
+		const savedUser = await this.utilisateursRepository.save(newUser);
 
 		// Gestions des erreurs
 		if (!savedUser) {
@@ -127,7 +140,7 @@ export class UsersService {
 		user.isVerified = true;
 
 		// Enregistrement de l'utilisateur
-		if (!(await this.utilisateurRepository.save(user))) {
+		if (!(await this.utilisateursRepository.save(user))) {
 			return new Res(
 				500,
 				"Erreur lors de la confirmation de l'inscription",
@@ -154,7 +167,7 @@ export class UsersService {
 		}
 
 		// Recherche de l'utilisateur dans la DB
-		const user = await this.utilisateurRepository.findOne({
+		const user = await this.utilisateursRepository.findOne({
 			where: { adresseMail: data.email },
 		});
 
@@ -231,7 +244,7 @@ export class UsersService {
 	 */
 	async getUser(id: number) {
 		// Récupération de l'utilisateur dans la DB
-		const user = await this.utilisateurRepository.findOne({
+		const user = await this.utilisateursRepository.findOne({
 			where: { id: id },
 		});
 
@@ -264,7 +277,7 @@ export class UsersService {
 		}
 
 		// Récupération de l'utilisateur dans la DB
-		const user = await this.utilisateurRepository.findOne({
+		const user = await this.utilisateursRepository.findOne({
 			where: { id: id },
 		});
 
@@ -285,7 +298,7 @@ export class UsersService {
 		}
 
 		// Enregistrement de l'utilisateur
-		const savedUser = await this.utilisateurRepository.save(user);
+		const savedUser = await this.utilisateursRepository.save(user);
 
 		// Suppression du hash du mot de passe
 		savedUser.mdpHash = undefined;
@@ -295,21 +308,58 @@ export class UsersService {
 	}
 
 	// DELETE /:id
-	async deleteUser(id: number) {
+	async deleteUser(id: number, requestedUserId: number) {
 		// Récupération de l'utilisateur dans la DB
-		const user = await this.utilisateurRepository.findOne({
+		const user = await this.utilisateursRepository.findOne({
 			where: { id: id },
+			relations: {
+				permAlgorithmes: true,
+				permDossiers: true,
+				tokens: true,
+			},
 		});
 
 		if (!user) {
 			return new Res(404, "Utilisateur introuvable");
+		} else if (user.id !== requestedUserId) {
+			return new Res(403, "Permission refusée");
 		}
 
-		// Suppression de l'utilisateur
-		await this.utilisateurRepository.delete(user.id);
-		// TODO: Supprimer les données de l'utilisateur (algos, ...)
+		// // Suppression des tokens de l'utilisateur.
+		for (const token of user.tokens) {
+			console.log(token);
+			await this.tokensRepository.delete(token.token);
+		}
+		// Suppression des dossiers et des permissions associées de l'utilisateur.
+		for (const permDossier of user.permDossiers) {
+			if (
+				permDossier.droits.length > 0 &&
+				permDossier.droits === Droits.Owner
+			) {
+				// TODO: utiliser le service de dossier pour supprimer le dossier (prochaine maj).
+				await this.dossiersRepository.delete(permDossier.idDossier);
+			} else {
+				await this.permsDossierRepository.delete(permDossier);
+			}
+		}
+		// Suppression des algorithmes et des permissions associées de l'utilisateur.
+		for (const permAlgo of user.permAlgorithmes) {
+			if (
+				permAlgo.droits.length > 0 &&
+				permAlgo.droits === Droits.Owner
+			) {
+				await this.algoService.deleteAlgo(
+					permAlgo.idAlgorithme,
+					user.id,
+				);
+			} else {
+				await this.permsAlgorithmesRepository.delete(permAlgo);
+			}
+		}
+		// Suppression de l'utilisateur.
+		const deletedUser = await this.utilisateursRepository.delete(user.id);
 
-		return new Res(200, "Utilisateur supprimé");
+		return new Res(200, "Utilisateur supprimé", deletedUser);
 	}
 
 	/** Vérification de la validité du token.
@@ -355,7 +405,7 @@ export class UsersService {
 	 */
 	async getUserByEmail(email: string) {
 		// Récupération de l'utilisateur dans la DB
-		const user = await this.utilisateurRepository.findOne({
+		const user = await this.utilisateursRepository.findOne({
 			where: { adresseMail: email },
 		});
 

@@ -184,9 +184,10 @@ export class UsersController {
 
 		// Récupération de l'id de l'utilisateur
 		const id = +req.params.id;
+		const requestedUserId = (res.locals.user as Utilisateur).id;
 
 		// S'il a les droits, on supprime l'utilisateur
-		const reponse = await this.usersService.deleteUser(id);
+		const reponse = await this.usersService.deleteUser(id, requestedUserId);
 
 		return res
 			.status(reponse.statut)
