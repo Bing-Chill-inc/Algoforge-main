@@ -1,6 +1,7 @@
 services:
     backend:
         container_name: algoforge-backend
+        restart: always
         build:
             context: .
             dockerfile: src/back/Dockerfile
@@ -16,6 +17,7 @@ services:
     db_postgres:
         image: postgres:17
         container_name: algoforge-db-postgres
+        restart: always
         environment:
             POSTGRES_USER: ${DATABASE_USER:-postgres}
             POSTGRES_PASSWORD: ${DATABASE_PASSWORD:-postgres}

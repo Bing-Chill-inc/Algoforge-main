@@ -80,7 +80,6 @@ Check-Requirements
 Clone-Repository
 Update-Repository
 Rename-Env-File
-Generate-Secret-Key
 Start-Application
 
 Write-Host "✔️ L'application est maintenant disponible dans quelques secondes ! Ouvrez un navigateur et entrez l'adresse: http://localhost:5205"
