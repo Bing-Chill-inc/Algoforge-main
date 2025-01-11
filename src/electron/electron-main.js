@@ -218,7 +218,7 @@ app.on("ready", () => {
 			contextIsolation: false, // Allows the renderer process to use Node.js features directly
 			webSecurity: false, // Disable certain security features to allow cookie access
 			allowRunningInsecureContent: true,
-			devTools: true,
+			devTools: !isExam,
 		},
 	});
 
