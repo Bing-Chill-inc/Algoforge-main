@@ -9,7 +9,7 @@ permissions:
     contents: write
 
 jobs:
-    build-and-release:
+    build-and-release-win-lnx:
         runs-on: ubuntu-latest
 
         strategy:
@@ -31,6 +31,81 @@ jobs:
                       tag: "linux-exam-x64"
                       zipFileName: "Algoforge-ExamEdition-Linux-x64.zip"
                       name: "Exam Edition Linux x64"
+
+        steps:
+            - name: Checkout code (with submodules)
+              uses: actions/checkout@v3
+              with:
+                  submodules: true # Initialize and update submodules
+
+            - name: Set up Node.js
+              uses: actions/setup-node@v3
+              with:
+                  node-version: 20 # Use a compatible Node.js version
+
+            - name: Install dependencies
+              working-directory: src/electron
+              run: npm install
+
+            - name: Run build script
+              working-directory: src/electron
+              run: npm run ${{ matrix.build.command }}
+
+            - name: Package build artifact
+              working-directory: src/electron/out
+              run: zip -r ${{ matrix.build.zipFileName }} ./*
+
+            - name: Create GitHub Release (if not exists)
+              id: create_release
+              uses: actions/create-release@v1
+              with:
+                  tag_name: build-${{ matrix.build.tag }}-${{ github.run_number }}-${{ github.sha }}
+                  release_name: Build - Algoforge ${{ matrix.build.name }} - #${{ github.run_number }}
+                  draft: false
+                  prerelease: false
+              env:
+                  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+            - name: Upload build artifact to release
+              uses: actions/upload-release-asset@v1
+              env:
+                  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+              with:
+                  upload_url: ${{ steps.create_release.outputs.upload_url }}
+                  asset_path: ./src/electron/out/${{ matrix.build.zipFileName }}
+                  asset_name: ${{ matrix.build.zipFileName }}
+                  asset_content_type: application/zip
+
+    build-and-release-darwin:
+        runs-on: macos-latest
+
+        strategy:
+            matrix:
+                build:
+                    - command: "package:mac:x64"
+                      tag: "mac-x64"
+                      zipFileName: "Algoforge-Mac-x64.zip"
+                      name: "MacOS x64"
+                    - command: "package:mac:arm64"
+                      tag: "mac-arm64"
+                      zipFileName: "Algoforge-Mac-ARM64.zip"
+                      name: "MacOS Apple Silicon (ARM64)"
+                    - command: "package:mac:universal"
+                      tag: "mac-universal"
+                      zipFileName: "Algoforge-Mac-universal.zip"
+                      name: "MacOS Universal"
+                    - command: "package:exam:mac:x64"
+                      tag: "mac-exam-x64"
+                      zipFileName: "Algoforge-ExamEdition-Mac-x64.zip"
+                      name: "Exam Edition MacOS x64"
+                    - command: "package:exam:mac:arm64"
+                      tag: "mac-exam-arm64"
+                      zipFileName: "Algoforge-ExamEdition-Mac-ARM64.zip"
+                      name: "Exam Edition MacOS Apple Silicon (ARM64)"
+                    - command: "package:exam:mac:universal"
+                      tag: "mac-exam-universal"
+                      zipFileName: "Algoforge-ExamEdition-Mac-universal.zip"
+                      name: "Exam Edition MacOS Universal"
 
         steps:
             - name: Checkout code (with submodules)
