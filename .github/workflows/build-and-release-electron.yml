@@ -14,8 +14,23 @@ jobs:
 
         strategy:
             matrix:
-                build_script:
-                    ["win:x64", "lnx:x64", "exam:win:x64", "exam:lnx:x64"]
+                build:
+                    - command: "package:win:x64"
+                      tag: "windows-x64"
+                      zipFileName: "Algoforge-Windows-x64.zip"
+                      name: "Windows x64"
+                    - command: "package:lnx:x64"
+                      tag: "linux-x64"
+                      zipFileName: "Algoforge-Linux-x64.zip"
+                      name: "Linux x64"
+                    - command: "package:exam:win:x64"
+                      tag: "windows-exam-x64"
+                      zipFileName: "Algoforge-ExamEdition-Windows-x64.zip"
+                      name: "Exam Edition Windows x64"
+                    - command: "package:exam:lnx:x64"
+                      tag: "linux-exam-x64"
+                      zipFileName: "Algoforge-ExamEdition-Linux-x64.zip"
+                      name: "Exam Edition Linux x64"
 
         steps:
             - name: Checkout code (with submodules)
@@ -34,17 +49,17 @@ jobs:
 
             - name: Run build script
               working-directory: src/electron
-              run: npm run package:${{ matrix.build_script }}
+              run: npm run ${{ matrix.build.command }}
 
             - name: Package build artifact
-              run: zip -r ${{ matrix.build_script }}-artifact.zip src/electron/out
+              run: zip -r ${{ matrix.build.zipFileName }} src/electron/out
 
             - name: Create GitHub Release (if not exists)
               id: create_release
               uses: actions/create-release@v1
               with:
-                  tag_name: build-${{ matrix.build_script }}-${{ github.run_number }}-${{ github.sha }}
-                  release_name: Build- ${{ matrix.build_script }} - #${{ github.run_number }}
+                  tag_name: build-${{ matrix.build.tag }}-${{ github.run_number }}-${{ github.sha }}
+                  release_name: Build - Algoforge ${{ matrix.build.name }} - #${{ github.run_number }}
                   draft: false
                   prerelease: false
               env:
@@ -54,6 +69,6 @@ jobs:
               uses: actions/upload-release-asset@v1
               with:
                   upload_url: ${{ steps.create_release.outputs.upload_url }}
-                  asset_path: ./${{ matrix.build_script }}-artifact.zip
-                  asset_name: ${{ matrix.build_script }}.zip
+                  asset_path: ./${{ matrix.build.zipFileName }}
+                  asset_name: ${{ matrix.build.zipFileName }}
                   asset_content_type: application/zip
