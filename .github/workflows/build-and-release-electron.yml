@@ -52,7 +52,8 @@ jobs:
               run: npm run ${{ matrix.build.command }}
 
             - name: Package build artifact
-              run: zip -r ${{ matrix.build.zipFileName }} src/electron/out
+              working-directory: src/electron/out
+              run: zip -r ${{ matrix.build.zipFileName }} ./*
 
             - name: Create GitHub Release (if not exists)
               id: create_release
