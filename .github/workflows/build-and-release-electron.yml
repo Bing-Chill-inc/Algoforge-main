@@ -15,12 +15,7 @@ jobs:
         strategy:
             matrix:
                 build_script:
-                    [
-                        "package:win:x64",
-                        "package:lnx:x64",
-                        "package:exam:win:x64",
-                        "package:exam:lnx:x64",
-                    ]
+                    ["win:x64", "lnx:x64", "exam:win:x64", "exam:lnx:x64"]
 
         steps:
             - name: Checkout code (with submodules)
@@ -39,7 +34,7 @@ jobs:
 
             - name: Run build script
               working-directory: src/electron
-              run: npm run ${{ matrix.build_script }}
+              run: npm run package:${{ matrix.build_script }}
 
             - name: Package build artifact
               run: zip -r ${{ matrix.build_script }}-artifact.zip src/electron/out
@@ -48,8 +43,8 @@ jobs:
               id: create_release
               uses: actions/create-release@v1
               with:
-                  tag_name: build-${{ github.run_number }}-${{ github.sha }}
-                  release_name: Build from Run #${{ github.run_number }}
+                  tag_name: build-${{ matrix.build_script }}-${{ github.run_number }}-${{ github.sha }}
+                  release_name: Build- ${{ matrix.build_script }} - #${{ github.run_number }}
                   draft: false
                   prerelease: false
               env:
