@@ -23,9 +23,6 @@ jobs:
                         "package:mac:universal",
                         "package:exam:win:x64",
                         "package:exam:lnx:x64",
-                        "package:exam:mac:x64",
-                        "package:exam:mac:arm64",
-                        "package:exam:mac:universal",
                     ]
 
         steps:
