@@ -56,10 +56,9 @@ jobs:
                   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
             - name: Upload build artifact to release
-              uses: actions/upload-release-asset@v1.0.1
+              uses: actions/upload-release-asset@v1
               with:
-                  repo: ${{ github.repository }}
-                  release_id: ${{ steps.create_release.outputs.id }}
+                  upload_url: ${{ steps.create_release.outputs.upload_url }}
                   asset_path: ./${{ matrix.build_script }}-artifact.zip
                   asset_name: ${{ matrix.build_script }}.zip
                   asset_content_type: application/zip
