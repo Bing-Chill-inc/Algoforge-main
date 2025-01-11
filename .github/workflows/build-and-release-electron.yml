@@ -9,8 +9,25 @@ permissions:
     contents: write
 
 jobs:
+    create-release:
+        runs-on: ubuntu-latest
+        outputs:
+            upload_url: ${{ steps.create_release.outputs.upload_url }}
+        steps:
+            - name: Create GitHub Release
+              id: create_release
+              uses: actions/create-release@v1
+              with:
+                  tag_name: "release-${{ github.run_number }}"
+                  release_name: "Algoforge Release #${{ github.run_number }}"
+                  draft: false
+                  prerelease: false
+              env:
+                  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
     build-and-release-win-lnx:
         runs-on: ubuntu-latest
+        needs: create-release
 
         strategy:
             matrix:
@@ -55,29 +72,19 @@ jobs:
               working-directory: src/electron/out
               run: zip -r ${{ matrix.build.zipFileName }} ./*
 
-            - name: Create GitHub Release (if not exists)
-              id: create_release
-              uses: actions/create-release@v1
-              with:
-                  tag_name: build-${{ matrix.build.tag }}-${{ github.run_number }}-${{ github.sha }}
-                  release_name: Build - Algoforge ${{ matrix.build.name }} - #${{ github.run_number }}
-                  draft: false
-                  prerelease: false
-              env:
-                  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
             - name: Upload build artifact to release
               uses: actions/upload-release-asset@v1
               env:
                   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
               with:
-                  upload_url: ${{ steps.create_release.outputs.upload_url }}
+                  upload_url: ${{ needs.create-release.outputs.upload_url }}
                   asset_path: ./src/electron/out/${{ matrix.build.zipFileName }}
                   asset_name: ${{ matrix.build.zipFileName }}
                   asset_content_type: application/zip
 
     build-and-release-darwin:
         runs-on: macos-latest
+        needs: create-release
 
         strategy:
             matrix:
@@ -122,23 +129,12 @@ jobs:
               working-directory: src/electron/out
               run: zip -r ${{ matrix.build.zipFileName }} ./*
 
-            - name: Create GitHub Release (if not exists)
-              id: create_release
-              uses: actions/create-release@v1
-              with:
-                  tag_name: build-${{ matrix.build.tag }}-${{ github.run_number }}-${{ github.sha }}
-                  release_name: Build - Algoforge ${{ matrix.build.name }} - #${{ github.run_number }}
-                  draft: false
-                  prerelease: false
-              env:
-                  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
             - name: Upload build artifact to release
               uses: actions/upload-release-asset@v1
               env:
                   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
               with:
-                  upload_url: ${{ steps.create_release.outputs.upload_url }}
+                  upload_url: ${{ needs.create-release.outputs.upload_url }}
                   asset_path: ./src/electron/out/${{ matrix.build.zipFileName }}
                   asset_name: ${{ matrix.build.zipFileName }}
                   asset_content_type: application/zip
