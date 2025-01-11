@@ -1,9 +1,12 @@
 name: Build and Release Electron App
 
 on:
-    pull_request:
+    push:
         branches:
             - main
+
+permissions:
+    contents: write
 
 jobs:
     build-and-release:
