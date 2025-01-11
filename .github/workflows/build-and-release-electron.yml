@@ -48,7 +48,7 @@ jobs:
               id: create_release
               uses: actions/create-release@v1
               with:
-                  tag_name: build-${{ github.run_number }}
+                  tag_name: build-${{ github.run_number }}-${{ github.sha }}
                   release_name: Build from Run #${{ github.run_number }}
                   draft: false
                   prerelease: false
