@@ -29,8 +29,10 @@ jobs:
                     ]
 
         steps:
-            - name: Checkout code
+            - name: Checkout code (with submodules)
               uses: actions/checkout@v3
+              with:
+                  submodules: true # Initialize and update submodules
 
             - name: Set up Node.js
               uses: actions/setup-node@v3
