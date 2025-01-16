@@ -17,10 +17,13 @@ const explorerDossier = (dossier: string) => {
 			path?: string;
 		}[];
 	}> = [];
-	const sousDossiers = fs.readdirSync(dossier).filter((nom) => {
-		const cheminComplet = path.join(dossier, nom);
-		return fs.statSync(cheminComplet).isDirectory();
-	});
+	const sousDossiers = fs
+		.readdirSync(dossier)
+		.sort((a, b) => a.localeCompare(b))
+		.filter((nom) => {
+			const cheminComplet = path.join(dossier, nom);
+			return fs.statSync(cheminComplet).isDirectory();
+		});
 
 	sousDossiers.forEach((nomDossier) => {
 		const cheminDossier = path.join(dossier, nomDossier);
