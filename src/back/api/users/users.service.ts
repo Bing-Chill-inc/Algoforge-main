@@ -205,7 +205,7 @@ export class UsersService {
 		return new Res(200, "Connexion réussie", user);
 	}
 
-	// POST /logout
+	// GET /logout
 	/** Déconnexion de l'utilisateur, utilisé lors de sa déconnexion.
 	 *
 	 * @param token Token de l'utilisateur à déconnecter.
@@ -361,10 +361,17 @@ export class UsersService {
 		return new Res(200, "Utilisateur supprimé", deletedUser);
 	}
 
-	/** Vérification de la validité du token.
-	 *
+	/**
+	 * Vérification de la validité du token.
 	 * @param token Token à vérifier.
 	 * @returns Réponse de la vérification du token.
+	 * @example
+	 * // Retours possibles :
+	 * { status: 400, message: "Token manquant" }
+	 * { status: 401, message: "Token invalide" }
+	 * { status: 401, message: "Utilisateur non vérifié" }
+	 * { status: 401, message: "Token expiré" }
+	 * { status: 200, message: "Token valide", data: Token }
 	 */
 	async verify(token: string) {
 		if (!token) return new Res(400, "Token manquant");
