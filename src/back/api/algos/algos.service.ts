@@ -35,10 +35,12 @@ export class AlgosService {
 	);
 
 	/**
-	 * Récupère les algorithmes que l'utilisateur a le droit de voir (propriétaire, écriture+lecture, lecture seule).
+	 * Récupère les algorithmes que l'utilisateur a le droit de voir (propriétaire, écriture+lecture, lecture seule), et qui se situent à la racine.
 	 * @param id Id de l'utilisateur.
 	 * @returns Les algorithmes de l'utilisateur.
 	 */
+	// TODO : Vérifier les droits de l'utilisateur (query)
+	// TODO : Changer en getAlgosOfUserInRoot
 	async getAlgosOfUser(id: number) {
 		const permAlgoRepository =
 			AppDataSource.manager.getRepository(PermAlgorithme);
@@ -48,6 +50,30 @@ export class AlgosService {
 			relations: { algorithme: true },
 			where: {
 				idUtilisateur: id,
+				algorithme: { dossier: null }
+			},
+		});
+	}
+
+	/**
+	 * Récupère les algorithmes que l'utilisateur a le droit de voir (propriétaire, écriture+lecture, lecture seule), et qui se situent dans un dossier.
+	 * @param id Id de l'utilisateur.
+	 * @param dirId Id du dossier.
+	 * @returns Les algorithmes de l'utilisateur dans le dossier.
+	 */
+	// TODO : Vérifier les droits de l'utilisateur (query)
+	async getAlgosOfUserInDir(id: number, dirId: number) {
+		const permAlgoRepository =
+			AppDataSource.manager.getRepository(PermAlgorithme);
+
+		// Récupération des algorithmes de l'utilisateur.
+		return await permAlgoRepository.find({
+			relations: { algorithme: true },
+			where: {
+				idUtilisateur: id,
+				algorithme: { dossier: {
+					id: dirId
+				}},
 			},
 		});
 	}

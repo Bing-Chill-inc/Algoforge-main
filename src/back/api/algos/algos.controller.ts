@@ -6,6 +6,8 @@ import { AlgoCreateDTO, AlgoUpdateDTO } from "./algos.dto";
 import { Res } from "../../types/response.entity";
 import { AuthService } from "../auth/auth.service";
 import { Utilisateur } from "../../db/schemas/Utilisateur.schema";
+import { PermAlgorithme } from "../../db/schemas/PermAlgorithme.schema";
+import { getOwnerOfDir } from "../../utils/queries";
 
 /**
  * Contrôleur pour les algorithmes.
@@ -21,13 +23,13 @@ import { Utilisateur } from "../../db/schemas/Utilisateur.schema";
  */
 export class AlgosController {
 	public router: Router;
-	private usersService: AlgosService;
+	private algosService: AlgosService;
 	private authService: AuthService;
 
 	constructor() {
 		Logger.debug("Initializing...", "AlgosController");
 		this.router = Router();
-		this.usersService = new AlgosService();
+		this.algosService = new AlgosService();
 		this.authService = new AuthService();
 		this.init();
 		Logger.debug("Done !", "AlgosController");
@@ -53,15 +55,32 @@ export class AlgosController {
 	}
 
 	// GET /byUserId/:id
+	// Si dirId est null, on se situe à la racine, sinon on se situe dans un dossier
 	private async getAlgosOfUser(req: Request, res: Response) {
 		// Vérification des droits de l'utilisateur
 		const hasRights = await this.authService.verifyUser(req, res);
 		if (!hasRights) return res;
 
 		// Récupération des données de la requête
-		const { id } = req.params;
+		const { id, dirId } = req.params;
 
-		const algos = await this.usersService.getAlgosOfUser(+id);
+		// Récupération des algorithmes de l'utilisateur en fonction du dossier
+		let algos: PermAlgorithme[];
+
+		if (!dirId) {
+			// On se situe à la racine
+			algos = await this.algosService.getAlgosOfUser(+id);
+		} else {
+			// On se situe dans un dossier
+			// Récupérer l'owner du dossier
+			const dirOwner = await getOwnerOfDir(+dirId);
+
+			if (!dirOwner) {
+				return res.status(404).json(new Res(404, "Dossier non trouvé"));
+			}
+	
+			algos = await this.algosService.getAlgosOfUserInDir(dirOwner.id, +dirId);
+		}
 
 		if (!algos || algos.length === 0) {
 			return res
@@ -82,7 +101,7 @@ export class AlgosController {
 		const { id } = req.params;
 		const user = res.locals.user as Utilisateur;
 
-		const algo = await this.usersService.getAlgo(+id, user.id);
+		const algo = await this.algosService.getAlgo(+id, user.id);
 
 		if (!algo) {
 			return res.status(404).json(new Res(404, "Algorithme non trouvé"));
@@ -91,7 +110,7 @@ export class AlgosController {
 		return res.status(200).json(new Res(200, "Algorithme trouvé", algo));
 	}
 
-	// POST /
+	// POST / // TODO: dossier
 	private async createAlgo(req: Request, res: Response) {
 		// Vérification des droits de l'utilisateur
 		const hasRights = await this.authService.verifyUser(req, res);
@@ -109,7 +128,7 @@ export class AlgosController {
 		data.sourceCode = sourceCode;
 		data.requestedUserId = (res.locals.user as Utilisateur).id;
 
-		const result = await this.usersService.createAlgo(data);
+		const result = await this.algosService.createAlgo(data);
 		if (result instanceof Res) {
 			return res.status(result.statut).json(result);
 		}
@@ -117,7 +136,7 @@ export class AlgosController {
 		return res.status(201).json(new Res(201, "Algorithme créé", result));
 	}
 
-	// PUT /:id
+	// PUT /:id // TODO: dossier
 	private async updateAlgo(req: Request, res: Response) {
 		// Vérification des droits de l'utilisateur
 		const hasRights = await this.authService.verifyUser(req, res);
@@ -139,7 +158,7 @@ export class AlgosController {
 			data.permsAlgorithme = permsAlgorithme;
 		}
 
-		const updatedAlgo = await this.usersService.updateAlgo(data);
+		const updatedAlgo = await this.algosService.updateAlgo(data);
 
 		if (!updatedAlgo) {
 			return res.status(404).json(new Res(404, "Algorithme non trouvé"));
@@ -159,7 +178,7 @@ export class AlgosController {
 		// Récupération des données de la requête
 		const { id } = req.params;
 
-		const result = await this.usersService.deleteAlgo(
+		const result = await this.algosService.deleteAlgo(
 			+id,
 			res.locals.user.id,
 		);

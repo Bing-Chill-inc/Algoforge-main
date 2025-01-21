@@ -30,7 +30,7 @@ CREATE TABLE IF NOT EXISTS Algorithme (
     nom VARCHAR(255) NOT NULL DEFAULT 'Nouvel algorithme',
     dateCreation BIGINT NOT NULL,
     dateModification BIGINT NOT NULL,
-    idDossier INT NOT NULL,
+    idDossier INT,
     FOREIGN KEY (idDossier) REFERENCES Dossier(id)
 );
 
