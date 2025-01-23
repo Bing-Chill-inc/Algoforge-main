@@ -1,21 +1,23 @@
-version: "3.8"
-
 services:
     backend:
         container_name: algoforge-backend
+        restart: unless-stopped
         build:
             context: .
             dockerfile: src/back/Dockerfile
         volumes:
             - ./:/app
         ports:
-            - "5205:3000"
+            - "${PORT:-5205}:${PORT:-5205}"
         networks:
             - algo_network
+        depends_on:
+            - db_postgres
 
     db_postgres:
         image: postgres:17
         container_name: algoforge-db-postgres
+        restart: unless-stopped
         environment:
             POSTGRES_USER: ${DATABASE_USER:-postgres}
             POSTGRES_PASSWORD: ${DATABASE_PASSWORD:-postgres}
@@ -35,7 +37,7 @@ services:
             PGADMIN_DEFAULT_EMAIL: ${PGADMIN_DEFAULT_EMAIL:-admin@admin.com}
             PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_DEFAULT_PASSWORD:-admin}
         ports:
-            - "5300:80"
+            - "${PGADMIN_PORT:-5300}:80"
         networks:
             - algo_network
             - db_network

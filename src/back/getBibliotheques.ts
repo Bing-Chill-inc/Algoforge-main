@@ -17,10 +17,13 @@ const explorerDossier = (dossier: string) => {
 			path?: string;
 		}[];
 	}> = [];
-	const sousDossiers = fs.readdirSync(dossier).filter((nom) => {
-		const cheminComplet = path.join(dossier, nom);
-		return fs.statSync(cheminComplet).isDirectory();
-	});
+	const sousDossiers = fs
+		.readdirSync(dossier)
+		.sort((a, b) => a.localeCompare(b))
+		.filter((nom) => {
+			const cheminComplet = path.join(dossier, nom);
+			return fs.statSync(cheminComplet).isDirectory();
+		});
 
 	sousDossiers.forEach((nomDossier) => {
 		const cheminDossier = path.join(dossier, nomDossier);
@@ -42,9 +45,18 @@ const explorerDossier = (dossier: string) => {
 			const cheminComplet = path.join(cheminDossier, nomFichier);
 			if (fs.statSync(cheminComplet).isDirectory()) {
 				const structureFichier = {
-					nom: lireContenuFichier(path.join(cheminComplet, "nom.txt")) || nomFichier,
-					descriptif: lireContenuFichier(path.join(cheminComplet, "descriptif.html")) || "",
-					algo: lireContenuFichier(path.join(cheminComplet, "algo.json")) || "",
+					nom:
+						lireContenuFichier(
+							path.join(cheminComplet, "nom.txt"),
+						) || nomFichier,
+					descriptif:
+						lireContenuFichier(
+							path.join(cheminComplet, "descriptif.html"),
+						) || "",
+					algo:
+						lireContenuFichier(
+							path.join(cheminComplet, "algo.json"),
+						) || "",
 					path: cheminComplet.substring(dossier.length + 1),
 				};
 				structureDossier.contenu.push(structureFichier);
@@ -61,7 +73,10 @@ const routeHandler: RouteHandler = {
 	route: "/edit/Bibliotheque/getStructure",
 	callback: (req, res) => {
 		// Replace this with the actual path to the root of your library
-		const cheminBibliotheque = path.join(__dirname, "../front-editeur/src/Bibliotheque");
+		const cheminBibliotheque = path.join(
+			__dirname,
+			"../front-editeur/src/Bibliotheque",
+		);
 		const arborescence = explorerDossier(cheminBibliotheque);
 
 		res.setHeader("Content-Type", "application/json");
@@ -75,7 +90,7 @@ const iconHandler: RouteHandler = {
 		const cheminIcone = path.join(
 			__dirname,
 			"../front-editeur/src",
-			new URL(req.url, "http://localhost").pathname.replace("edit", "")
+			new URL(req.url, "http://localhost").pathname.replace("edit", ""),
 		);
 
 		console.log(cheminIcone);

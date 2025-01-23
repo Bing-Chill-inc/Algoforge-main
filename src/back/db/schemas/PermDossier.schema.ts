@@ -1,21 +1,59 @@
-import { Entity, Column, PrimaryColumn, ManyToOne } from "typeorm";
+import { Entity, Column, PrimaryColumn, ManyToOne, JoinColumn } from "typeorm";
 import type { Relation } from "typeorm";
 import { Utilisateur } from "./Utilisateur.schema";
 import { Dossier } from "./Dossier.schema";
 
+/**
+ * Modèle de données pour les permissions des dossiers.
+ * Un utilisateur précis peut avoir des droits sur un dossier.
+ * La liste des droits disponibles est définie dans l'énumérateur {@link Droits}.
+ * @hideconstructor
+ * @category Database
+ */
 @Entity()
 export class PermDossier {
-	@PrimaryColumn({ type: "int" })
+	/**
+	 * Identifiant de l'utilisateur.
+	 * @public
+	 * @type {number}
+	 */
+	@PrimaryColumn({ type: "int", name: "idUtilisateur" })
 	idUtilisateur: number;
 
-	@PrimaryColumn({ type: "int" })
+	/**
+	 * Identifiant du dossier.
+	 * @public
+	 * @type {number}
+	 */
+	@PrimaryColumn({ type: "int", name: "idDossier" })
 	idDossier: number;
 
-    @Column({ type: "varchar", length: 255 })
-    droits: string;
+	/**
+	 * Droits de l'utilisateur sur le dossier.
+	 * @public
+	 * @type {string}
+	 * @see {@link Droits}
+	 */
+	@Column({ type: "varchar", length: 255 })
+	droits: string;
 
-    @ManyToOne(() => Utilisateur, utilisateur => utilisateur.permDossiers)
-    utilisateur: Relation<Utilisateur>;
-    @ManyToOne(() => Dossier, dossier => dossier.permDossiers)
-    dossier: Relation<Dossier>;
+	/**
+	 * Utilisateur ayant les droits.
+	 * @public
+	 * @type {Utilisateur}
+	 * @see {@link Utilisateur}
+	 */
+	@ManyToOne(() => Utilisateur, (utilisateur) => utilisateur.permDossiers)
+	@JoinColumn({ name: "idUtilisateur" })
+	utilisateur: Relation<Utilisateur>;
+
+	/**
+	 * Dossier sur lequel les droits sont appliqués.
+	 * @public
+	 * @type {Dossier}
+	 * @see {@link Dossier}
+	 */
+	@ManyToOne(() => Dossier, (dossier) => dossier.permDossiers)
+	@JoinColumn({ name: "idDossier" })
+	dossier: Relation<Dossier>;
 }

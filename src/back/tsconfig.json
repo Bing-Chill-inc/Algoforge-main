@@ -13,6 +13,25 @@
 		// Disallow features that require cross-file awareness
 		"isolatedModules": true,
 		"emitDecoratorMetadata": true,
-		"experimentalDecorators": true
+		"experimentalDecorators": true,
+		"skipLibCheck": true
+	},
+
+	"exclude": ["node_modules", "*.sqlite", "docs"],
+
+	"typedocOptions": {
+		"plugin": ["typedoc-github-theme", "typedoc-plugin-merge-modules"],
+		"entryPoints": [
+			"./api/**/*.ts",
+			"./utils/**/*.ts",
+			"./middlewares/**/*.ts",
+			"./types/**/*.ts",
+			"./db/**/*.ts"
+		],
+		"excludeInternal": true,
+		"out": "docs",
+		"name": "Algoforge/Back-end",
+		"lang": "fr",
+		"mergeModulesMergeMode": "project"
 	}
 }

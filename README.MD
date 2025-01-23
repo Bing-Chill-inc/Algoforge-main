@@ -1,19 +1,23 @@
-# Algoforge
-
-![Le logo d'AlgoForge](logo.png)
+<div align=center>
+    <img src="logo.png" style="width:128px" alt="Le logo d'AlgoForge"/>
+    </br>
+    </br>
+    <h1>AlgoForge</h1>
+</div>
 
 ## Table des matières
 
 -   [Pitch](#pitch)
 -   [Fonctionnalités de l'application (WIP)](#fonctionnalités-de-lapplication)
--   [Utilisation](#utilisation)
+-   [Utilisation](#utilisation--installation)
     -   [Version en ligne](#version-en-ligne)
     -   [Version docker](#version-docker)
         -   [Programmes requis](#programmes-requis)
-        -   [Installation](#installation)
-    -   [Version manuelle](#version-manuelle)
+        -   [Installation Windows](#installation-windows)
+        -   [Installation UNIX](#installation-unix)
+    -   [Version standalone](#version-standalone)
         -   [Programmes requis](#programmes-requis-1)
-        -   [Installation](#installation-1)
+        -   [Installation (Windows/UNIX)](#installation-windowsunix)
     -   [Version de bureau (WIP)](#version-de-bureau)
 -   [Identité collaborateurs](#identité-collaborateurs)
 -   [Structure des dossiers (WIP)](#structure-des-dossiers)
@@ -55,12 +59,11 @@ Précédemment nommé I Need Algo, **AlgoForge** a changé de nom pour aborder u
     -   Plusieurs thèmes.
     -   Importation d'algorithmes.
     -   Exportation d'algorithmes sous différent formats, avec une sélection ou tout l'algorithme.
-    -   Détection d'anomalies dans l'algorithme.
     -   Bibliotheque d'algorithmes, privée et publique.
-    -   Imbrication des algorithmes dans d'autres algorithmes pour une meilleure lisibilité.
+    -   Décomposition des algorithmes sur un autre plan de travail pour une meilleure lisibilité.
     -   Zoom dynamique, raccourcis clavier, menu contextuel complet.
 
-## Utilisation
+## Utilisation / Installation
 
 AlgoForge est utilisable de deux manières différentes: en ligne sur un navigateur ou en local sur un ordinateur (avec une installation simple docker-compose ou même manuelle).
 
@@ -70,62 +73,89 @@ Pour utiliser AlgoForge en ligne, vous pouvez vous rendre sur ce lien : https://
 
 ### Version docker
 
-La version docker de l'application comprend une base de données PostgreSQL ainsi que l'application PGAdmin pour la gestion de la base de données.
+La version docker de l'application comprend par défaut une base de données PostgreSQL ainsi que l'application PGAdmin pour la gestion de la base de données. Nous vous proposons dans cette section des installateurs automatiques pour Windows et UNIX.
 
 #### Programmes requis
 
--   Rendre disponible 2 ports: l'un pour l'application et l'autre pour PGAdmin.
+-   Rendre disponible 2 ports: l'un pour l'application et l'autre pour PGAdmin. (par défaut 5205 et 5300)
 -   Installer [git](https://git-scm.com/downloads).
 -   Installer [Docker](https://docker.com).
 
 > [!CAUTION]
 > Docker doit être démarré quand vous voulez utiliser l’application.
 
-#### Installation
+#### Installation Windows
 
-1. Télécharger le programme grâce à la commande git suivante:
+1. Télécharger l'installateur de l'application. Nous vous proposons 2 méthodes pour cela:
 
-```
-git clone --depth 1 --recurse-submodules https://github.com/Bing-Chill-inc/Algoforge.git
-```
+-   Sans Powershell:
+    -   installation rapide en un clic: `run-installer-minimal.bat`
+    -   installation complète (personnalisation possible): `run-installer-full.bat`
+-   Avec Powershell:
+    -   installation rapide en un clic: `run-installer-minimal.ps1`
+    -   installation complète (personnalisation possible): `run-installer-full.ps1`
 
-2. Se placer dans le dossier Algoforge:
+2. Exécuter le programme depuis une invite de commande avec l'une des commandes suivantes:
 
-```
-cd Algoforge
-```
+-   Bash (minimal):
 
-3. Renommer le fichier template.env en .env:
-
-```
-mv template.env .env
-```
-
-4. Modifier le fichier .env pour ajouter les informations de connexion à la base de données.
-    > [!CAUTION]  
-    > Si vous utilisez notre version de docker-compose, vous devez utiliser comme base de données PostgreSQL.
-5. Lancer l’application avec la commande suivante:
-
-```
-docker-compose up --wait
+```bash
+$ ./run-installer-minimal.bat
 ```
 
-L’application est maintenant disponible ! Ouvrez un navigateur et entrez l'adresse: http://localhost:5205
+-   Bash (complet):
 
-### Version manuelle
+```bash
+$ ./run-installer-complet.bat
+```
+
+-   Powershell (minimal):
+
+```powershell
+PS > ./run-installer-minimal.ps1
+```
+
+-   Powershell (complet):
+
+```powershell
+PS > ./run-installer-complet.ps1
+```
+
+#### Installation UNIX
+
+1. Télécharger l'installateur de l'application.
+
+    - Installation rapide : `run-installer-minimal.sh`
+    - Installation complète (personnalisation possible) : `run-installer-complet.sh`
+
+2. Exécuter le programme depuis une invite de commande:
+
+-   Bash (minimal):
+
+```bash
+$ ./run-installer-minimal.sh
+```
+
+-   Bash (complet):
+
+```bash
+$ ./run-installer-complet.sh
+```
+
+### Version standalone
 
 #### Programmes requis
 
--   Rendre disponible 1 port pour l'application.
+-   Rendre disponible 1 port pour l'application. (5205 par défaut)
 -   Installer [git](https://git-scm.com/downloads).
 -   Installer [Bun](https://bun.sh), testé avec la version 1.1.34.
 
-#### Installation:
+#### Installation (Windows/UNIX):
 
 1. Télécharger le programme grâce à la commande git suivante:
 
 ```
-git clone --depth 1 --recurse-submodules https://github.com/Bing-Chill-inc/Algoforge.git
+git clone --depth 1 --recurse-submodules https://github.com/Bing-Chill-inc/Algoforge-main.git
 ```
 
 2. Se placer dans le dossier Algoforge:
@@ -134,20 +164,27 @@ git clone --depth 1 --recurse-submodules https://github.com/Bing-Chill-inc/Algof
 cd Algoforge
 ```
 
-3. Renommer le fichier template.env en .env:
+3. Mettre à jour les sous-modules (nécessaire)
+
+```
+git submodule update --init --recursive
+```
+
+4. Renommer le fichier template.env en .env:
 
 ```
 mv template.env .env
 ```
 
-4. Modifier le fichier .env pour ajouter les informations de connexion à la base de données.
-5. Se placer dans le dossier back-end:
+5. (optionnel) Modifier le fichier .env pour modifier les informations de connexion à la base de données.
+
+6. Se placer dans le dossier back-end:
 
 ```
 cd src/back-end
 ```
 
-6. Lancer l’application avec la commande suivante:
+7. Lancer l’application avec la commande suivante:
 
 ```
 bun run prod
@@ -155,7 +192,7 @@ bun run prod
 
 _(Cette dernière va directement télécharger et installer les dépendances nécessaires)_
 
-L’application est maintenant disponible ! Ouvrez un navigateur et entrez l'adresse: http://localhost:3000
+L'application est en train de se démarrer en arrière plan ! Ouvrez un navigateur et entrez l'adresse: http://localhost:5205 (par défaut)
 
 ### Version de bureau
 

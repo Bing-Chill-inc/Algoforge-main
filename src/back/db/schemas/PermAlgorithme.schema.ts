@@ -1,22 +1,59 @@
-import { Entity, Column, PrimaryColumn, ManyToOne } from "typeorm";
+import { Entity, Column, PrimaryColumn, ManyToOne, JoinColumn } from "typeorm";
 import type { Relation } from "typeorm";
 import { Utilisateur } from "./Utilisateur.schema";
 import { Algorithme } from "./Algorithme.schema";
-import { Dossier } from "./Dossier.schema";
 
+/**
+ * Modèle de données pour les permissions des algorithmes.
+ * Un utilisateur précis peut avoir des droits sur un algorithme.
+ * La liste des droits disponibles est définie dans l'énumérateur {@link Droits}.
+ * @hideconstructor
+ * @category Database
+ */
 @Entity()
 export class PermAlgorithme {
-	@PrimaryColumn({ type: "int" })
+	/**
+	 * Identifiant de l'utilisateur.
+	 * @public
+	 * @type {number}
+	 */
+	@PrimaryColumn({ type: "int", name: "idUtilisateur" })
 	idUtilisateur: number;
 
-	@PrimaryColumn({ type: "int" })
+	/**
+	 * Identifiant de l'algorithme.
+	 * @public
+	 * @type {number}
+	 */
+	@PrimaryColumn({ type: "int", name: "idAlgorithme" })
 	idAlgorithme: number;
 
-    @Column({ type: "varchar", length: 255 })
-    droits: string;
+	/**
+	 * Droits de l'utilisateur sur l'algorithme.
+	 * @public
+	 * @type {string}
+	 * @see {@link Droits}
+	 */
+	@Column({ type: "varchar", length: 255 })
+	droits: string;
 
-    @ManyToOne(() => Utilisateur, utilisateur => utilisateur.permAlgorithmes)
-    utilisateur: Relation<Utilisateur>;
-    @ManyToOne(() => Algorithme, algorithme => algorithme.permAlgorithmes)
-    dossier: Relation<Dossier>;
+	/**
+	 * Utilisateur ayant les droits.
+	 * @public
+	 * @type {Utilisateur}
+	 * @see {@link Utilisateur}
+	 */
+	@ManyToOne(() => Utilisateur, (utilisateur) => utilisateur.permAlgorithmes)
+	@JoinColumn({ name: "idUtilisateur" })
+	utilisateur: Relation<Utilisateur>;
+
+	/**
+	 * Algorithme sur lequel les droits sont appliqués.
+	 * @public
+	 * @type {Algorithme}
+	 * @see {@link Algorithme}
+	 */
+	@ManyToOne(() => Algorithme, (algorithme) => algorithme.permAlgorithmes)
+	@JoinColumn({ name: "idAlgorithme" })
+	algorithme: Relation<Algorithme>;
 }

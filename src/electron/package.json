@@ -7,11 +7,15 @@
 		"start": "electron-forge start",
 		"start:exam": "echo 'const isExam = true; export default isExam;' > ./exam-mode.js && electron-forge start && echo 'const isExam = false; export default isExam;' > ./exam-mode.js",
 		"package": "electron-forge package",
+		"package:win:x64": "electron-forge package --arch x64 --platform win32",
+		"package:lnx:x64": "electron-forge package --arch x64 --platform linux",
+		"package:mac:x64": "electron-forge package --arch x64 --platform darwin",
+		"package:mac:arm64": "electron-forge package --arch arm64 --platform darwin",
 		"package:exam": "echo 'const isExam = true; export default isExam;' > ./exam-mode.js && electron-forge package && echo 'const isExam = false; export default isExam;' > ./exam-mode.js",
 		"package:exam:win:x64": "echo 'const isExam = true; export default isExam;' > ./exam-mode.js && electron-forge package --arch x64 --platform win32 && echo 'const isExam = false; export default isExam;' > ./exam-mode.js",
 		"package:exam:lnx:x64": "echo 'const isExam = true; export default isExam;' > ./exam-mode.js && electron-forge package --arch x64 --platform linux && echo 'const isExam = false; export default isExam;' > ./exam-mode.js",
-		"make": "electron-forge make",
-		"publish": "electron-forge publish"
+		"package:exam:mac:x64": "echo 'const isExam = true; export default isExam;' > ./exam-mode.js && electron-forge package --arch x64 --platform darwin && echo 'const isExam = false; export default isExam;' > ./exam-mode.js",
+		"package:exam:mac:arm64": "echo 'const isExam = true; export default isExam;' > ./exam-mode.js && electron-forge package --arch arm64 --platform darwin && echo 'const isExam = false; export default isExam;' > ./exam-mode.js"
 	},
 	"author": "AlgoForge inc.",
 	"license": "ISC",

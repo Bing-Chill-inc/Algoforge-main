@@ -1,0 +1,140 @@
+name: Build and Release Electron App
+
+on:
+    push:
+        branches:
+            - main
+
+permissions:
+    contents: write
+
+jobs:
+    create-release:
+        runs-on: ubuntu-latest
+        outputs:
+            upload_url: ${{ steps.create_release.outputs.upload_url }}
+        steps:
+            - name: Create GitHub Release
+              id: create_release
+              uses: actions/create-release@v1
+              with:
+                  tag_name: "release-${{ github.run_number }}"
+                  release_name: "Algoforge Release #${{ github.run_number }}"
+                  draft: false
+                  prerelease: false
+              env:
+                  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+    build-and-release-win-lnx:
+        runs-on: ubuntu-latest
+        needs: create-release
+
+        strategy:
+            matrix:
+                build:
+                    - command: "package:win:x64"
+                      tag: "windows-x64"
+                      zipFileName: "Algoforge-Windows-x64.zip"
+                      name: "Windows x64"
+                    - command: "package:lnx:x64"
+                      tag: "linux-x64"
+                      zipFileName: "Algoforge-Linux-x64.zip"
+                      name: "Linux x64"
+                    - command: "package:exam:win:x64"
+                      tag: "windows-exam-x64"
+                      zipFileName: "Algoforge-ExamEdition-Windows-x64.zip"
+                      name: "Exam Edition Windows x64"
+                    - command: "package:exam:lnx:x64"
+                      tag: "linux-exam-x64"
+                      zipFileName: "Algoforge-ExamEdition-Linux-x64.zip"
+                      name: "Exam Edition Linux x64"
+
+        steps:
+            - name: Checkout code (with submodules)
+              uses: actions/checkout@v3
+              with:
+                  submodules: true # Initialize and update submodules
+
+            - name: Set up Node.js
+              uses: actions/setup-node@v3
+              with:
+                  node-version: 20 # Use a compatible Node.js version
+
+            - name: Install dependencies
+              working-directory: src/electron
+              run: npm install
+
+            - name: Run build script
+              working-directory: src/electron
+              run: npm run ${{ matrix.build.command }}
+
+            - name: Package build artifact
+              working-directory: src/electron/out
+              run: zip -r ${{ matrix.build.zipFileName }} ./*
+
+            - name: Upload build artifact to release
+              uses: actions/upload-release-asset@v1
+              env:
+                  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+              with:
+                  upload_url: ${{ needs.create-release.outputs.upload_url }}
+                  asset_path: ./src/electron/out/${{ matrix.build.zipFileName }}
+                  asset_name: ${{ matrix.build.zipFileName }}
+                  asset_content_type: application/zip
+
+    build-and-release-darwin:
+        runs-on: macos-latest
+        needs: create-release
+
+        strategy:
+            matrix:
+                build:
+                    - command: "package:mac:x64"
+                      tag: "mac-x64"
+                      zipFileName: "Algoforge-Mac-x64.zip"
+                      name: "MacOS x64"
+                    - command: "package:mac:arm64"
+                      tag: "mac-arm64"
+                      zipFileName: "Algoforge-Mac-ARM64.zip"
+                      name: "MacOS Apple Silicon (ARM64)"
+                    - command: "package:exam:mac:x64"
+                      tag: "mac-exam-x64"
+                      zipFileName: "Algoforge-ExamEdition-Mac-x64.zip"
+                      name: "Exam Edition MacOS x64"
+                    - command: "package:exam:mac:arm64"
+                      tag: "mac-exam-arm64"
+                      zipFileName: "Algoforge-ExamEdition-Mac-ARM64.zip"
+                      name: "Exam Edition MacOS Apple Silicon (ARM64)"
+
+        steps:
+            - name: Checkout code (with submodules)
+              uses: actions/checkout@v3
+              with:
+                  submodules: true # Initialize and update submodules
+
+            - name: Set up Node.js
+              uses: actions/setup-node@v3
+              with:
+                  node-version: 20 # Use a compatible Node.js version
+
+            - name: Install dependencies
+              working-directory: src/electron
+              run: npm install
+
+            - name: Run build script
+              working-directory: src/electron
+              run: npm run ${{ matrix.build.command }}
+
+            - name: Package build artifact
+              working-directory: src/electron/out
+              run: zip -r ${{ matrix.build.zipFileName }} ./*
+
+            - name: Upload build artifact to release
+              uses: actions/upload-release-asset@v1
+              env:
+                  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+              with:
+                  upload_url: ${{ needs.create-release.outputs.upload_url }}
+                  asset_path: ./src/electron/out/${{ matrix.build.zipFileName }}
+                  asset_name: ${{ matrix.build.zipFileName }}
+                  asset_content_type: application/zip
