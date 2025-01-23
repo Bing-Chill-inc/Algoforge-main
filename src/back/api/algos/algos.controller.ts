@@ -6,6 +6,7 @@ import { AlgoCreateDTO, AlgoUpdateDTO } from "./algos.dto";
 import { Res } from "../../types/response.entity";
 import { AuthService } from "../auth/auth.service";
 import { Utilisateur } from "../../db/schemas/Utilisateur.schema";
+import { authMiddleware } from "../../middlewares/auth.middleware";
 
 /**
  * Contrôleur pour les algorithmes.
@@ -34,6 +35,9 @@ export class AlgosController {
 	}
 
 	private init() {
+		// Vérification des droits de l'utilisateur sur toutes les routes.
+		this.router.use(authMiddleware);
+
 		this.router.get(
 			"/byUserId/:id",
 			expressAsyncHandler(this.getAlgosOfUser.bind(this)),
@@ -54,10 +58,6 @@ export class AlgosController {
 
 	// GET /byUserId/:id
 	private async getAlgosOfUser(req: Request, res: Response) {
-		// Vérification des droits de l'utilisateur
-		const hasRights = await this.authService.verifyUser(req, res);
-		if (!hasRights) return res;
-
 		// Récupération des données de la requête
 		const { id } = req.params;
 
@@ -74,10 +74,6 @@ export class AlgosController {
 
 	// GET /:id
 	private async getAlgo(req: Request, res: Response) {
-		// Vérification des droits de l'utilisateur
-		const hasRights = await this.authService.verifyUser(req, res);
-		if (!hasRights) return res;
-
 		// Récupération des données de la requête
 		const { id } = req.params;
 		const user = res.locals.user as Utilisateur;
@@ -93,10 +89,6 @@ export class AlgosController {
 
 	// POST /
 	private async createAlgo(req: Request, res: Response) {
-		// Vérification des droits de l'utilisateur
-		const hasRights = await this.authService.verifyUser(req, res);
-		if (!hasRights) return res;
-
 		// Récupération des données de la requête
 		const { ownerId, nom, sourceCode } = req.body;
 		if (!ownerId || !nom || !sourceCode) {
@@ -119,10 +111,6 @@ export class AlgosController {
 
 	// PUT /:id
 	private async updateAlgo(req: Request, res: Response) {
-		// Vérification des droits de l'utilisateur
-		const hasRights = await this.authService.verifyUser(req, res);
-		if (!hasRights) return res;
-
 		// Récupération des données de la requête
 		const { id } = req.params;
 		const { nom, permsAlgorithme, sourceCode } = req.body;
@@ -152,10 +140,6 @@ export class AlgosController {
 
 	// DELETE /:id
 	private async deleteAlgo(req: Request, res: Response) {
-		// Vérification des droits de l'utilisateur
-		const hasRights = await this.authService.verifyUser(req, res);
-		if (!hasRights) return res;
-
 		// Récupération des données de la requête
 		const { id } = req.params;
 

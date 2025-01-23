@@ -5,6 +5,7 @@ import { Logger } from "../../utils/logger";
 import { UserRegisterDTO, UserLoginDTO, UserUpdateDTO } from "./users.dto";
 import { AuthService } from "../auth/auth.service";
 import { Utilisateur } from "../../db/schemas/Utilisateur.schema";
+import { authMiddleware } from "../../middlewares/auth.middleware";
 
 /**
  * Contrôleur pour les utilisateurs.
@@ -51,15 +52,21 @@ export class UsersController {
 			expressAsyncHandler(this.recover.bind(this)),
 		);
 
-		this.router.get("/:id", expressAsyncHandler(this.getUser.bind(this)));
+		this.router.get(
+			"/:id",
+			authMiddleware,
+			expressAsyncHandler(this.getUser.bind(this)),
+		);
 
 		this.router.put(
 			"/:id",
+			authMiddleware,
 			expressAsyncHandler(this.updateUser.bind(this)),
 		);
 
 		this.router.delete(
 			"/:id",
+			authMiddleware,
 			expressAsyncHandler(this.deleteUser.bind(this)),
 		);
 	}
@@ -140,10 +147,6 @@ export class UsersController {
 
 	// GET /:id
 	private async getUser(req: Request, res: Response) {
-		// Vérification des droits de l'utilisateur
-		const hasRights = await this.authService.verifyUser(req, res);
-		if (!hasRights) return res;
-
 		// Récupération de l'id de l'utilisateur
 		const id = +req.params.id;
 
@@ -157,10 +160,6 @@ export class UsersController {
 
 	// PUT /:id
 	private async updateUser(req: Request, res: Response) {
-		// Vérification des droits de l'utilisateur
-		const hasRights = await this.authService.verifyUser(req, res);
-		if (!hasRights) return res;
-
 		// Récupération de l'id de l'utilisateur
 		const id = +req.params.id;
 
@@ -182,10 +181,6 @@ export class UsersController {
 
 	// DELETE /:id
 	private async deleteUser(req: Request, res: Response) {
-		// Vérification des droits de l'utilisateur
-		const hasRights = await this.authService.verifyUser(req, res);
-		if (!hasRights) return res;
-
 		// Récupération de l'id de l'utilisateur
 		const id = +req.params.id;
 		const requestedUserId = (res.locals.user as Utilisateur).id;
