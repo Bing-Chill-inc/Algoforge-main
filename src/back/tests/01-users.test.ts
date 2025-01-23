@@ -233,7 +233,7 @@ describe("Users: new user", () => {
 			);
 
 			// Récupération du token pour les tests suivants.
-			token = response.body.data.tokens[0].token;
+			token = response.headers.authorization;
 		});
 
 		test("GET /api/users/1 -> Utilisateur trouvé.", async () => {

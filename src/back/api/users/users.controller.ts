@@ -104,6 +104,10 @@ export class UsersController {
 		data.password = password;
 
 		const reponse = await this.usersService.login(data);
+		if (reponse.statut === 200 && reponse.data?.tokens[0]?.token) {
+			// Ajout du token dans les headers de la réponse.
+			res.header("Authorization", reponse.data?.tokens[0]?.token);
+		}
 
 		return res
 			.status(reponse.statut)

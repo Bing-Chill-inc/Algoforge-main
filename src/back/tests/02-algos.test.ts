@@ -23,7 +23,7 @@ beforeAll(async () => {
 	payload.password = UserSet.example.newPassword;
 	const response = await request.post("/api/users/login").send(payload);
 	Logger.debug(JSON.stringify(response.body), "test: algos", 5);
-	token = response.body.data.tokens[0].token;
+	token = response.headers.authorization;
 	Logger.log(`Logged in ! Token: ${token}`, "test: algos");
 });
 
