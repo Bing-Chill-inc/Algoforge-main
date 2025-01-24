@@ -42,7 +42,16 @@ export class Dossier {
 	 * @type {Dossier}
 	 */
 	@OneToOne(() => Dossier, (dossier) => dossier.id)
-	idParent: Dossier;
+	parent: Dossier;
+
+	/**
+	 * Identifiant du dossier parent.
+	 * Si null, le dossier est à la racine.
+	 * @public
+	 * @type {number}
+	 */
+	@Column({ type: "int", nullable: true })
+	idParent: number;
 
 	/**
 	 * Date de création du dossier.

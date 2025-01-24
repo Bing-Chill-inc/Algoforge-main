@@ -35,47 +35,38 @@ export class AlgosService {
 	);
 
 	/**
-	 * Récupère les algorithmes que l'utilisateur a le droit de voir (propriétaire, écriture+lecture, lecture seule), et qui se situent à la racine.
+	 * Récupère les permissions des algorithmes que l'utilisateur a le droit de voir (propriétaire, écriture+lecture, lecture seule).
 	 * @param id Id de l'utilisateur.
+	 * @param dirId Id du dossier.
 	 * @returns Les algorithmes de l'utilisateur.
 	 */
 	// TODO : Vérifier les droits de l'utilisateur (query)
-	// TODO : Changer en getAlgosOfUserInRoot
-	async getAlgosOfUser(id: number) {
+	async getAlgosPermsOfUser(id: number, dirId: number) {
 		const permAlgoRepository =
 			AppDataSource.manager.getRepository(PermAlgorithme);
 
 		// Récupération des algorithmes de l'utilisateur.
-		return await permAlgoRepository.find({
-			relations: { algorithme: true },
-			where: {
-				idUtilisateur: id,
-				algorithme: { dossier: null }
-			},
-		});
-	}
-
-	/**
-	 * Récupère les algorithmes que l'utilisateur a le droit de voir (propriétaire, écriture+lecture, lecture seule), et qui se situent dans un dossier.
-	 * @param id Id de l'utilisateur.
-	 * @param dirId Id du dossier.
-	 * @returns Les algorithmes de l'utilisateur dans le dossier.
-	 */
-	// TODO : Vérifier les droits de l'utilisateur (query)
-	async getAlgosOfUserInDir(id: number, dirId: number) {
-		const permAlgoRepository =
-			AppDataSource.manager.getRepository(PermAlgorithme);
-
-		// Récupération des algorithmes de l'utilisateur.
-		return await permAlgoRepository.find({
-			relations: { algorithme: true },
-			where: {
-				idUtilisateur: id,
-				algorithme: { dossier: {
-					id: dirId
-				}},
-			},
-		});
+		if (dirId) {
+			return await permAlgoRepository.find({
+				relations: { algorithme: true },
+				where: {
+					idUtilisateur: id,
+					algorithme: {
+						dossier: {
+							id: dirId,
+						},
+					},
+				},
+			});
+		} else {
+			return await permAlgoRepository.find({
+				relations: { algorithme: true },
+				where: {
+					idUtilisateur: id,
+					algorithme: { dossier: null },
+				},
+			});
+		}
 	}
 
 	/**
@@ -120,12 +111,13 @@ export class AlgosService {
 	 * @param algo Données de l'algorithme à créer.
 	 * @returns L'algorithme créé.
 	 */
+	// TODO : 
 	async createAlgo(algo: AlgoCreateDTO) {
 		// Vérification des droits de l'utilisateur.
 		if (algo.requestedUserId !== algo.ownerId) {
 			return new Res(
 				403,
-				"Vous n'avez pas les droits pour créer cet algorithme",
+				"Vous n'avez pas les droits pour créer cet algorithme.",
 			);
 		}
 

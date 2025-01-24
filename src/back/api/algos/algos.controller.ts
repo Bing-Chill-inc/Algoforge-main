@@ -38,7 +38,7 @@ export class AlgosController {
 	private init() {
 		this.router.get(
 			"/byUserId/:id",
-			expressAsyncHandler(this.getAlgosOfUser.bind(this)),
+			expressAsyncHandler(this.getAlgosPermsOfUser.bind(this)),
 		);
 		this.router.get("/:id", expressAsyncHandler(this.getAlgo.bind(this)));
 
@@ -56,39 +56,34 @@ export class AlgosController {
 
 	// GET /byUserId/:id
 	// Si dirId est null, on se situe à la racine, sinon on se situe dans un dossier
-	private async getAlgosOfUser(req: Request, res: Response) {
+	private async getAlgosPermsOfUser(req: Request, res: Response) {
 		// Vérification des droits de l'utilisateur
 		const hasRights = await this.authService.verifyUser(req, res);
 		if (!hasRights) return res;
 
 		// Récupération des données de la requête
-		const { id, dirId } = req.params;
+		let { id, dirId } = req.params;
 
-		// Récupération des algorithmes de l'utilisateur en fonction du dossier
-		let algos: PermAlgorithme[];
-
-		if (!dirId) {
-			// On se situe à la racine
-			algos = await this.algosService.getAlgosOfUser(+id);
-		} else {
-			// On se situe dans un dossier
+		// Si dirId est null, on se situe à la racine, sinon on se situe dans un dossier, on récupère l'owner du dossier
+		if (dirId) {
 			// Récupérer l'owner du dossier
-			const dirOwner = await getOwnerOfDir(+dirId);
+			id = String((await getOwnerOfDir(+dirId)).id);
 
-			if (!dirOwner) {
+			if (!id) {
 				return res.status(404).json(new Res(404, "Dossier non trouvé"));
 			}
-	
-			algos = await this.algosService.getAlgosOfUserInDir(dirOwner.id, +dirId);
 		}
 
-		if (!algos || algos.length === 0) {
+		// Récupération des permissions des algorithmes de l'utilisateur dans le dossier
+		const algosPerms = await this.algosService.getAlgosPermsOfUser(+id, +dirId);
+
+		if (!algosPerms || algosPerms.length === 0) {
 			return res
 				.status(404)
 				.json(new Res(404, "Aucun algorithme trouvé"));
 		}
 
-		return res.status(200).json(new Res(200, "Algorithmes trouvés", algos));
+		return res.status(200).json(new Res(200, "Algorithmes trouvés", algosPerms));
 	}
 
 	// GET /:id

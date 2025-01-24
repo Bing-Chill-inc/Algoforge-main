@@ -15,20 +15,76 @@ import path from "path";
 import { Logger } from "../../utils/logger";
 
 export class DirsService {
-    /**
-     * Chemin vers le dossier contenant les dossiers.
-     * @public
-     * @type {string}
-     * @readonly
-     */
-    public static readonly dataPath: string = path.join(
-        __dirname,
-        "../../../../data/dirs/",
-    );
+	/**
+	 * Récupère les dossiers que l'utilisateur a le droit de voir (propriétaire, écriture+lecture, lecture seule).
+	 * @param id Id de l'utilisateur.
+	 * @param idParent Id du dossier parent.
+	 * @returns Les dossiers de l'utilisateur.
+	 */
+	async getDirsPermsOfUser(id: number, idParent: number) {
+		const permDirRepository =
+			AppDataSource.manager.getRepository(PermDossier);
 
-    /**
-     * Récupère les dossiers que l'utilisateur a le droit de voir (propriétaire, écriture+lecture, lecture seule), et qui se situent à la racine.
-     * @param id Id de l'utilisateur.
-     * @returns Les dossiers de l'utilisateur.
-     */
+		// Récupération des dossiers de l'utilisateur.
+		if (idParent) {
+			return await permDirRepository.find({
+				relations: { dossier: true },
+				where: {
+					idUtilisateur: id,
+					dossier: {
+						idParent: idParent,
+					},
+				},
+			});
+		} else {
+			return await permDirRepository.find({
+				relations: { dossier: true },
+				where: {
+					idUtilisateur: id,
+					dossier: {
+						idParent: null,
+					},
+				},
+			});
+		}
+	}
+
+	/**
+	 * Crée un dossier.
+	 * @param dir Données de création du dossier.
+	 * @returns Le dossier créé.
+	 */
+	async createDir(dir: DirCreateDTO) {
+		// Vérification des droits de l'utilisateur
+		if (dir.requestedUserId !== dir.ownerId) {
+			return new Res(
+				403,
+				"Vous n'avez pas les droits pour créer ce dossier.",
+			);
+		}
+
+		const dossierRepository = AppDataSource.manager.getRepository(Dossier);
+		const permDirRepository =
+			AppDataSource.manager.getRepository(PermDossier);
+        
+        // Création du dossier
+        const newDir = new Dossier();
+        newDir.nom = dir.nom;
+        newDir.idParent = dir.idParent;
+		newDir.dateCreation = new Date().getTime();
+		newDir.dateModification = new Date().getTime();
+		// Enregistrement du dossier en base de données.
+        const savedDir = await dossierRepository.save(newDir);
+
+		// Création du droit d'ownership.
+		const newPerm = new PermDossier();
+		newPerm.idUtilisateur = dir.ownerId;
+		newPerm.idDossier = savedDir.id;
+		newPerm.droits = Droits.Owner;
+		// Enregistrement du droit.
+		const savedPerm = await permDirRepository.save(newPerm);
+		savedDir.permDossiers = [savedPerm];
+
+		return savedDir;
+	}
 }

@@ -6,6 +6,7 @@ import { DirCreateDTO, DirUpdateDTO } from "./dirs.dto";
 import { Res } from "../../types/response.entity";
 import { AuthService } from "../auth/auth.service";
 import { Utilisateur } from "../../db/schemas/Utilisateur.schema";
+import { getOwnerOfDir } from "../../utils/queries";
 
 /**
  * Contrôleur pour les dossiers.
@@ -55,15 +56,25 @@ export class DirsController {
 		if (!hasRights) return res;
 
 		// Récupérations des données de la requête
-		const { id } = req.params;
+		let { id, idParent } = req.params;
 
-		const dirs = await this.dirsService.getDirsOfUser(+id);
+		// Si idParent est null, on se situe à la racine, sinon on se situe dans un dossier
+		if (idParent) {
+			// Récupérer l'owner du dossier
+			id = String((await getOwnerOfDir(+idParent)).id);
 
-		if (!dirs || dirs.length === 0) {
+			if (!id) {
+				return res.status(404).json(new Res(404, "Dossier parent non trouvé"));
+			}
+		}
+
+		const dirsPerms = await this.dirsService.getDirsPermsOfUser(+id, +idParent);
+
+		if (!dirsPerms || dirsPerms.length === 0) {
 			return res.status(404).json(new Res(404, "Aucun dossier trouvé"));
 		}
 
-		return res.status(200).json(new Res(200, "Dossiers trouvés", dirs));
+		return res.status(200).json(new Res(200, "Dossiers trouvés", dirsPerms));
 	}
 
 	// POST /
