@@ -1,4 +1,4 @@
-import { readFileSync } from "fs";
+import { readFileSync, watch } from "fs";
 import express from "express";
 import cors from "cors";
 import path from "path";
@@ -32,6 +32,17 @@ app.get(iconHandler.route, iconHandler.callback);
 // Préparation du bundle de l'éditeur - SmeltJS.
 const SmeltJS = async () => {
 	console.log(await $`bun i`.cwd(`../front-editeur`).text());
+
+	// Si le contenu du dossier ../front-editeur change, il faut relancer la commande.
+
+	watch(
+		path.join(__dirname, "/../front-editeur/src"),
+		{ recursive: true },
+		async () => {
+			console.log(await $`bun SmeltJS.ts`.cwd(`../front-editeur`).text());
+		},
+	);
+
 	console.log(await $`bun SmeltJS.ts`.cwd(`../front-editeur`).text());
 };
 
