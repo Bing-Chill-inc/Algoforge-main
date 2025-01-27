@@ -310,14 +310,11 @@ describe("Users: new user", () => {
 	});
 
 	describe("logout", () => {
-		test("GET /api/users/logout -> erreur: Token introuvable.", async () => {
+		test("GET /api/users/logout -> erreur: Token manquant.", async () => {
 			const response = await request.get("/api/users/logout");
 			Logger.debug(JSON.stringify(response.body), "test: users", 5);
-			expect(response.status).toBe(404);
-			expect(response.body).toHaveProperty(
-				"message",
-				"Token introuvable",
-			);
+			expect(response.status).toBe(400);
+			expect(response.body).toHaveProperty("message", "Token manquant");
 		});
 		test("GET /api/users/logout -> Déconnexion réussie.", async () => {
 			const response = await request
