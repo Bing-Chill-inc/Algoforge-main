@@ -71,7 +71,19 @@ export class UsersController {
 		);
 	}
 
-	// POST /register
+	/**
+	 * POST /register
+	 * Inscription d'un utilisateur.
+	 * @param req.body {@link UserRegisterDTO}
+	 * @example
+	 * // Retours possibles :
+	 * {status: 400, message: "Il manque des données" }
+	 * {status: 400, message: "Données invalides", data: {email: "Email invalide"} }
+	 * {status: 409, message: "Email déjà utilisé" }
+	 * {status: 500, message: "Erreur lors de la création de l'utilisateur" }
+	 * {status: 500, message: "Erreur lors de la création du token de confirmation" }
+	 * {status: 201, message: "Utilisateur créé", data: new Utilisateur() }
+	 */
 	private async register(req: Request, res: Response) {
 		// Récupération des données de la requête
 		const { email, password, pseudo } = req.body;
@@ -88,7 +100,17 @@ export class UsersController {
 			.json({ message: reponse.message, data: reponse.data });
 	}
 
-	// GET /confirm/:token
+	/**
+	 * GET /confirm/:token
+	 * Confirmation de l'inscription.
+	 * @param req.params.token Token de confirmation
+	 * @example
+	 * // Retours possibles :
+	 * {status: 400, message: "Token manquant" }
+	 * {status: 404, message: "Utilisateur introuvable ou déjà vérifié" }
+	 * {status: 500, message: "Erreur lors de la confirmation de l'utilisateur" }
+	 * {status: 200, message: "Inscription confirmé" }
+	 */
 	private async confirm(req: Request, res: Response) {
 		// Récupération des données de la requête
 		const token = req.params.token;
@@ -101,7 +123,19 @@ export class UsersController {
 			.json({ message: reponse.message, data: reponse.data });
 	}
 
-	// POST /login
+	/**
+	 * POST /login
+	 * Connexion d'un utilisateur.
+	 * @param req.body {@link UserLoginDTO}
+	 * @example
+	 * // Retours possibles :
+	 * {status: 400, message: "Il manque des données" }
+	 * {status: 400, message: "Données invalides", data: {email: "Email invalide"} }
+	 * {status: 404, message: "Utilisateur introuvable" }
+	 * {status: 401, message: "Mot de passe incorrect" }
+	 * {status: 500, message: "Erreur lors de la connexion de l'utilisateur" }
+	 * {status: 200, message: "Connexion réussie", data: new Utilisateur() }
+	 */
 	private async login(req: Request, res: Response) {
 		// Récupération des données de la requête
 		const { email, password } = req.body;
@@ -121,10 +155,21 @@ export class UsersController {
 			.json({ message: reponse.message, data: reponse.data });
 	}
 
-	// GET /logout
+	/**
+	 * GET /logout
+	 * Déconnexion d'un utilisateur.
+	 * @remarks
+	 * Besoin d'être connecté, voir: {@link UsersService.verify}
+	 * @example
+	 * // Retours possibles :
+	 * {status: 400, message: "Token manquant" }
+	 * {status: 404, message: "Token introuvable" }
+	 * {status: 200, message: "Déconnexion réussie" }
+	 */
 	private async logout(req: Request, res: Response) {
 		// Récupération des données de la requête
 		const token = this.authService.extractToken(req);
+		if (!token) return res.status(400).json({ message: "Token manquant" });
 
 		const reponse = await this.usersService.logout(token);
 
@@ -133,7 +178,14 @@ export class UsersController {
 			.json({ message: reponse.message, data: reponse.data });
 	}
 
-	// POST /recover
+	/**
+	 * TODO: POST /recover
+	 * Récupération du mot de passe.
+	 * @param req.body {email: string}
+	 * @example
+	 * // Retours possibles :
+	 * {status: 200, message: "Mail de récupérataion envoyé" }
+	 */
 	private async recover(req: Request, res: Response) {
 		// Récupération des données de la requête
 		const { email } = req.body;
@@ -145,7 +197,17 @@ export class UsersController {
 			.json({ message: reponse.message, data: reponse.data });
 	}
 
-	// GET /:id
+	/**
+	 * GET /:id
+	 * Récupérer un utilisateur.
+	 * @param req.params.id Id de l'utilisateur
+	 * @remarks
+	 * Besoin d'être connecté, voir: {@link UsersService.verify}
+	 * @example
+	 * // Retours possibles :
+	 * {status: 404, message: "Utilisateur introuvable" }
+	 * {status: 200, message: "Utilisateur trouvé", data: new Utilisateur() }
+	 */
 	private async getUser(req: Request, res: Response) {
 		// Récupération de l'id de l'utilisateur
 		const id = +req.params.id;
@@ -158,7 +220,23 @@ export class UsersController {
 			.json({ message: reponse.message, data: reponse.data });
 	}
 
-	// PUT /:id
+	/**
+	 * PUT /:id
+	 * Mettre à jour un utilisateur.
+	 * @param req.params.id Id de l'utilisateur
+	 * @param req.body {@link UserUpdateDTO}
+	 * @remarks
+	 * Besoin d'être connecté, voir: {@link UsersService.verify}
+	 * @example
+	 * // Retours possibles :
+	 * {status: 403, message: "Permission refusée" }
+	 * {status: 400, message: "Il manque des données" }
+	 * {status: 400, message: "Données invalides", data: {email: "Email invalide"} }
+	 * {status: 404, message: "Utilisateur introuvable" }
+	 * {status: 401, message: "Mot de passe incorrect" }
+	 * {status: 500, message: "Erreur lors de la mise à jour de l'utilisateur" }
+	 * {status: 200, message: "Utilisateur mis à jour", data: new Utilisateur() }
+	 */
 	private async updateUser(req: Request, res: Response) {
 		// Récupération de l'id de l'utilisateur
 		const id = +req.params.id;
@@ -179,7 +257,18 @@ export class UsersController {
 			.json({ message: reponse.message, data: reponse.data });
 	}
 
-	// DELETE /:id
+	/**
+	 * DELETE /:id
+	 * Supprimer un utilisateur ainsi que toutes ses données.
+	 * @param req.params.id Id de l'utilisateur
+	 * @remarks
+	 * Besoin d'être connecté, voir: {@link UsersService.verify}
+	 * @example
+	 * // Retours possibles :
+	 * {status: 403, message: "Permission refusée" }
+	 * {status: 404, message: "Utilisateur introuvable" }
+	 * {status: 200, message: "Utilisateur supprimé" }
+	 */
 	private async deleteUser(req: Request, res: Response) {
 		// Récupération de l'id de l'utilisateur
 		const id = +req.params.id;

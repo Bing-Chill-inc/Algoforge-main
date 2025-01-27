@@ -3,7 +3,13 @@ import expressAsyncHandler from "express-async-handler";
 import { AlgosService } from "./algos.service";
 import { Logger } from "../../utils/logger";
 import { AlgoCreateDTO, AlgoUpdateDTO } from "./algos.dto";
-import { Res } from "../../types/response.entity";
+import {
+	BadRequestRes,
+	CreatedRes,
+	NotFoundRes,
+	OkRes,
+	Res,
+} from "../../types/response.entity";
 import { AuthService } from "../auth/auth.service";
 import { Utilisateur } from "../../db/schemas/Utilisateur.schema";
 import { authMiddleware } from "../../middlewares/auth.middleware";
@@ -66,10 +72,10 @@ export class AlgosController {
 		if (!algos || algos.length === 0) {
 			return res
 				.status(404)
-				.json(new Res(404, "Aucun algorithme trouvé"));
+				.json(new NotFoundRes("Aucun algorithme trouvé"));
 		}
 
-		return res.status(200).json(new Res(200, "Algorithmes trouvés", algos));
+		return res.status(200).json(new OkRes("Algorithmes trouvés", algos));
 	}
 
 	// GET /:id
@@ -81,10 +87,12 @@ export class AlgosController {
 		const algo = await this.usersService.getAlgo(+id, user.id);
 
 		if (!algo) {
-			return res.status(404).json(new Res(404, "Algorithme non trouvé"));
+			return res
+				.status(404)
+				.json(new NotFoundRes("Algorithme non trouvé"));
 		}
 
-		return res.status(200).json(new Res(200, "Algorithme trouvé", algo));
+		return res.status(200).json(new OkRes("Algorithme trouvé", algo));
 	}
 
 	// POST /
@@ -92,7 +100,9 @@ export class AlgosController {
 		// Récupération des données de la requête
 		const { ownerId, nom, sourceCode } = req.body;
 		if (!ownerId || !nom || !sourceCode) {
-			return res.status(400).json(new Res(400, "Données manquantes"));
+			return res
+				.status(400)
+				.json(new BadRequestRes("Données manquantes"));
 		}
 
 		const data = new AlgoCreateDTO();
@@ -106,7 +116,7 @@ export class AlgosController {
 			return res.status(result.statut).json(result);
 		}
 
-		return res.status(201).json(new Res(201, "Algorithme créé", result));
+		return res.status(201).json(new CreatedRes("Algorithme créé", result));
 	}
 
 	// PUT /:id
@@ -115,7 +125,9 @@ export class AlgosController {
 		const { id } = req.params;
 		const { nom, permsAlgorithme, sourceCode } = req.body;
 		if (!id || !nom || !permsAlgorithme || !sourceCode) {
-			return res.status(400).json(new Res(400, "Données manquantes"));
+			return res
+				.status(BadRequestRes.statut)
+				.json(new BadRequestRes("Données manquantes"));
 		}
 
 		const data = new AlgoUpdateDTO();
@@ -130,12 +142,14 @@ export class AlgosController {
 		const updatedAlgo = await this.usersService.updateAlgo(data);
 
 		if (!updatedAlgo) {
-			return res.status(404).json(new Res(404, "Algorithme non trouvé"));
+			return res
+				.status(404)
+				.json(new NotFoundRes("Algorithme non trouvé"));
 		}
 
 		return res
-			.status(200)
-			.json(new Res(200, "Algorithme mis à jour", updatedAlgo));
+			.status(OkRes.statut)
+			.json(new OkRes("Algorithme mis à jour", updatedAlgo));
 	}
 
 	// DELETE /:id
@@ -149,13 +163,15 @@ export class AlgosController {
 		);
 
 		if (!result) {
-			return res.status(404).json(new Res(404, "Algorithme non trouvé"));
+			return res
+				.status(NotFoundRes.statut)
+				.json(new NotFoundRes("Algorithme non trouvé"));
 		} else if (result instanceof Res) {
 			return res.status(result.statut).json(result);
 		}
 
 		return res
-			.status(200)
-			.json(new Res(200, "Algorithme supprimé", result));
+			.status(OkRes.statut)
+			.json(new OkRes("Algorithme supprimé", result));
 	}
 }
