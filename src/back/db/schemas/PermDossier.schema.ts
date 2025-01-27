@@ -10,14 +10,14 @@ import { Dossier } from "./Dossier.schema";
  * @hideconstructor
  * @category Database
  */
-@Entity()
+@Entity({ name: "permdossier" })
 export class PermDossier {
 	/**
 	 * Identifiant de l'utilisateur.
 	 * @public
 	 * @type {number}
 	 */
-	@PrimaryColumn({ type: "int", name: "idUtilisateur" })
+	@PrimaryColumn({ type: "int", name: "idutilisateur" })
 	idUtilisateur: number;
 
 	/**
@@ -25,7 +25,7 @@ export class PermDossier {
 	 * @public
 	 * @type {number}
 	 */
-	@PrimaryColumn({ type: "int", name: "idDossier" })
+	@PrimaryColumn({ type: "int", name: "iddossier" })
 	idDossier: number;
 
 	/**
@@ -44,7 +44,7 @@ export class PermDossier {
 	 * @see {@link Utilisateur}
 	 */
 	@ManyToOne(() => Utilisateur, (utilisateur) => utilisateur.permDossiers)
-	@JoinColumn({ name: "idUtilisateur" })
+	@JoinColumn({ name: "idutilisateur" })
 	utilisateur: Relation<Utilisateur>;
 
 	/**
@@ -54,6 +54,6 @@ export class PermDossier {
 	 * @see {@link Dossier}
 	 */
 	@ManyToOne(() => Dossier, (dossier) => dossier.permDossiers)
-	@JoinColumn({ name: "idDossier" })
+	@JoinColumn({ name: "iddossier" })
 	dossier: Relation<Dossier>;
 }
