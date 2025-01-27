@@ -1,6 +1,7 @@
 CREATE TABLE IF NOT EXISTS utilisateur (
     id SERIAL PRIMARY KEY,
     adressemail VARCHAR(255) NOT NULL,
+    pseudo VARCHAR(255) NOT NULL,
     mdphash VARCHAR(255) NOT NULL,
     dateinscription BIGINT NOT NULL,
     theme INT NOT NULL DEFAULT 0,
