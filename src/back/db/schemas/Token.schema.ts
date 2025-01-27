@@ -10,7 +10,7 @@ import { Utilisateur } from "./Utilisateur.schema";
  * @hideconstructor
  * @category Database
  */
-@Entity()
+@Entity({ name: "token" })
 export class Token {
 	/**
 	 * Valeur du token. Identifiant unique.
@@ -26,7 +26,7 @@ export class Token {
 	 * @public
 	 * @type {number}
 	 */
-	@Column({ type: "bigint" })
+	@Column({ type: "bigint", name: "datecreation" })
 	dateCreation: number;
 
 	/**
@@ -35,7 +35,7 @@ export class Token {
 	 * @public
 	 * @type {number}
 	 */
-	@Column({ type: "bigint" })
+	@Column({ type: "bigint", name: "dateexpiration" })
 	dateExpiration: number;
 
 	/**

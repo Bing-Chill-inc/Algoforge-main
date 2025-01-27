@@ -16,7 +16,7 @@ import { PermAlgorithme } from "./PermAlgorithme.schema";
  * @hideconstructor
  * @category Database
  */
-@Entity()
+@Entity({ name: "algorithme" })
 export class Algorithme {
 	/**
 	 * Identifiant de l'algorithme.
@@ -41,7 +41,7 @@ export class Algorithme {
 	 * @public
 	 * @type {number}
 	 */
-	@Column({ type: "bigint" })
+	@Column({ type: "bigint", name: "datecreation" })
 	dateCreation: number;
 
 	/**
@@ -50,7 +50,7 @@ export class Algorithme {
 	 * @public
 	 * @type {number}
 	 */
-	@Column({ type: "bigint" })
+	@Column({ type: "bigint", name: "datemodification" })
 	dateModification: number;
 
 	/**
