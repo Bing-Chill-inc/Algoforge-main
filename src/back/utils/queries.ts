@@ -70,7 +70,7 @@ export async function hasRightsUserOnDir(userId: number, dirId: number) {
 		if (!hasRightsOnDir) {
 			const parentDir = permsDir[0].dossier.idParent;
 			if (parentDir) {
-				dirId = parentDir.id;
+				dirId = parentDir;
 			}
 		}
 		// Sinon, on sort de la boucle.
