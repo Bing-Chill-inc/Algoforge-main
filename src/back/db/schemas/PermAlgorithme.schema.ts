@@ -10,14 +10,14 @@ import { Algorithme } from "./Algorithme.schema";
  * @hideconstructor
  * @category Database
  */
-@Entity()
+@Entity({ name: "permalgorithme" })
 export class PermAlgorithme {
 	/**
 	 * Identifiant de l'utilisateur.
 	 * @public
 	 * @type {number}
 	 */
-	@PrimaryColumn({ type: "int", name: "idUtilisateur" })
+	@PrimaryColumn({ type: "int", name: "idutilisateur" })
 	idUtilisateur: number;
 
 	/**
@@ -25,7 +25,7 @@ export class PermAlgorithme {
 	 * @public
 	 * @type {number}
 	 */
-	@PrimaryColumn({ type: "int", name: "idAlgorithme" })
+	@PrimaryColumn({ type: "int", name: "idalgorithme" })
 	idAlgorithme: number;
 
 	/**
@@ -44,7 +44,7 @@ export class PermAlgorithme {
 	 * @see {@link Utilisateur}
 	 */
 	@ManyToOne(() => Utilisateur, (utilisateur) => utilisateur.permAlgorithmes)
-	@JoinColumn({ name: "idUtilisateur" })
+	@JoinColumn({ name: "idutilisateur" })
 	utilisateur: Relation<Utilisateur>;
 
 	/**
@@ -54,6 +54,6 @@ export class PermAlgorithme {
 	 * @see {@link Algorithme}
 	 */
 	@ManyToOne(() => Algorithme, (algorithme) => algorithme.permAlgorithmes)
-	@JoinColumn({ name: "idAlgorithme" })
+	@JoinColumn({ name: "idalgorithme" })
 	algorithme: Relation<Algorithme>;
 }

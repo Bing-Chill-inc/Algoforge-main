@@ -20,7 +20,7 @@ describe("Users: delete user", () => {
 		payload2.password = UserSet.test2.password;
 		for (const payload of [payload1, payload2]) {
 			let response = await request.post("/api/users/login").send(payload);
-			tokensUser.push(response.body.data.tokens[0].token);
+			tokensUser.push(response.headers.authorization);
 		}
 		Logger.log("Logged in !", "test: users");
 	});

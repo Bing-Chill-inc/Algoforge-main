@@ -1,5 +1,7 @@
 import { Request, Response } from "express";
 import { UsersService } from "../users/users.service";
+import { Utilisateur } from "../../db/schemas/Utilisateur.schema";
+import { Token } from "../../db/schemas/Token.schema";
 
 /**
  * Service pour l'authentification de l'utilisateur.
@@ -29,7 +31,12 @@ export class AuthService {
 		}
 
 		// Ajout de l'utilisateur dans les informations de la requête.
-		res.locals.user = verify.data.utilisateur;
+		const token = verify.data as Token;
+		const user = token.utilisateur as Utilisateur;
+		res.locals.user = user;
+		// Ajout du token dans les headers de la réponse.
+		res.header("Authorization", token.token);
+
 		return true;
 	}
 
