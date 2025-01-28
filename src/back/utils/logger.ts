@@ -2,10 +2,12 @@ import dayjs from "dayjs";
 import clic from "cli-color";
 import readline from "readline";
 import fs from "fs";
+import { resolve } from "path";
 
 function initLogFile(logsFolderPath: string) {
-	if (!fs.existsSync(logsFolderPath)) {
-		fs.mkdirSync(logsFolderPath);
+	const resolvedLogsFolderPath = resolve(logsFolderPath);
+	if (!fs.existsSync(resolvedLogsFolderPath)) {
+		fs.mkdirSync(resolvedLogsFolderPath);
 	}
 	return `${logsFolderPath}${dayjs().format("YYYY-MM-DD")}.log`;
 }
