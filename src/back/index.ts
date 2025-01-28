@@ -31,7 +31,11 @@ app.get(iconHandler.route, iconHandler.callback);
 
 // Préparation du bundle de l'éditeur - SmeltJS.
 const SmeltJS = async () => {
-	console.log(await $`bun i`.cwd(`../front-editeur`).text());
+	Logger.debug(
+		await $`bun i`.cwd(`../front-editeur`).text(),
+		"main: SmeltJS",
+		10,
+	);
 
 	// Si le contenu du dossier ../front-editeur change, il faut relancer la commande.
 
@@ -39,14 +43,20 @@ const SmeltJS = async () => {
 		path.join(__dirname, "/../front-editeur/src"),
 		{ recursive: true },
 		async () => {
-			console.log(await $`bun SmeltJS.ts`.cwd(`../front-editeur`).text());
+			Logger.debug(
+				await $`bun SmeltJS.ts`.cwd(`../front-editeur`).text(),
+				"main: SmeltJS",
+				10,
+			);
 		},
 	);
 
-	console.log(await $`bun SmeltJS.ts`.cwd(`../front-editeur`).text());
+	Logger.debug(
+		await $`bun SmeltJS.ts`.cwd(`../front-editeur`).text(),
+		"main: SmeltJS",
+		10,
+	);
 };
-
-SmeltJS();
 
 app.use("/edit", express.static(path.join(__dirname, "/../front-editeur/out")));
 app.use("/cloud", express.static(path.join(__dirname, "/../front-cloud/dist")));
@@ -117,8 +127,9 @@ Promise.all([dbConnexion])
 		app.use(errorMiddleware);
 
 		// Start server
-		app.listen(port, () => {
+		app.listen(port, async () => {
 			Logger.log(`Server is running on http://localhost:${port}`, "main");
+			await SmeltJS();
 
 			// On indique que l'application est initialisée.
 			// Cela permet de lancer les tests après que l'application soit prête.
