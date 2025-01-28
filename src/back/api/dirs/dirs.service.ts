@@ -1,17 +1,9 @@
-import {
-	existsSync,
-	mkdirSync,
-	readFileSync,
-	unlinkSync,
-	writeFileSync,
-} from "fs";
 import { Dossier } from "../../db/schemas/Dossier.schema";
 import { AppDataSource } from "../../db/data-source";
 import { PermDossier } from "../../db/schemas/PermDossier.schema";
 import { Droits } from "../../types/droits.enum";
 import { DirCreateDTO, DirUpdateDTO } from "./dirs.dto";
 import { Res } from "../../types/response.entity";
-import path from "path";
 import { Logger } from "../../utils/logger";
 
 export class DirsService {
@@ -66,15 +58,15 @@ export class DirsService {
 		const dossierRepository = AppDataSource.manager.getRepository(Dossier);
 		const permDirRepository =
 			AppDataSource.manager.getRepository(PermDossier);
-        
-        // Création du dossier
-        const newDir = new Dossier();
-        newDir.nom = dir.nom;
-        newDir.idParent = dir.idParent;
+
+		// Création du dossier
+		const newDir = new Dossier();
+		newDir.nom = dir.nom;
+		newDir.idParent = dir.idParent;
 		newDir.dateCreation = new Date().getTime();
 		newDir.dateModification = new Date().getTime();
 		// Enregistrement du dossier en base de données.
-        const savedDir = await dossierRepository.save(newDir);
+		const savedDir = await dossierRepository.save(newDir);
 
 		// Création du droit d'ownership.
 		const newPerm = new PermDossier();
@@ -86,5 +78,15 @@ export class DirsService {
 		savedDir.permDossiers = [savedPerm];
 
 		return savedDir;
+	}
+
+	async updateDir(id: number, nom: any) {
+		throw new Error("Method not implemented.");
+		return new Res(200, "Dossier mis à jour");
+	}
+
+	async deleteDir(dirId: number, userId: any) {
+		throw new Error("Method not implemented.");
+		return new Res(200, "Dossier supprimé");
 	}
 }

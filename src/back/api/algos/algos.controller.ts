@@ -92,7 +92,17 @@ export class AlgosController {
 			.json(new OkRes("Algorithmes trouvés", algosPerms));
 	}
 
-	// GET /:id
+	/**
+	 * GET /:id
+	 * Récupérer un algorithme.
+	 * @param req.params.id Id de l'algorithme
+	 * @remarks
+	 * Besoin d'être connecté, voir: {@link UsersService.verify}
+	 * @example
+	 * // Retours possibles :
+	 * {status: 404, message: "Algorithme non trouvé" }
+	 * {status: 200, message: "Algorithme trouvé", data: new Algo() }
+	 */
 	private async getAlgo(req: Request, res: Response) {
 		// Récupération des données de la requête
 		const { id } = req.params;
@@ -106,16 +116,30 @@ export class AlgosController {
 				.json(new NotFoundRes("Algorithme non trouvé"));
 		}
 
-		return res.status(200).json(new OkRes("Algorithme trouvé", algo));
+		return res
+			.status(OkRes.statut)
+			.json(new OkRes("Algorithme trouvé", algo));
 	}
 
-	// POST / // TODO: dossier
+	/**
+	 * POST /
+	 * Créer un algorithme.
+	 * @param req.body {@link AlgoCreateDTO}
+	 * @remarks
+	 * Besoin d'être connecté, voir: {@link UsersService.verify}
+	 * @example
+	 * // Retours possibles :
+	 * {status: 400, message: "Données manquantes" }
+	 * {status: 400, message: "Algorithme invalide" }
+	 * {status: 403, message: "Vous n'avez pas les droits pour créer cet algorithme" }
+	 * {status: 201, message: "Algorithme créé", data: new Algo() }
+	 */
 	private async createAlgo(req: Request, res: Response) {
 		// Récupération des données de la requête
 		const { ownerId, nom, sourceCode } = req.body;
 		if (!ownerId || !nom || !sourceCode) {
 			return res
-				.status(400)
+				.status(BadRequestRes.statut)
 				.json(new BadRequestRes("Données manquantes"));
 		}
 
@@ -130,10 +154,26 @@ export class AlgosController {
 			return res.status(result.statut).json(result);
 		}
 
-		return res.status(201).json(new CreatedRes("Algorithme créé", result));
+		return res
+			.status(CreatedRes.statut)
+			.json(new CreatedRes("Algorithme créé", result));
 	}
 
-	// PUT /:id // TODO: dossier
+	/**
+	 * PUT /:id
+	 * Mettre à jour un algorithme.
+	 * @param req.params.id Id de l'algorithme
+	 * @param req.body {@link AlgoUpdateDTO}
+	 * @remarks
+	 * Besoin d'être connecté, voir: {@link UsersService.verify}
+	 * @example
+	 * // Retours possibles :
+	 * {status: 400, message: "Données manquantes" }
+	 * {status: 404, message: "Algorithme non trouvé" }
+	 * {status: 400, message: "Algorithme invalide" }
+	 * {status: 403, message: "Vous n'avez pas les droits pour modifier cet algorithme" }
+	 * {status: 200, message: "Algorithme mis à jour", data: new Algo() }
+	 */
 	private async updateAlgo(req: Request, res: Response) {
 		// Récupération des données de la requête
 		const { id } = req.params;
@@ -157,7 +197,7 @@ export class AlgosController {
 
 		if (!updatedAlgo) {
 			return res
-				.status(404)
+				.status(NotFoundRes.statut)
 				.json(new NotFoundRes("Algorithme non trouvé"));
 		}
 
@@ -166,7 +206,19 @@ export class AlgosController {
 			.json(new OkRes("Algorithme mis à jour", updatedAlgo));
 	}
 
-	// DELETE /:id
+	/**
+	 * DELETE /:id
+	 * Supprimer un algorithme.
+	 * @param req.params.id Id de l'algorithme
+	 * @remarks
+	 * Besoin d'être connecté, voir: {@link UsersService.verify}
+	 * @example
+	 * // Retours possibles :
+	 * {status: 404, message: "Algorithme non trouvé" }
+	 * {status: 403, message: "Permission refusée" }
+	 * {status: 500, message: "Erreur lors de la suppression de l'algorithme" }
+	 * {status: 200, message: "Algorithme supprimé" }
+	 */
 	private async deleteAlgo(req: Request, res: Response) {
 		// Récupération des données de la requête
 		const { id } = req.params;
@@ -180,12 +232,8 @@ export class AlgosController {
 			return res
 				.status(NotFoundRes.statut)
 				.json(new NotFoundRes("Algorithme non trouvé"));
-		} else if (result instanceof Res) {
-			return res.status(result.statut).json(result);
 		}
 
-		return res
-			.status(OkRes.statut)
-			.json(new OkRes("Algorithme supprimé", result));
+		return res.status(result.statut).json(result);
 	}
 }
