@@ -16,8 +16,7 @@ import {
 	ForbiddenRes,
 	InternalServerErrorRes,
 	NotFoundRes,
-	OkRes,
-	Res,
+	OkRes
 } from "../../types/response.entity";
 import path from "path";
 import { Logger } from "../../utils/logger";
@@ -82,6 +81,7 @@ export class AlgosService {
 	 * @param id Id de l'algorithme.
 	 * @returns L'algorithme.
 	 */
+	// TODO : Vérifier les droits de l'utilisateur (query)
 	async getAlgo(id: number, requestedUserId: number) {
 		const algoRepository = AppDataSource.manager.getRepository(Algorithme);
 
@@ -119,7 +119,7 @@ export class AlgosService {
 	 * @param algo Données de l'algorithme à créer.
 	 * @returns L'algorithme créé.
 	 */
-	// TODO :
+	// TODO : Vérifier les droits de l'utilisateur (query)
 	async createAlgo(algo: AlgoCreateDTO) {
 		// Vérification des droits de l'utilisateur.
 		if (algo.requestedUserId !== algo.ownerId) {
@@ -153,6 +153,7 @@ export class AlgosService {
 		const savedPerm = await permAlgoRepository.save(newPerm);
 		savedAlgo.permAlgorithmes = [savedPerm];
 
+		// TODO : Ranger l'algorithme dans le dossier de l'owner
 		// Enregistrement de l'algorithme dans le système de fichiers.
 		this.writeAlgoToDisk(savedAlgo.id, algo.sourceCode);
 
@@ -165,36 +166,15 @@ export class AlgosService {
 	 * @returns L'algorithme mis à jour.
 	 */
 	// TODO: mettre à jour les permissions de l'algorithme.
+	// TODO : Si l'utilisateur renvoie le même algo, ne rien faire
+	// TODO : Modifier l'id du dossier
 	async updateAlgo(algo: AlgoUpdateDTO) {
 		// Récupération de l'algorithme.
 		const algoToUpdate = await this.getAlgo(algo.id, algo.requestedUserId);
 		if (!algoToUpdate) return null;
 
-		// Vérification des droits de l'utilisateur.
-		const ownerAlgo = await getOwnerOfAlgo(algoToUpdate.id);
-		if (!ownerAlgo) return null;
-		const ownerPerm = new PermAlgorithme();
-		ownerPerm.idUtilisateur = ownerAlgo.id;
-		ownerPerm.idAlgorithme = algoToUpdate.id;
-		ownerPerm.droits = Droits.Owner;
-		if (
-			!algoToUpdate.permAlgorithmes ||
-			algoToUpdate.permAlgorithmes.length === 0
-		) {
-			algoToUpdate.permAlgorithmes = [ownerPerm];
-		} else {
-			algoToUpdate.permAlgorithmes.push(ownerPerm);
-		}
+		// TODO : Vérification des droits de l'utilisateur (query)
 
-		for (const perm of algoToUpdate.permAlgorithmes) {
-			if (
-				perm.idUtilisateur === algo.requestedUserId &&
-				(perm.droits === Droits.Owner ||
-					perm.droits === Droits.ReadWrite)
-			) {
-				return new ForbiddenRes(Responses.Algo.Forbidden_update);
-			}
-		}
 
 		// Validation de l'algorithme.
 		const validationResult = AlgoValidator.validateAlgo(algo.sourceCode);
@@ -208,6 +188,7 @@ export class AlgosService {
 		// Mise à jour de l'algorithme.
 		algoToUpdate.nom = algo.nom;
 		algoToUpdate.dateModification = new Date().getTime();
+
 		// Enregistrement de l'algorithme.
 		const savedAlgo = await algoRepository.save(algoToUpdate);
 
@@ -223,6 +204,7 @@ export class AlgosService {
 	 * @param requestedUserId Id de l'utilisateur qui demande la suppression.
 	 * @returns L'algorithme supprimé.
 	 */
+	// TODO : Vérifier les droits de l'utilisateur (query)
 	async deleteAlgo(id: number, requestedUserId: number) {
 		const algoRepository = AppDataSource.manager.getRepository(Algorithme);
 

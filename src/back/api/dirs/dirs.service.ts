@@ -3,8 +3,11 @@ import { AppDataSource } from "../../db/data-source";
 import { PermDossier } from "../../db/schemas/PermDossier.schema";
 import { Droits } from "../../types/droits.enum";
 import { DirCreateDTO, DirUpdateDTO } from "./dirs.dto";
-import { Res } from "../../types/response.entity";
-import { Logger } from "../../utils/logger";
+import {
+	ForbiddenRes,
+	OkRes,
+} from "../../types/response.entity";
+import { Responses } from "../../constants/responses.const";
 
 export class DirsService {
 	/**
@@ -42,24 +45,54 @@ export class DirsService {
 	}
 
 	/**
+	 * Récupère un dossier.
+	 * @param id Id du dossier.
+	 * @returns Le dossier.
+	 */
+	// TODO : Vérifier les droits de l'utilisateur (query)
+	async getDir(id: number, requestedUserId: number) {
+		const dossierRepository = AppDataSource.manager.getRepository(Dossier);
+		const permDirRepository =
+			AppDataSource.manager.getRepository(PermDossier);
+
+		// Récupération du dossier.
+		const dir = await dossierRepository.findOne({
+			where: { id: id },
+			relations: { permDossiers: true },
+		});
+		if (!dir) return null;
+
+		// Récupération des permissions du dossier.
+		const perms = await permDirRepository.find({
+			where: {
+				idDossier: id,
+				idUtilisateur: requestedUserId,
+			},
+		});
+
+		// Vérification des droits de l'utilisateur.
+		if (perms.length === 0) return null;
+
+		return dir;
+	}
+
+	/**
 	 * Crée un dossier.
 	 * @param dir Données de création du dossier.
 	 * @returns Le dossier créé.
 	 */
+	// TODO : Vérifier les droits de l'utilisateur (query)
 	async createDir(dir: DirCreateDTO) {
-		// Vérification des droits de l'utilisateur
+		// Vérification des droits de l'utilisateur.
 		if (dir.requestedUserId !== dir.ownerId) {
-			return new Res(
-				403,
-				"Vous n'avez pas les droits pour créer ce dossier.",
-			);
+			return new ForbiddenRes(Responses.Dir.Forbidden_create)
 		}
 
 		const dossierRepository = AppDataSource.manager.getRepository(Dossier);
 		const permDirRepository =
 			AppDataSource.manager.getRepository(PermDossier);
 
-		// Création du dossier
+		// Création du dossier.
 		const newDir = new Dossier();
 		newDir.nom = dir.nom;
 		newDir.idParent = dir.idParent;
@@ -80,13 +113,69 @@ export class DirsService {
 		return savedDir;
 	}
 
-	async updateDir(id: number, nom: any) {
-		throw new Error("Method not implemented.");
-		return new Res(200, "Dossier mis à jour");
+	/**
+	 * Met à jour un dossier.
+	 * @param dir Données de mise à jour du dossier.
+	 * @returns Le dossier mis à jour.
+	 */
+	// TODO : Vérifier les droits de l'utilisateur (query)
+	// TODO : mettre à jour les permissions du dossier.
+	async updateDir(dir: DirUpdateDTO) {
+		// Récupération du dossier.
+		const dirToUpdate = await this.getDir(dir.id, dir.requestedUserId);
+		if (!dirToUpdate) return null;
+
+		// Vérification des droits de l'utilisateur.
+
+
+		const dossierRepository = AppDataSource.manager.getRepository(Dossier);
+
+		// Mise à jour du dossier.
+		dirToUpdate.nom = dir.nom;
+		dirToUpdate.dateModification = new Date().getTime();
+		if (dir.idParent) dirToUpdate.idParent = dir.idParent;
+
+		const savedDir = await dossierRepository.save(dirToUpdate);
+
+		return savedDir;
 	}
 
-	async deleteDir(dirId: number, userId: any) {
-		throw new Error("Method not implemented.");
-		return new Res(200, "Dossier supprimé");
+	/**
+	 * Supprime un dossier. Seul le propriétaire du dossier peut le supprimer.
+	 * @param dirId Id du dossier à supprimer.
+	 * @param requestedUserId Id de l'utilisateur qui demande la suppression.
+	 * @returns Le dossier supprimé.
+	 */
+	// TODO : Vérifier les droits de l'utilisateur (query)
+	async deleteDir(dirId: number, requestedUserId: number) {
+		const dossierRepository = AppDataSource.manager.getRepository(Dossier);
+
+		// Récupération du dossier
+		const dir = await dossierRepository.findOne({
+			where: { id: dirId },
+			relations: { permDossiers: true },
+		});
+		if (!dir) return null;
+
+		// Vérification des droits de l'utilisateur.
+		
+		// Supression des permissions du dossier.
+		dir.permDossiers.forEach(async (perm) => {
+			await AppDataSource.manager
+			.getRepository(PermDossier)
+			.remove(perm);
+		});
+		delete dir.permDossiers;
+
+		// Suppression de tous les algos du dossier.
+		// TODO : Récupérer les algos du dossier
+
+		// Suppression de tous les sous-dossiers du dossier.
+		// TODO : Récupérer les sous-dossiers du dossier
+
+		// Suppression du dossier.
+		const deletedDir = await dossierRepository.remove(dir);
+
+		return new OkRes(Responses.Dir.Success.Deleted, deletedDir);
 	}
 }

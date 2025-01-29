@@ -3,10 +3,17 @@ import expressAsyncHandler from "express-async-handler";
 import { DirsService } from "./dirs.service";
 import { Logger } from "../../utils/logger";
 import { DirCreateDTO, DirUpdateDTO } from "./dirs.dto";
-import { Res } from "../../types/response.entity";
+import {
+    BadRequestRes,
+    CreatedRes,
+    NotFoundRes,
+    OkRes,
+    Res,
+} from "../../types/response.entity";
 import { AuthService } from "../auth/auth.service";
-import { Utilisateur } from "../../db/schemas/Utilisateur.schema";
 import { getOwnerOfDir } from "../../utils/queries";
+import { Utilisateur } from "../../db/schemas/Utilisateur.schema";
+import { Responses } from "../../constants/responses.const";
 
 /**
  * Contrôleur pour les dossiers.
@@ -20,146 +27,160 @@ import { getOwnerOfDir } from "../../utils/queries";
  * @category Dossiers
  */
 export class DirsController {
-	public router: Router;
-	private authService: AuthService;
-	private dirsService: DirsService;
+    public router: Router;
+    private authService: AuthService;
+    private dirsService: DirsService;
 
-	constructor() {
-		Logger.debug("Initializing...", "DirsController");
-		this.router = Router();
-		this.authService = new AuthService();
-		this.dirsService = new DirsService();
-		this.init();
-		Logger.debug("Done !", "DirsController");
-	}
+    constructor() {
+        Logger.debug("Initializing...", "DirsController");
+        this.router = Router();
+        this.authService = new AuthService();
+        this.dirsService = new DirsService();
+        this.init();
+        Logger.debug("Done !", "DirsController");
+    }
 
-	private init() {
-		this.router.get(
-			"/byUserId/:id",
-			expressAsyncHandler(this.getDirs.bind(this)),
-		);
+    private init() {
+        this.router.get(
+            "/byUserId/:id",
+            expressAsyncHandler(this.getDirs.bind(this)),
+        );
 
-		this.router.post("/", expressAsyncHandler(this.createDir.bind(this)));
+        this.router.post("/", expressAsyncHandler(this.createDir.bind(this)));
 
-		this.router.put("/:id", expressAsyncHandler(this.updateDir.bind(this)));
+        this.router.put("/:id", expressAsyncHandler(this.updateDir.bind(this)));
 
-		this.router.delete(
-			"/:id",
-			expressAsyncHandler(this.deleteDir.bind(this)),
-		);
-	}
+        this.router.delete(
+            "/:id",
+            expressAsyncHandler(this.deleteDir.bind(this)),
+        );
+    }
 
-	// GET /
-	private async getDirs(req: Request, res: Response) {
-		// Vérification des droits de l'utilisateur
-		const hasRights = await this.authService.verifyUser(req, res);
-		if (!hasRights) return res;
+    // GET /byUserId/:id
+    private async getDirs(req: Request, res: Response) {
+        // Vérification des droits de l'utilisateur
+        const hasRights = await this.authService.verifyUser(req, res);
+        if (!hasRights) return res;
 
-		// Récupérations des données de la requête
-		let { id, idParent } = req.params;
+        // Récupérations des données de la requête
+        let { id, idParent } = req.params;
 
-		// Si idParent est null, on se situe à la racine, sinon on se situe dans un dossier
-		if (idParent) {
-			// Récupérer l'owner du dossier
-			id = String((await getOwnerOfDir(+idParent)).id);
+        // Si idParent est null, on se situe à la racine, sinon on se situe dans un dossier
+        if (idParent) {
+            // Récupérer l'owner du dossier
+            id = String((await getOwnerOfDir(+idParent)).id);
 
-			if (!id) {
-				return res.status(404).json(new Res(404, "Dossier parent non trouvé"));
-			}
-		}
+            if (!id) {
+                return res
+                    .status(NotFoundRes.statut)
+                    .json(new NotFoundRes(Responses.Dir.Parent_Not_found));
+            }
+        }
 
-		const dirsPerms = await this.dirsService.getDirsPermsOfUser(+id, +idParent);
+        const dirsPerms = await this.dirsService.getDirsPermsOfUser(+id, +idParent);
 
-		if (!dirsPerms || dirsPerms.length === 0) {
-			return res.status(404).json(new Res(404, "Aucun dossier trouvé"));
-		}
+        if (!dirsPerms || dirsPerms.length === 0) {
+            return res
+                .status(NotFoundRes.statut)
+                .json(new NotFoundRes(Responses.Dir.By_User.Not_found));
+        }
 
-		return res.status(200).json(new Res(200, "Dossiers trouvés", dirsPerms));
-	}
+        return res
+            .status(OkRes.statut)
+            .json(new OkRes(Responses.Dir.By_User.Found, dirsPerms));
+    }
 
-	// POST /
-	private async createDir(req: Request, res: Response) {
-		// Vérification des droits de l'utilisateur
-		const hasRights = await this.authService.verifyUser(req, res);
-		if (!hasRights) return res;
+    // POST /
+    private async createDir(req: Request, res: Response) {
+        // Vérification des droits de l'utilisateur
+        const hasRights = await this.authService.verifyUser(req, res);
+        if (!hasRights) return res;
 
-		// Récupération des données de la requête
-		const { nom, ownerId, idParent } = req.body;
-		if (!nom || !ownerId) {
-			return res.status(400).json(new Res(400, "Données manquantes"));
-		}
+        // Récupération des données de la requête
+        const { nom, ownerId, idParent } = req.body;
+        if (!nom || !ownerId) {
+            return res
+                .status(BadRequestRes.statut)
+                .json(new BadRequestRes(Responses.General.Missing_data));
+        }
 
-		console.log("idParent", idParent);
+        const data = new DirCreateDTO();
+        data.nom = nom;
+        data.ownerId = ownerId;
+        data.idParent = idParent; // TODO : vérifier si on a bien un null et pas un undefined
+        data.requestedUserId = (res.locals as Utilisateur).id;
 
-		const data = new DirCreateDTO();
-		data.nom = nom;
-		data.ownerId = ownerId;
-		data.idParent = idParent; // TODO : vérifier si on a bien un null et pas un undefined
-		data.requestedUserId = (res.locals as Utilisateur).id;
+        const result = await this.dirsService.createDir(data);
+        if (result instanceof Res) {
+            return res.status(result.statut).json(result);
+        }
 
-		const result = await this.dirsService.createDir(data);
-		if (result instanceof Res) {
-			return res.status(result.statut).json(result);
-		}
+        return res
+            .status(CreatedRes.statut)
+            .json(new CreatedRes(Responses.Dir.Success.Created, result));
+    }
 
-		return res.status(201).json(new Res(201, "Dossier créé", result));
-	}
+    // PUT /:id
+    private async updateDir(req: Request, res: Response) {
+        // Vérification des droits de l'utilisateur
+        const hasRights = await this.authService.verifyUser(req, res);
+        if (!hasRights) return res;
 
-	// PUT /:id
-	private async updateDir(req: Request, res: Response) {
-		// Vérification des droits de l'utilisateur
-		const hasRights = await this.authService.verifyUser(req, res);
-		if (!hasRights) return res;
+        // Récupération des données de la requête
+        const { id } = req.params;
+        const { nom, permsDossier, idParent } = req.body;
+        if (!id || !nom || !permsDossier) {
+            return res
+                .status(BadRequestRes.statut)
+                .json(new BadRequestRes(Responses.General.Missing_data));
+        }
 
-		// Récupération des données de la requête
-		const { id } = req.params;
-		const { nom, permsDossier, idParent } = req.body;
-		if (!id || !nom || !permsDossier) {
-			return res.status(400).json(new Res(400, "Données manquantes"));
-		}
+        const data = new DirUpdateDTO();
+        data.id = +id;
+        data.nom = nom;
+        data.idParent = idParent; // TODO : vérifier si on a bien un null et pas un undefined
+        data.requestedUserId = (res.locals as Utilisateur).id;
+        if (Array.isArray(permsDossier) && permsDossier?.length > 0) {
+            data.permsDossier = permsDossier;
+        }
 
-		console.log("idParent", idParent);
+        const updatedDir = await this.dirsService.updateDir(data);
 
-		const data = new DirUpdateDTO();
-		data.id = +id;
-		data.nom = nom;
-		data.idParent = idParent; // TODO : vérifier si on a bien un null et pas un undefined
-		data.requestedUserId = (res.locals as Utilisateur).id;
-		if (Array.isArray(permsDossier) && permsDossier?.length > 0) {
-			data.permsDossier = permsDossier;
-		}
+        if (!updatedDir) {
+            return res
+                .status(NotFoundRes.statut)
+                .json(new NotFoundRes(Responses.Dir.Not_found));
+        }
 
-		const updatedDir = await this.dirsService.updateDir(+id, nom);
+        return res
+            .status(OkRes.statut)
+            .json(new OkRes(Responses.Dir.Success.Updated, updatedDir));
+    }
 
-		if (!updatedDir) {
-			return res.status(404).json(new Res(404, "Dossier non trouvé"));
-		}
+    // DELETE /:id
+    private async deleteDir(req: Request, res: Response) {
+        // Vérification des droits de l'utilisateur
+        const hasRights = await this.authService.verifyUser(req, res);
+        if (!hasRights) return res;
 
-		return res
-			.status(200)
-			.json(new Res(200, "Dossier mis à jour", updatedDir));
-	}
+        // Récupération des données de la requête
+        const { id } = req.params;
 
-	// DELETE /:id
-	private async deleteDir(req: Request, res: Response) {
-		// Vérification des droits de l'utilisateur
-		const hasRights = await this.authService.verifyUser(req, res);
-		if (!hasRights) return res;
+        const result = await this.dirsService.deleteDir(
+            +id,
+            res.locals.user.id,
+        );
 
-		// Récupération des données de la requête
-		const { id } = req.params;
+        if (!result) {
+            return res
+                .status(NotFoundRes.statut)
+                .json(new NotFoundRes(Responses.Dir.Not_found));
+        } else if (result instanceof Res) {
+            return res.status(result.statut).json(result);
+        }
 
-		const result = await this.dirsService.deleteDir(
-			+id,
-			res.locals.user.id,
-		);
-
-		if (!result) {
-			return res.status(404).json(new Res(404, "Dossier non trouvé"));
-		} else if (result instanceof Res) {
-			return res.status(result.statut).json(result);
-		}
-
-		return res.status(200).json(new Res(200, "Dossier supprimé", result));
-	}
+        return res
+            .status(OkRes.statut)
+            .json(new OkRes(Responses.Dir.Success.Deleted, result));
+    }
 }
