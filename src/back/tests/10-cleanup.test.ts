@@ -4,6 +4,7 @@ import { server, request } from "./setup";
 
 import { beforeAll, describe, expect, test } from "bun:test";
 import { UserSet } from "./user.set";
+import { Responses } from "../constants/responses.const";
 
 describe("Users: delete user", () => {
 	let tokensUser: string[] = [];
@@ -31,7 +32,10 @@ describe("Users: delete user", () => {
 			.auth("wrong", { type: "bearer" });
 		Logger.debug(JSON.stringify(response.body), "test: users", 5);
 		expect(response.status).toBe(401);
-		expect(response.body).toHaveProperty("message", "Token invalide");
+		expect(response.body).toHaveProperty(
+			"message",
+			Responses.Token.Invalid,
+		);
 	});
 
 	test("DELETE /api/users/2 -> erreur: Utilisateur introuvable.", async () => {
@@ -42,7 +46,7 @@ describe("Users: delete user", () => {
 		expect(response.status).toBe(404);
 		expect(response.body).toHaveProperty(
 			"message",
-			"Utilisateur introuvable",
+			Responses.User.Not_found,
 		);
 	});
 
@@ -52,7 +56,10 @@ describe("Users: delete user", () => {
 			.auth(tokensUser[1], { type: "bearer" });
 		Logger.debug(JSON.stringify(response.body), "test: users", 5);
 		expect(response.status).toBe(403);
-		expect(response.body).toHaveProperty("message", "Permission refusée");
+		expect(response.body).toHaveProperty(
+			"message",
+			Responses.General.Forbidden,
+		);
 	});
 
 	test("DELETE /api/users/2 -> Utilisateur supprimé.", async () => {
@@ -61,6 +68,9 @@ describe("Users: delete user", () => {
 			.auth(tokensUser[0], { type: "bearer" });
 		Logger.debug(JSON.stringify(response.body), "test: users", 5);
 		expect(response.status).toBe(200);
-		expect(response.body).toHaveProperty("message", "Utilisateur supprimé");
+		expect(response.body).toHaveProperty(
+			"message",
+			Responses.User.Success.Deleted,
+		);
 	});
 });
