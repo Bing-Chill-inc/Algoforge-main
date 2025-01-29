@@ -13,6 +13,7 @@ import {
 import { Utilisateur } from "../../db/schemas/Utilisateur.schema";
 import { getOwnerOfDir } from "../../utils/queries";
 import { authMiddleware } from "../../middlewares/auth.middleware";
+import { Responses } from "../../constants/responses.const";
 
 /**
  * Contrôleur pour les algorithmes.
@@ -83,13 +84,13 @@ export class AlgosController {
 
 		if (!algosPerms || algosPerms.length === 0) {
 			return res
-				.status(404)
-				.json(new NotFoundRes("Aucun algorithme trouvé"));
+				.status(NotFoundRes.statut)
+				.json(new NotFoundRes(Responses.Algo.By_User.Not_found));
 		}
 
 		return res
-			.status(200)
-			.json(new OkRes("Algorithmes trouvés", algosPerms));
+			.status(OkRes.statut)
+			.json(new OkRes(Responses.Algo.By_User.Found, algosPerms));
 	}
 
 	/**
@@ -112,13 +113,13 @@ export class AlgosController {
 
 		if (!algo) {
 			return res
-				.status(404)
-				.json(new NotFoundRes("Algorithme non trouvé"));
+				.status(NotFoundRes.statut)
+				.json(new NotFoundRes(Responses.Algo.Not_found));
 		}
 
 		return res
 			.status(OkRes.statut)
-			.json(new OkRes("Algorithme trouvé", algo));
+			.json(new OkRes(Responses.Algo.Success.Found, algo));
 	}
 
 	/**
@@ -140,7 +141,7 @@ export class AlgosController {
 		if (!ownerId || !nom || !sourceCode) {
 			return res
 				.status(BadRequestRes.statut)
-				.json(new BadRequestRes("Données manquantes"));
+				.json(new BadRequestRes(Responses.General.Missing_data));
 		}
 
 		const data = new AlgoCreateDTO();
@@ -156,7 +157,7 @@ export class AlgosController {
 
 		return res
 			.status(CreatedRes.statut)
-			.json(new CreatedRes("Algorithme créé", result));
+			.json(new CreatedRes(Responses.Algo.Success.Created, result));
 	}
 
 	/**
@@ -181,7 +182,7 @@ export class AlgosController {
 		if (!id || !nom || !permsAlgorithme || !sourceCode) {
 			return res
 				.status(BadRequestRes.statut)
-				.json(new BadRequestRes("Données manquantes"));
+				.json(new BadRequestRes(Responses.General.Missing_data));
 		}
 
 		const data = new AlgoUpdateDTO();
@@ -197,13 +198,13 @@ export class AlgosController {
 
 		if (!updatedAlgo) {
 			return res
-				.status(NotFoundRes.statut)
-				.json(new NotFoundRes("Algorithme non trouvé"));
+				.status(404)
+				.json(new NotFoundRes(Responses.Algo.Not_found));
 		}
 
 		return res
 			.status(OkRes.statut)
-			.json(new OkRes("Algorithme mis à jour", updatedAlgo));
+			.json(new OkRes(Responses.Algo.Success.Updated, updatedAlgo));
 	}
 
 	/**
@@ -231,9 +232,13 @@ export class AlgosController {
 		if (!result) {
 			return res
 				.status(NotFoundRes.statut)
-				.json(new NotFoundRes("Algorithme non trouvé"));
+				.json(new NotFoundRes(Responses.Algo.Not_found));
+		} else if (result instanceof Res) {
+			return res.status(result.statut).json(result);
 		}
 
-		return res.status(result.statut).json(result);
+		return res
+			.status(OkRes.statut)
+			.json(new OkRes(Responses.Algo.Success.Deleted, result));
 	}
 }

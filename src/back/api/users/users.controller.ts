@@ -6,6 +6,7 @@ import { UserRegisterDTO, UserLoginDTO, UserUpdateDTO } from "./users.dto";
 import { AuthService } from "../auth/auth.service";
 import { Utilisateur } from "../../db/schemas/Utilisateur.schema";
 import { authMiddleware } from "../../middlewares/auth.middleware";
+import { Responses } from "../../constants/responses.const";
 
 /**
  * Contrôleur pour les utilisateurs.
@@ -114,7 +115,8 @@ export class UsersController {
 	private async confirm(req: Request, res: Response) {
 		// Récupération des données de la requête
 		const token = req.params.token;
-		if (!token) return res.status(400).json({ message: "Token manquant" });
+		if (!token)
+			return res.status(400).json({ message: Responses.Token.Missing });
 
 		const reponse = await this.usersService.confirm(token);
 
@@ -169,7 +171,8 @@ export class UsersController {
 	private async logout(req: Request, res: Response) {
 		// Récupération des données de la requête
 		const token = this.authService.extractToken(req);
-		if (!token) return res.status(400).json({ message: "Token manquant" });
+		if (!token)
+			return res.status(400).json({ message: Responses.Token.Missing });
 
 		const reponse = await this.usersService.logout(token);
 

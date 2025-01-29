@@ -9,6 +9,7 @@ import { server, request } from "./setup";
 
 import { afterAll, describe, expect, test } from "bun:test";
 import { UserSet } from "./user.set";
+import { Responses } from "../constants/responses.const";
 
 describe("Users: new user", () => {
 	// Création de 2 utilisateurs pour les tests suivants.
@@ -52,7 +53,7 @@ describe("Users: new user", () => {
 			expect(response.status).toBe(400);
 			expect(response.body).toHaveProperty(
 				"message",
-				"Il manque des données",
+				Responses.General.Missing_data,
 			);
 		});
 
@@ -69,7 +70,7 @@ describe("Users: new user", () => {
 			expect(response.status).toBe(400);
 			expect(response.body).toHaveProperty(
 				"message",
-				"Données invalides",
+				Responses.General.Invalid_data,
 			);
 			expect(response.body.data[0]).toHaveProperty("property", "email");
 		});
@@ -87,7 +88,7 @@ describe("Users: new user", () => {
 			expect(response.status).toBe(400);
 			expect(response.body).toHaveProperty(
 				"message",
-				"Données invalides",
+				Responses.General.Invalid_data,
 			);
 			expect(response.body.data[0]).toHaveProperty(
 				"property",
@@ -106,7 +107,10 @@ describe("Users: new user", () => {
 				.send(payload);
 			Logger.debug(JSON.stringify(response.body), "test: users", 5);
 			expect(response.status).toBe(201);
-			expect(response.body).toHaveProperty("message", "Utilisateur créé");
+			expect(response.body).toHaveProperty(
+				"message",
+				Responses.User.Success.Created,
+			);
 
 			// Récupération du token de confirmation ("envoyé par mail") pour les tests suivants.
 			confirmToken = await createMailToken(response.body.data.id);
@@ -129,7 +133,7 @@ describe("Users: new user", () => {
 			expect(response.status).toBe(409);
 			expect(response.body).toHaveProperty(
 				"message",
-				"Email déjà utilisé",
+				Responses.User.Email_already_exists,
 			);
 		});
 
@@ -138,7 +142,10 @@ describe("Users: new user", () => {
 			const response = await request.get("/api/users/confirm/wrong");
 			Logger.debug(JSON.stringify(response.body), "test: users", 5);
 			expect(response.status).toBe(400);
-			expect(response.body).toHaveProperty("message", "Token invalide");
+			expect(response.body).toHaveProperty(
+				"message",
+				Responses.Token.Invalid,
+			);
 		});
 		test("GET /api/users/confirm/:token -> erreur: Token invalide. (Ex: base64)", async () => {
 			const response = await request.get(
@@ -146,7 +153,10 @@ describe("Users: new user", () => {
 			);
 			Logger.debug(JSON.stringify(response.body), "test: users", 5);
 			expect(response.status).toBe(400);
-			expect(response.body).toHaveProperty("message", "Token invalide");
+			expect(response.body).toHaveProperty(
+				"message",
+				Responses.Token.Invalid,
+			);
 		});
 		test("GET /api/users/confirm/:token -> Inscription confirmée.", async () => {
 			const response = await request.get(
@@ -156,7 +166,7 @@ describe("Users: new user", () => {
 			expect(response.status).toBe(200);
 			expect(response.body).toHaveProperty(
 				"message",
-				"Inscription confirmée",
+				Responses.User.Success.Confirmed,
 			);
 		});
 
@@ -165,7 +175,10 @@ describe("Users: new user", () => {
 			const response = await request.get("/api/users/1");
 			Logger.debug(JSON.stringify(response.body), "test: users", 5);
 			expect(response.status).toBe(400);
-			expect(response.body).toHaveProperty("message", "Token manquant");
+			expect(response.body).toHaveProperty(
+				"message",
+				Responses.Token.Missing,
+			);
 		});
 		test("GET /api/users/1 -> erreur: Token invalide.", async () => {
 			const response = await request
@@ -173,7 +186,10 @@ describe("Users: new user", () => {
 				.auth("wrong", { type: "bearer" });
 			Logger.debug(JSON.stringify(response.body), "test: users", 5);
 			expect(response.status).toBe(401);
-			expect(response.body).toHaveProperty("message", "Token invalide");
+			expect(response.body).toHaveProperty(
+				"message",
+				Responses.Token.Invalid,
+			);
 		});
 	});
 
@@ -184,7 +200,7 @@ describe("Users: new user", () => {
 			expect(response.status).toBe(400);
 			expect(response.body).toHaveProperty(
 				"message",
-				"Il manque des données",
+				Responses.General.Missing_data,
 			);
 		});
 		test("POST /api/users/login -> erreur: Utilisateur introuvable.", async () => {
@@ -199,7 +215,7 @@ describe("Users: new user", () => {
 			expect(response.status).toBe(404);
 			expect(response.body).toHaveProperty(
 				"message",
-				"Utilisateur introuvable",
+				Responses.User.Not_found,
 			);
 		});
 		test("POST /api/users/login -> erreur: Mot de passe incorrect.", async () => {
@@ -214,7 +230,7 @@ describe("Users: new user", () => {
 			expect(response.status).toBe(401);
 			expect(response.body).toHaveProperty(
 				"message",
-				"Mot de passe incorrect",
+				Responses.User.Invalid_password,
 			);
 		});
 		test("POST /api/users/login -> Connexion réussie.", async () => {
@@ -229,7 +245,7 @@ describe("Users: new user", () => {
 			expect(response.status).toBe(200);
 			expect(response.body).toHaveProperty(
 				"message",
-				"Connexion réussie",
+				Responses.Auth.Success.Logged_in,
 			);
 
 			// Récupération du token pour les tests suivants.
@@ -244,7 +260,7 @@ describe("Users: new user", () => {
 			expect(response.status).toBe(200);
 			expect(response.body).toHaveProperty(
 				"message",
-				"Utilisateur trouvé",
+				Responses.User.Success.Found,
 			);
 		});
 
@@ -256,7 +272,7 @@ describe("Users: new user", () => {
 			expect(response.status).toBe(403);
 			expect(response.body).toHaveProperty(
 				"message",
-				"Permission refusée",
+				Responses.General.Forbidden,
 			);
 		});
 		test("PUT /api/users/1 -> erreur: Mot de passe incorrect.", async () => {
@@ -272,7 +288,7 @@ describe("Users: new user", () => {
 			expect(response.status).toBe(401);
 			expect(response.body).toHaveProperty(
 				"message",
-				"Mot de passe incorrect",
+				Responses.User.Invalid_password,
 			);
 		});
 		test("PUT /api/users/1 -> Pseudonyme modifié.", async () => {
@@ -288,7 +304,7 @@ describe("Users: new user", () => {
 			expect(response.status).toBe(200);
 			expect(response.body).toHaveProperty(
 				"message",
-				"Utilisateur mis à jour",
+				Responses.User.Success.Updated,
 			);
 		});
 		test("PUT /api/users/1 -> Mot de passe modifié.", async () => {
@@ -304,7 +320,7 @@ describe("Users: new user", () => {
 			expect(response.status).toBe(200);
 			expect(response.body).toHaveProperty(
 				"message",
-				"Utilisateur mis à jour",
+				Responses.User.Success.Updated,
 			);
 		});
 	});
@@ -314,7 +330,10 @@ describe("Users: new user", () => {
 			const response = await request.get("/api/users/logout");
 			Logger.debug(JSON.stringify(response.body), "test: users", 5);
 			expect(response.status).toBe(400);
-			expect(response.body).toHaveProperty("message", "Token manquant");
+			expect(response.body).toHaveProperty(
+				"message",
+				Responses.Token.Missing,
+			);
 		});
 		test("GET /api/users/logout -> Déconnexion réussie.", async () => {
 			const response = await request
@@ -324,7 +343,7 @@ describe("Users: new user", () => {
 			expect(response.status).toBe(200);
 			expect(response.body).toHaveProperty(
 				"message",
-				"Déconnexion réussie",
+				Responses.Auth.Success.Logged_out,
 			);
 		});
 	});
