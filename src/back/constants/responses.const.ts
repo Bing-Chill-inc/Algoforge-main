@@ -39,6 +39,28 @@ export const Responses = {
 			Logged_out: "Déconnexion réussie.",
 		},
 	},
+	Algo: {
+		Forbidden_create:
+			"Vous n'avez pas les droits pour créer cet algorithme.",
+		Forbidden_update:
+			"Vous n'avez pas les droits pour modifier cet algorithme.",
+		Not_found: "Algorithme non trouvé.",
+		Invalid: "Algorithme invalide.",
+		By_User: {
+			Not_found: "Aucun algorithme trouvé.",
+			Found: "Algorithmes trouvés.",
+		},
+		Errors: {
+			While_deleting_algo:
+				"Erreur lors de la suppression de l'algorithme.",
+		},
+		Success: {
+			Created: "Algorithme créé.",
+			Updated: "Algorithme mis à jour.",
+			Deleted: "Algorithme supprimé.",
+			Found: "Algorithme trouvé.",
+		},
+	},
 	General: {
 		Invalid_data: "Données invalides.",
 		Missing_data: "Il manque des données.",

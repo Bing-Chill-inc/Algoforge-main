@@ -9,6 +9,7 @@ import { AlgoCreateDTO, AlgoUpdateDTO } from "../api/algos/algos.dto";
 import { AlgosService } from "../api/algos/algos.service";
 import { UserLoginDTO } from "../api/users/users.dto";
 import { UserSet } from "./user.set";
+import { Responses } from "../constants/responses.const";
 
 let token: string;
 
@@ -41,7 +42,7 @@ describe("Algos: empty database", async () => {
 		expect(response.status).toBe(404);
 		expect(response.body).toHaveProperty(
 			"message",
-			"Aucun algorithme trouvé",
+			Responses.Algo.By_User.Not_found,
 		);
 	});
 
@@ -53,7 +54,7 @@ describe("Algos: empty database", async () => {
 		expect(response.status).toBe(404);
 		expect(response.body).toHaveProperty(
 			"message",
-			"Algorithme non trouvé",
+			Responses.Algo.Not_found,
 		);
 	});
 
@@ -64,7 +65,10 @@ describe("Algos: empty database", async () => {
 			.send({});
 		Logger.debug(JSON.stringify(response.body), "test: algos", 5);
 		expect(response.status).toBe(400);
-		expect(response.body).toHaveProperty("message", "Données manquantes");
+		expect(response.body).toHaveProperty(
+			"message",
+			Responses.General.Missing_data,
+		);
 	});
 
 	test("PUT /api/algos/:id -> erreur: Données manquantes.", async () => {
@@ -74,7 +78,10 @@ describe("Algos: empty database", async () => {
 			.send({});
 		Logger.debug(JSON.stringify(response.body), "test: algos", 5);
 		expect(response.status).toBe(400);
-		expect(response.body).toHaveProperty("message", "Données manquantes");
+		expect(response.body).toHaveProperty(
+			"message",
+			Responses.General.Missing_data,
+		);
 	});
 
 	test("DELETE /api/algos/:id -> erreur: Algorithme non trouvé.", async () => {
@@ -85,7 +92,7 @@ describe("Algos: empty database", async () => {
 		expect(response.status).toBe(404);
 		expect(response.body).toHaveProperty(
 			"message",
-			"Algorithme non trouvé",
+			Responses.Algo.Not_found,
 		);
 	});
 });
@@ -107,7 +114,7 @@ describe("Algos: creating data", () => {
 		Logger.debug(JSON.stringify(response.body), "test: algos", 5);
 		// Vérification de la réponse.
 		expect(response.status).toBe(400);
-		expect(response.body).toHaveProperty("message", "Algorithme invalide");
+		expect(response.body).toHaveProperty("message", Responses.Algo.Invalid);
 
 		// Vérification de la non-création de l'algorithme.
 		const filePath = AlgosService.dataPath + "1.json";
@@ -126,7 +133,10 @@ describe("Algos: creating data", () => {
 		Logger.debug(JSON.stringify(response.body), "test: algos", 5);
 		// Vérification de la réponse.
 		expect(response.status).toBe(201);
-		expect(response.body).toHaveProperty("message", "Algorithme créé");
+		expect(response.body).toHaveProperty(
+			"message",
+			Responses.Algo.Success.Created,
+		);
 
 		// Vérification de la création de l'algorithme.
 		const filePath = AlgosService.dataPath + "1.json";
@@ -148,7 +158,7 @@ describe("Algos: creating data", () => {
 		expect(response.status).toBe(200);
 		expect(response.body).toHaveProperty(
 			"message",
-			"Algorithme mis à jour",
+			Responses.Algo.Success.Updated,
 		);
 
 		// Vérification de la mise à jour de l'algorithme.
@@ -161,7 +171,10 @@ describe("Algos: creating data", () => {
 			.auth(token, { type: "bearer" });
 		Logger.debug(JSON.stringify(response.body), "test: algos", 5);
 		expect(response.status).toBe(200);
-		expect(response.body).toHaveProperty("message", "Algorithmes trouvés");
+		expect(response.body).toHaveProperty(
+			"message",
+			Responses.Algo.By_User.Found,
+		);
 		expect(response.body.data).toBeArrayOfSize(1);
 	});
 
@@ -171,7 +184,10 @@ describe("Algos: creating data", () => {
 			.auth(token, { type: "bearer" });
 		Logger.debug(JSON.stringify(response.body), "test: algos", 5);
 		expect(response.status).toBe(200);
-		expect(response.body).toHaveProperty("message", "Algorithme trouvé");
+		expect(response.body).toHaveProperty(
+			"message",
+			Responses.Algo.Success.Found,
+		);
 		expect(response.body.data.sourceCode).toEqual(readAlgo("algo-complet"));
 	});
 
@@ -183,7 +199,7 @@ describe("Algos: creating data", () => {
 		expect(response.status).toBe(404);
 		expect(response.body).toHaveProperty(
 			"message",
-			"Algorithme non trouvé",
+			Responses.Algo.Not_found,
 		);
 	});
 	test("DELETE /api/algos/:id -> succès: Algorithme supprimé.", async () => {
@@ -192,7 +208,10 @@ describe("Algos: creating data", () => {
 			.auth(token, { type: "bearer" });
 		Logger.debug(JSON.stringify(response.body), "test: algos", 5);
 		expect(response.status).toBe(200);
-		expect(response.body).toHaveProperty("message", "Algorithme supprimé");
+		expect(response.body).toHaveProperty(
+			"message",
+			Responses.Algo.Success.Deleted,
+		);
 		expect(existsSync(AlgosService.dataPath + "1.json")).toBe(false);
 	});
 });

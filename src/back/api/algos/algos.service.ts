@@ -22,6 +22,7 @@ import {
 import path from "path";
 import { Logger } from "../../utils/logger";
 import { getOwnerOfAlgo } from "../../utils/queries";
+import { Responses } from "../../constants/responses.const";
 
 /**
  * Service pour les algorithmes.
@@ -104,15 +105,13 @@ export class AlgosService {
 	async createAlgo(algo: AlgoCreateDTO) {
 		// Vérification des droits de l'utilisateur.
 		if (algo.requestedUserId !== algo.ownerId) {
-			return new ForbiddenRes(
-				"Vous n'avez pas les droits pour créer cet algorithme",
-			);
+			return new ForbiddenRes(Responses.Algo.Forbidden_create);
 		}
 
 		// Validation de l'algorithme.
 		const validationResult = AlgoValidator.validateAlgo(algo.sourceCode);
 		if (!validationResult.success) {
-			return new BadRequestRes("Algorithme invalide", validationResult);
+			return new BadRequestRes(Responses.Algo.Invalid, validationResult);
 		}
 
 		const algoRepository = AppDataSource.manager.getRepository(Algorithme);
@@ -175,16 +174,14 @@ export class AlgosService {
 				(perm.droits === Droits.Owner ||
 					perm.droits === Droits.ReadWrite)
 			) {
-				return new ForbiddenRes(
-					"Vous n'avez pas les droits pour modifier cet algorithme",
-				);
+				return new ForbiddenRes(Responses.Algo.Forbidden_update);
 			}
 		}
 
 		// Validation de l'algorithme.
 		const validationResult = AlgoValidator.validateAlgo(algo.sourceCode);
 		if (!validationResult.success) {
-			return new BadRequestRes("Algorithme invalide", validationResult);
+			return new BadRequestRes(Responses.Algo.Invalid, validationResult);
 		}
 		algo.sourceCode = JSON.parse(JSON.stringify(validationResult.data));
 
@@ -223,7 +220,7 @@ export class AlgosService {
 		// Vérification des droits de l'utilisateur.
 		const ownerAlgo = await getOwnerOfAlgo(id);
 		if (ownerAlgo.id != requestedUserId)
-			return new ForbiddenRes("Permission refusée");
+			return new ForbiddenRes(Responses.General.Forbidden);
 
 		// Suppression de l'algorithme.
 		try {
@@ -239,13 +236,13 @@ export class AlgosService {
 
 			// Suppression de l'algorithme du système de fichiers.
 			const result = this.deleteAlgoFromDisk(id);
-			if (!result) return new NotFoundRes("Algorithme non trouvé");
-			return new OkRes("Algorithme supprimé", deletedAlgo);
+			if (!result) return new NotFoundRes(Responses.Algo.Not_found);
+			return new OkRes(Responses.Algo.Success.Deleted, deletedAlgo);
 		} catch (error) {
 			if (error instanceof Error)
 				Logger.error(error.stack, "AlgosService: deleteAlgo");
 			return new InternalServerErrorRes(
-				"Erreur lors de la suppression de l'algorithme",
+				Responses.Algo.Errors.While_deleting_algo,
 			);
 		}
 	}
