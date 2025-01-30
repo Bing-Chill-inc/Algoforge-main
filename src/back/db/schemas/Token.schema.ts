@@ -1,4 +1,4 @@
-import { Entity, Column, PrimaryColumn, ManyToOne } from "typeorm";
+import { Entity, Column, PrimaryColumn, ManyToOne, JoinColumn } from "typeorm";
 import type { Relation } from "typeorm";
 import { Utilisateur } from "./Utilisateur.schema";
 
@@ -45,5 +45,6 @@ export class Token {
 	 * @see {@link Utilisateur}
 	 */
 	@ManyToOne(() => Utilisateur, (utilisateur) => utilisateur.tokens)
+	@JoinColumn({ name: "idutilisateur" })
 	utilisateur: Relation<Utilisateur>;
 }
