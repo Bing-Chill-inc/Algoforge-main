@@ -1,5 +1,5 @@
 import { Logger } from "../utils/logger";
-import { server, request } from "./setup";
+import { server, request } from "./setup.test";
 import { AlgoValidator } from "../utils/algoValidator";
 import { readFileSync, rmdirSync, existsSync } from "fs";
 
@@ -15,7 +15,8 @@ let token: string;
 
 beforeAll(async () => {
 	Logger.log("Clearing data/algos folder...", "test: algos");
-	rmdirSync(AlgosService.dataPath, { recursive: true });
+	if (existsSync(AlgosService.dataPath))
+		rmdirSync(AlgosService.dataPath, { recursive: true });
 	Logger.log("Cleared !", "test: algos");
 
 	Logger.log("Logging in with user (ID: 1)...", "test: algos");
@@ -293,6 +294,6 @@ function validationAlgo(algoName: string) {
  */
 function readAlgo(algoName: string) {
 	return JSON.parse(
-		readFileSync(path.join(__dirname, `./json/${algoName}.json`), "utf-8"),
+		readFileSync(path.join(__dirname, `../json/${algoName}.json`), "utf-8"),
 	);
 }

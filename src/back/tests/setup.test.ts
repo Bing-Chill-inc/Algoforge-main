@@ -15,7 +15,7 @@ if (process.env.BUILD !== "dev") {
 }
 
 // Démarrage des tests.
-import { beforeAll } from "bun:test";
+import { afterAll, beforeAll } from "bun:test";
 import { app } from "../index";
 import supertest from "supertest";
 import { AppDataSource } from "../db/data-source";
@@ -24,15 +24,28 @@ export const request = supertest(app);
 export const server = app;
 
 // On attend que l'application soit initialisée avant de lancer les tests.
-beforeAll((done) => {
+beforeAll(async (done) => {
 	Logger.log("Waiting for application to be initialized...", "test: setup");
 	const interval = setInterval(async () => {
-		if (app.locals.initialized) {
+		if (app.locals.initialized && !app.locals.testSetupInit) {
+			Logger.log("Application initialized !", "test: setup");
+			app.locals.testSetupInit = true;
 			clearInterval(interval);
 			await clearAllTables();
+			app.locals.testSetupDone = true;
 			done();
 		}
-	}, 100);
+	}, 1000);
+});
+
+import { AlgosTests } from "./algos.test";
+import { UsersTests } from "./users.test";
+
+// Lancement des tests unitaires.
+afterAll(async (done) => {
+	await UsersTests();
+	await AlgosTests();
+	done;
 });
 
 import { Utilisateur } from "../db/schemas/Utilisateur.schema";
@@ -43,7 +56,7 @@ import { Dossier } from "../db/schemas/Dossier.schema";
 import { PermDossier } from "../db/schemas/PermDossier.schema";
 // Suppression de toutes les données de la base de données.
 async function clearAllTables() {
-	Logger.debug("Cleaning database...", "test: setup", 2);
+	Logger.log("Cleaning database...", "test: setup");
 	// Récupération de toutes les entités de l'application.
 	const entities = [
 		PermAlgorithme,
@@ -71,5 +84,5 @@ async function clearAllTables() {
 		);
 	}
 
-	Logger.debug("Cleaning done !", "test: setup", 2);
+	Logger.log("Cleaning done !", "test: setup");
 }

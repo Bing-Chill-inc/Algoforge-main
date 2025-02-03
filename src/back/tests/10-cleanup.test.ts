@@ -1,6 +1,6 @@
 import { UserLoginDTO } from "../api/users/users.dto";
 import { Logger } from "../utils/logger";
-import { server, request } from "./setup";
+import { server, request } from "./setup.test";
 
 import { beforeAll, describe, expect, test } from "bun:test";
 import { UserSet } from "./user.set";

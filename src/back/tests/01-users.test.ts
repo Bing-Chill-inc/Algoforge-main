@@ -5,7 +5,7 @@ import {
 } from "../api/users/users.dto";
 import { Logger } from "../utils/logger";
 import { createMailToken } from "../utils/mailConfirmToken";
-import { server, request } from "./setup";
+import { server, request } from "./setup.test";
 
 import { afterAll, describe, expect, test } from "bun:test";
 import { UserSet } from "./user.set";
