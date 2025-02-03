@@ -8,4 +8,8 @@ export const Transporter = createTransport({
 		user: process.env.MAIL_USER,
 		pass: process.env.MAIL_PASSWORD,
 	},
+	connectionTimeout: 30000,
+	dnsTimeout: 30000,
+	greetingTimeout: 30000,
+	debug: true,
 });

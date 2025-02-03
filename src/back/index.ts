@@ -73,33 +73,79 @@ import { Transporter } from "./mail/transporter";
 
 // Init database connection
 const dbConnexion = new Promise((resolve, reject) => {
-	Logger.log("Attempting to initialize database connection...", "main: db");
-	AppDataSource.initialize()
-		.then(() => {
-			Logger.log("Database connected.", "main: db");
-			resolve(null);
-		})
-		.catch((err) => {
-			reject(err);
-		});
+	const retryTimes = parseInt(process.env.RETRY_MANY_TIMES || "3", 10);
+	let attempts = 1;
+
+	const connectWithRetry = () => {
+		Logger.log(
+			`Attempting to initialize database connection... (Attempt ${attempts})`,
+			"main: db",
+		);
+		AppDataSource.initialize()
+			.then(() => {
+				Logger.log("Database connected.", "main: db");
+				resolve(null);
+			})
+			.catch(async (err) => {
+				attempts++;
+				Logger.error(
+					`Error while connecting to database: \n${err}`,
+					"main: db",
+				);
+				if (attempts <= retryTimes) {
+					Logger.log(
+						`Retrying to connect to database... (${attempts}/${retryTimes})`,
+						"main: db",
+					);
+					setTimeout(connectWithRetry, 1000);
+				} else {
+					reject(err);
+				}
+			});
+	};
+
+	connectWithRetry();
 });
 // Init mail connection
 const mailConnexion = new Promise((resolve, reject) => {
-	Logger.log("Attempting to initialize mail connection...", "main: mail");
-	Transporter.verify()
-		.then(() => {
-			Logger.log("Mail connected.", "main: mail");
-			resolve(null);
-		})
-		.catch((err) => {
-			reject(err);
-		});
+	const retryTimes = parseInt(process.env.RETRY_MANY_TIMES || "3", 10);
+	let attempts = 1;
+
+	const connectWithRetry = () => {
+		Logger.log(
+			`Attempting to initialize mail connection... (Attempt ${attempts})`,
+			"main: mail",
+		);
+		Transporter.verify()
+			.then(() => {
+				Logger.log("Mail connected.", "main: mail");
+				resolve(null);
+			})
+			.catch((err) => {
+				attempts++;
+				Logger.error(
+					`Error while connecting to mail: \n${err}`,
+					"main: mail",
+				);
+				if (attempts <= retryTimes) {
+					Logger.log(
+						`Retrying to connect to mail... (${attempts}/${retryTimes})`,
+						"main: mail",
+					);
+					setTimeout(connectWithRetry, 1000);
+				} else {
+					reject(err);
+				}
+			});
+	};
+
+	connectWithRetry();
 });
 
 // Starting application
 import { AlgosController } from "./api/algos/algos.controller";
 import { UsersController } from "./api/users/users.controller";
-Promise.all([dbConnexion,mailConnexion])
+Promise.all([dbConnexion, mailConnexion])
 	.then(async () => {
 		// Handling API logs.
 		app.use(loggerMiddleware);
