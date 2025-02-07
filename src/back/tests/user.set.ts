@@ -1,4 +1,3 @@
-// FIXME: Supprimer les entrées test1 et test2.
 export const UserSet = {
 	example: {
 		id: 112,
@@ -7,16 +6,6 @@ export const UserSet = {
 		newPassword: "nouveauMdp",
 		pseudo: "Test de ToxykAuBleu",
 		newPseudo: "Nouveau pseudo !",
-	},
-	test1: {
-		email: "test1@algoforge.fr",
-		password: "testtest1",
-		pseudo: "Test1",
-	},
-	test2: {
-		email: "test2@algoforge.fr",
-		password: "testtest2",
-		pseudo: "Test2",
 	},
 	unitTestUser1: {
 		id: 101,
