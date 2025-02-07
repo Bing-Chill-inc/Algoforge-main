@@ -5,8 +5,8 @@ import { Logger } from "../utils/logger";
  */
 
 // Vérification du mode de l'application.
-if (process.env.BUILD !== "dev") {
-	Logger.error("Le mode de l'application doit être 'dev'.", "test: setup");
+if (process.env.BUILD !== "test") {
+	Logger.error("Le mode de l'application doit être 'test'.", "test: setup");
 	Logger.warn(
 		"ATTENTION: ceci supprime toutes les données de la base de données.",
 		"test: setup",
