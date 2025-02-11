@@ -22,7 +22,8 @@ import { hashString } from "../utils/hash";
 const utilisateursRepository = AppDataSource.getRepository(Utilisateur);
 let token: string;
 
-// TODO: Tester les routes individuellement, et non en fonction des données que peut contenir la base de données.
+// FIXME: rendre les tests indépendants, avec des données propres à chaque test
+// => utiliser beforeAll dans chaque route (= describe).
 export const AlgosTests = async () => {
 	beforeAll(async (done) => {
 		const interval = setInterval(async () => {
@@ -66,13 +67,8 @@ export const AlgosTests = async () => {
 		}, 100);
 	});
 
-	/**
-	 * Tests des routes de l'API des algorithmes.
-	 * Nous considérons que la base de données est vide,
-	 * et que l'utilisateur est vérifié et connecté.
-	 */
-	describe("Algos: empty database", async () => {
-		test("GET /api/algos/byUserId/:id -> erreur: Aucun algorithme trouvé.", async () => {
+	describe("GET /api/algos/byUserId/:id", () => {
+		test("erreur: Aucun algorithme trouvé.", async () => {
 			const response = await request
 				.get(`/api/algos/byUserId/${UserSet.unitTestAlgo1.id}`)
 				.auth(token, { type: "bearer" });
@@ -84,7 +80,22 @@ export const AlgosTests = async () => {
 			);
 		});
 
-		test("GET /api/algos/:id -> erreur: Algorithme non trouvé.", async () => {
+		test("succès: Algorithme trouvé.", async () => {
+			const response = await request
+				.get(`/api/algos/byUserId/${UserSet.unitTestAlgo1.id}`)
+				.auth(token, { type: "bearer" });
+			Logger.debug(JSON.stringify(response.body), "test: algos", 5);
+			expect(response.status).toBe(OkRes.statut);
+			expect(response.body).toHaveProperty(
+				"message",
+				Responses.Algo.By_User.Found,
+			);
+			expect(response.body.data).toBeArrayOfSize(1);
+		});
+	});
+
+	describe("Algos: GET /api/algos/:id", () => {
+		test("erreur: Algorithme non trouvé.", async () => {
 			const response = await request
 				.get("/api/algos/1")
 				.auth(token, { type: "bearer" });
@@ -96,7 +107,24 @@ export const AlgosTests = async () => {
 			);
 		});
 
-		test("POST /api/algos/ -> erreur: Données manquantes.", async () => {
+		test("succès: Algorithme trouvé.", async () => {
+			const response = await request
+				.get("/api/algos/1")
+				.auth(token, { type: "bearer" });
+			Logger.debug(JSON.stringify(response.body), "test: algos", 5);
+			expect(response.status).toBe(OkRes.statut);
+			expect(response.body).toHaveProperty(
+				"message",
+				Responses.Algo.Success.Found,
+			);
+			expect(response.body.data.sourceCode).toEqual(
+				readAlgo("algo-complet"),
+			);
+		});
+	});
+
+	describe("Algos: POST /api/algos", () => {
+		test("erreur: Données manquantes.", async () => {
 			const response = await request
 				.post("/api/algos")
 				.auth(token, { type: "bearer" })
@@ -109,37 +137,7 @@ export const AlgosTests = async () => {
 			);
 		});
 
-		test("PUT /api/algos/:id -> erreur: Données manquantes.", async () => {
-			const response = await request
-				.put("/api/algos/1")
-				.auth(token, { type: "bearer" })
-				.send({});
-			Logger.debug(JSON.stringify(response.body), "test: algos", 5);
-			expect(response.status).toBe(BadRequestRes.statut);
-			expect(response.body).toHaveProperty(
-				"message",
-				Responses.General.Missing_data,
-			);
-		});
-
-		test("DELETE /api/algos/:id -> erreur: Algorithme non trouvé.", async () => {
-			const response = await request
-				.delete("/api/algos/1")
-				.auth(token, { type: "bearer" });
-			Logger.debug(JSON.stringify(response.body), "test: algos", 5);
-			expect(response.status).toBe(NotFoundRes.statut);
-			expect(response.body).toHaveProperty(
-				"message",
-				Responses.Algo.Not_found,
-			);
-		});
-	});
-
-	/**
-	 * Tests des routes de l'API des algorithmes, avec la manipulation de plusieurs algorithmes.
-	 */
-	describe("Algos: creating data", () => {
-		test("POST /api/algos/ -> erreur: Algorithme invalide.", async () => {
+		test("erreur: Algorithme invalide.", async () => {
 			const payload = new AlgoCreateDTO();
 			payload.nom = "Algorithme test";
 			payload.ownerId = UserSet.unitTestAlgo1.id;
@@ -161,7 +159,7 @@ export const AlgosTests = async () => {
 			const filePath = AlgosService.dataPath + "1.json";
 			expect(existsSync(filePath)).toBe(false);
 		});
-		test("POST /api/algos/ -> succès: Algorithme créé.", async () => {
+		test("succès: Algorithme créé.", async () => {
 			const payload = new AlgoCreateDTO();
 			payload.nom = "Algorithme test";
 			payload.ownerId = UserSet.unitTestAlgo1.id;
@@ -183,7 +181,23 @@ export const AlgosTests = async () => {
 			const filePath = AlgosService.dataPath + "1.json";
 			expect(existsSync(filePath)).toBe(true);
 		});
-		test("PUT /api/algos/:id -> succès: Algorithme mis à jour.", async () => {
+	});
+
+	describe("Algos: PUT /api/algos/:id", () => {
+		test("erreur: Données manquantes.", async () => {
+			const response = await request
+				.put("/api/algos/1")
+				.auth(token, { type: "bearer" })
+				.send({});
+			Logger.debug(JSON.stringify(response.body), "test: algos", 5);
+			expect(response.status).toBe(BadRequestRes.statut);
+			expect(response.body).toHaveProperty(
+				"message",
+				Responses.General.Missing_data,
+			);
+		});
+
+		test("succès: Algorithme mis à jour.", async () => {
 			const payload = new AlgoUpdateDTO();
 			payload.id = 1;
 			payload.nom = "Algorithme test mis à jour";
@@ -206,35 +220,10 @@ export const AlgosTests = async () => {
 			const filePath = AlgosService.dataPath + "1.json";
 			expect(existsSync(filePath)).toBe(true);
 		});
-		test("GET /api/algos/byUserId/:id -> succès: Algorithme trouvé.", async () => {
-			const response = await request
-				.get(`/api/algos/byUserId/${UserSet.unitTestAlgo1.id}`)
-				.auth(token, { type: "bearer" });
-			Logger.debug(JSON.stringify(response.body), "test: algos", 5);
-			expect(response.status).toBe(OkRes.statut);
-			expect(response.body).toHaveProperty(
-				"message",
-				Responses.Algo.By_User.Found,
-			);
-			expect(response.body.data).toBeArrayOfSize(1);
-		});
+	});
 
-		test("GET /api/algos/:id -> succès: Algorithme trouvé.", async () => {
-			const response = await request
-				.get("/api/algos/1")
-				.auth(token, { type: "bearer" });
-			Logger.debug(JSON.stringify(response.body), "test: algos", 5);
-			expect(response.status).toBe(OkRes.statut);
-			expect(response.body).toHaveProperty(
-				"message",
-				Responses.Algo.Success.Found,
-			);
-			expect(response.body.data.sourceCode).toEqual(
-				readAlgo("algo-complet"),
-			);
-		});
-
-		test("DELETE /api/algos/:id -> erreur: Algorithme non trouvé.", async () => {
+	describe("Algos: DELETE /api/algos/:id", () => {
+		test("erreur: Algorithme non trouvé.", async () => {
 			const response = await request
 				.delete("/api/algos/2")
 				.auth(token, { type: "bearer" });
@@ -245,7 +234,7 @@ export const AlgosTests = async () => {
 				Responses.Algo.Not_found,
 			);
 		});
-		test("DELETE /api/algos/:id -> succès: Algorithme supprimé.", async () => {
+		test("succès: Algorithme supprimé.", async () => {
 			const response = await request
 				.delete("/api/algos/1")
 				.auth(token, { type: "bearer" });
