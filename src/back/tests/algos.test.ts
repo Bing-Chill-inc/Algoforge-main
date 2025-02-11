@@ -1,4 +1,11 @@
-import { existsSync, readFileSync, rmdirSync } from "fs";
+import {
+	copyFileSync,
+	existsSync,
+	mkdir,
+	mkdirSync,
+	readFileSync,
+	rmdirSync,
+} from "fs";
 import path from "path";
 import { describe, test, expect, beforeAll } from "bun:test";
 import { AlgoValidator } from "../utils/algoValidator";
@@ -18,12 +25,18 @@ import { AlgoCreateDTO, AlgoUpdateDTO } from "../api/algos/algos.dto";
 import { AppDataSource } from "../db/data-source";
 import { Utilisateur } from "../db/schemas/Utilisateur.schema";
 import { hashString } from "../utils/hash";
+import { Algorithme } from "../db/schemas/Algorithme.schema";
+import { PermAlgorithme } from "../db/schemas/PermAlgorithme.schema";
+import { Droits } from "../types/droits.enum";
 
 const utilisateursRepository = AppDataSource.getRepository(Utilisateur);
+const algoRepository = AppDataSource.getRepository(Algorithme);
+const permAlgoRepository = AppDataSource.getRepository(PermAlgorithme);
+
 let token: string;
 
-// FIXME: rendre les tests indépendants, avec des données propres à chaque test
-// => utiliser beforeAll dans chaque route (= describe).
+// NOTE: idéalement, chaque test devrait avoir son jeu de données,
+// au lieu de partager les mêmes données entre les tests avec le beforeAll.
 export const AlgosTests = async () => {
 	beforeAll(async (done) => {
 		const interval = setInterval(async () => {
@@ -31,8 +44,10 @@ export const AlgosTests = async () => {
 				clearInterval(interval);
 
 				Logger.log("Clearing data/algos folder...", "test: algos");
-				if (existsSync(AlgosService.dataPath))
+				if (existsSync(AlgosService.dataPath)) {
 					rmdirSync(AlgosService.dataPath, { recursive: true });
+				}
+				mkdirSync(AlgosService.dataPath, { recursive: true });
 				Logger.log("Cleared !", "test: algos");
 
 				Logger.log("Creating test users...", "test: users");
@@ -62,15 +77,35 @@ export const AlgosTests = async () => {
 				token = response.headers.authorization;
 				Logger.log(`Logged in ! Token: ${token}`, "test: algos");
 
+				Logger.log("Creating test algos...", "test: algos");
+				const algo = new Algorithme();
+				algo.nom = "Algorithme test";
+				algo.dateCreation = new Date().getTime();
+				algo.dateModification = new Date().getTime();
+				const savedAlgo = await algoRepository.save(algo);
+				const ownerPerm = new PermAlgorithme();
+				ownerPerm.idUtilisateur = UserSet.unitTestAlgo1.id;
+				ownerPerm.idAlgorithme = savedAlgo.id;
+				ownerPerm.droits = Droits.Owner;
+				await permAlgoRepository.save(ownerPerm);
+
+				const sourcePath = path.join(
+					__dirname,
+					"./json/algo-complet.json",
+				);
+				const destPath = path.join(AlgosService.dataPath, "1.json");
+				copyFileSync(sourcePath, destPath);
+				Logger.log("Test algos created.", "test: algos");
+
 				done();
 			}
 		}, 100);
 	});
 
-	describe("GET /api/algos/byUserId/:id", () => {
+	describe("Algos: GET /api/algos/byUserId/:id", () => {
 		test("erreur: Aucun algorithme trouvé.", async () => {
 			const response = await request
-				.get(`/api/algos/byUserId/${UserSet.unitTestAlgo1.id}`)
+				.get(`/api/algos/byUserId/3`)
 				.auth(token, { type: "bearer" });
 			Logger.debug(JSON.stringify(response.body), "test: algos", 5);
 			expect(response.status).toBe(NotFoundRes.statut);
@@ -97,7 +132,7 @@ export const AlgosTests = async () => {
 	describe("Algos: GET /api/algos/:id", () => {
 		test("erreur: Algorithme non trouvé.", async () => {
 			const response = await request
-				.get("/api/algos/1")
+				.get("/api/algos/13")
 				.auth(token, { type: "bearer" });
 			Logger.debug(JSON.stringify(response.body), "test: algos", 5);
 			expect(response.status).toBe(NotFoundRes.statut);
@@ -156,7 +191,7 @@ export const AlgosTests = async () => {
 			);
 
 			// Vérification de la non-création de l'algorithme.
-			const filePath = AlgosService.dataPath + "1.json";
+			const filePath = AlgosService.dataPath + "2.json";
 			expect(existsSync(filePath)).toBe(false);
 		});
 		test("succès: Algorithme créé.", async () => {
@@ -178,7 +213,7 @@ export const AlgosTests = async () => {
 			);
 
 			// Vérification de la création de l'algorithme.
-			const filePath = AlgosService.dataPath + "1.json";
+			const filePath = AlgosService.dataPath + "2.json";
 			expect(existsSync(filePath)).toBe(true);
 		});
 	});
@@ -225,7 +260,7 @@ export const AlgosTests = async () => {
 	describe("Algos: DELETE /api/algos/:id", () => {
 		test("erreur: Algorithme non trouvé.", async () => {
 			const response = await request
-				.delete("/api/algos/2")
+				.delete("/api/algos/13")
 				.auth(token, { type: "bearer" });
 			Logger.debug(JSON.stringify(response.body), "test: algos", 5);
 			expect(response.status).toBe(NotFoundRes.statut);
