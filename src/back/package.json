@@ -6,7 +6,7 @@
 		"prod": "bun install && bun run build:front-cloud && bun run start",
 		"build:front-cloud": "cd ../front-cloud && bun install && bun run build",
 		"start": "bun --env-file=../../.env index.ts",
-		"test": "bun test --env-file=../../.env",
+		"test": "bun test --env-file=../../.env ./tests/setup.test.ts",
 		"test:docker": "bun install && bun run build:front-cloud && bun run test",
 		"doc": "typedoc"
 	},
