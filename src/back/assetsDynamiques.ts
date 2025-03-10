@@ -226,22 +226,21 @@ AssetsDynamiques.push({
 		const fgColor = req.query.fgColor || "000000";
 
 		const svgContent = `
-		<svg version="1.1" id="Calque_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
+		<svg version="1.1" id="ConditionSortie" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
 	 viewBox="0 0 320.3 319.9" style="enable-background:new 0 0 320.3 319.9;" xml:space="preserve">
 <style type="text/css">
-        .st0{stroke:#${fgColor};;stroke-width:27;stroke-linecap:round;stroke-miterlimit:10;}
-        .st1{fill:none;stroke:#${fgColor};;stroke-width:15;stroke-linecap:round;stroke-miterlimit:10;}
-        .st2{stroke:#${fgColor};;stroke-width:27;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:1;}
-        .st3{fill:none;stroke:#${fgColor};;stroke-width:27;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:1;}
+	.st0{stroke:#${fgColor};stroke-width:27;stroke-linecap:round;stroke-miterlimit:10;}
+	.st1{fill:none;stroke:#${fgColor};stroke-width:15;stroke-linecap:round;stroke-miterlimit:10;}
+	.st2{stroke:#${fgColor};stroke-width:27;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:1;}
+	.st3{fill:none;stroke:#${fgColor};stroke-width:27;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:1;}
 </style>
-<polyline fill="#${fgColor}" class="st0" points="130.7,157.6 130.7,17.5 189.6,16.9 189.6,157.6 "/>
+<polyline fill="#${fgColor}" class="st0" points="113.2,179.3 113.2,17.6 207.3,16.9 207.3,179.3 "/>
 <path fill="#${fgColor}" class="st1" d="M59,170.8"/>
-<path fill="#${fgColor}" class="st2" d="M217.9,157.6l-56.3,58.8c-0.8,0.9-2,0.9-2.9,0l-56.4-58.8H217.9z"/>
+<path fill="#${fgColor}" class="st2" d="M252.5,179.3l-90,67.9c-1.3,1-3.2,1-4.6,0l-90.1-67.9H252.5z"/>
 <path fill="#${fgColor}" class="st3" d="M106.6,120.5"/>
 	<path fill="#${fgColor}" d="M283.4,8c15.9,0,28.9,12.9,28.9,28.9V283c0,15.9-12.9,28.9-28.9,28.9H36.9C20.9,311.9,8,299,8,283V36.9
 		C8,20.9,20.9,8,36.9,8H283.4 M283.4,0H36.9C16.5,0,0,16.5,0,36.9V283c0,20.4,16.5,36.9,36.9,36.9h246.6c20.4,0,36.9-16.5,36.9-36.9
 		V36.9C320.3,16.5,303.8,0,283.4,0L283.4,0z"/>
-
 </svg>
 	`;
 
@@ -352,17 +351,23 @@ AssetsDynamiques.push({
 		const fgColor = req.query.fgColor || "000000";
 
 		const svgContent = `
-	<svg version="1.1" id="Pointeur" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
-	 viewBox="0 0 512.7 512.7" style="enable-background:new 0 0 512.7 512.7;" xml:space="preserve" width="32" height="32">
+	<svg id="Pointeur" width="32" height="32" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
+	 viewBox="0 0 512.7 512.7" style="enable-background:new 0 0 512.7 512.7;" xml:space="preserve">
 <style type="text/css">
-	.st0{stroke:#000000;stroke-width:0.6643;stroke-miterlimit:10;fill:#${fgColor};}
+	.st0{stroke:#000000;stroke-width:0.6643;stroke-miterlimit:10;}
 </style>
-<g id="Marteau">
-	<path class="st0" d="M448.3,500.8l-272-286.4c-2.6-2.7-2.4-6.9,0.5-9.5c0.1,0,0.1-0.1,0.1-0.1l45.5-37.7c2.9-2.4,7.2-2.1,9.8,0.6
-		l270.7,285.8c13.7,14.4,12.6,36.6-2.5,49.7c-0.5,0.5-1,0.8-1.6,1.2l0,0C483.6,516.3,461.4,514.7,448.3,500.8z"/>
-	<path class="st0" d="M136.1,196.4l15.4,17c0.3,0.4,0.9,0.4,1.3,0.1c0,0,0,0,0.1,0l77.6-70.7c0.3-0.3,0.4-0.8,0.1-1.2
-		c0,0,0,0-0.1-0.1l-15.7-13.8c-0.3-0.3-0.9-0.3-1.2,0l-77.3,67.4C135.8,195.5,135.8,196.1,136.1,196.4L136.1,196.4z"/>
-	<polyline class="st0" points="133.1,185.3 56.3,215.8 0.4,155.5 64.1,47.8 183.7,0.4 239.6,60.7 202.7,122.9 	"/>
+<g id="Marteau" fill="#${fgColor}">
+	<path class="st0" d="M73.8,491.8l263.3-277.2c2.5-2.6,2.3-6.7-0.5-9.2c-0.1,0-0.1-0.1-0.1-0.1l-44-36.5c-2.8-2.3-7-2-9.5,0.6
+		L21,446C7.7,460,8.8,481.4,23.4,494.1c0.5,0.5,1,0.8,1.5,1.2l0,0C39.7,506.8,61.2,505.3,73.8,491.8z"/>
+	<path class="st0" d="M376,197.2l-14.9,16.5c-0.3,0.4-0.9,0.4-1.3,0.1c0,0,0,0-0.1,0l-75.1-68.4c-0.3-0.3-0.4-0.8-0.1-1.2
+		c0,0,0,0,0.1-0.1l15.2-13.4c0.3-0.3,0.9-0.3,1.2,0l74.8,65.2C376.3,196.3,376.3,196.9,376,197.2L376,197.2z"/>
+	<polyline class="st0" points="378.9,186.4 453.2,216 507.3,157.6 445.7,53.4 329.9,7.5 275.8,65.9 311.5,126.1 		"/>
+</g>
+<g id="Cursor"	fill="#${fgColor}">
+	<path d="M0,10.3C0.3,2.8,7.4-1.9,14.7,0.7c9,3.2,17.9,6.6,26.8,9.9c52.3,19.4,104.6,38.8,156.9,58.2c0.9,0.3,1.9,0.7,2.8,1
+		c4.5,1.8,7,5.5,6.9,10.1c-0.1,4.4-2.8,8-7.4,9.5c-3.5,1.2-7.1,2.3-10.7,3.4c-23.5,7.3-47,14.7-70.6,21.9c-2.3,0.7-3.5,2.2-4.2,4.4
+		c-8.3,26.6-16.6,53.1-24.9,79.7c-1.9,6-5.9,9-11.6,8.4c-4.4-0.5-7.2-3.2-8.7-7.3c-4.9-13.1-9.7-26.1-14.6-39.2
+		c-18-48.5-36.1-96.9-54.1-145.4C0.8,13.8,0.5,12,0,10.3z"/>
 </g>
 </svg>
 	`;

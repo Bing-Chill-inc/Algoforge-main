@@ -7,20 +7,21 @@
 
 ## Table des matières
 
--   [Pitch](#pitch)
--   [Fonctionnalités de l'application (WIP)](#fonctionnalités-de-lapplication)
--   [Utilisation](#utilisation--installation)
-    -   [Version en ligne](#version-en-ligne)
-    -   [Version docker](#version-docker)
-        -   [Programmes requis](#programmes-requis)
-        -   [Installation Windows](#installation-windows)
-        -   [Installation UNIX](#installation-unix)
-    -   [Version standalone](#version-standalone)
-        -   [Programmes requis](#programmes-requis-1)
-        -   [Installation (Windows/UNIX)](#installation-windowsunix)
-    -   [Version de bureau (WIP)](#version-de-bureau)
--   [Identité collaborateurs](#identité-collaborateurs)
--   [Structure des dossiers (WIP)](#structure-des-dossiers)
+- [Table des matières](#table-des-matières)
+- [Pitch](#pitch)
+- [Fonctionnalités de l'application](#fonctionnalités-de-lapplication)
+- [Utilisation / Installation](#utilisation--installation)
+  - [Version en ligne](#version-en-ligne)
+  - [Version docker](#version-docker)
+    - [Programmes requis](#programmes-requis)
+    - [Installation Windows](#installation-windows)
+    - [Installation UNIX](#installation-unix)
+  - [Version standalone](#version-standalone)
+    - [Programmes requis](#programmes-requis-1)
+    - [Installation (Windows/UNIX):](#installation-windowsunix)
+  - [Version de bureau](#version-de-bureau)
+- [Identité collaborateurs](#identité-collaborateurs)
+- [Structure des dossiers](#structure-des-dossiers)
 
 ## Pitch
 
@@ -88,58 +89,19 @@ La version docker de l'application comprend par défaut une base de données Pos
 
 1. Télécharger l'installateur de l'application. Nous vous proposons 2 méthodes pour cela:
 
--   Sans Powershell:
-    -   installation rapide en un clic: `run-installer-minimal.bat`
-    -   installation complète (personnalisation possible): `run-installer-full.bat`
--   Avec Powershell:
-    -   installation rapide en un clic: `run-installer-minimal.ps1`
-    -   installation complète (personnalisation possible): `run-installer-full.ps1`
+-   Sans Powershell: `run-installer.bat`
+-   Avec Powershell: `run-installer.ps1`
 
-2. Exécuter le programme depuis une invite de commande avec l'une des commandes suivantes:
-
--   Bash (minimal):
-
-```bash
-$ ./run-installer-minimal.bat
-```
-
--   Bash (complet):
-
-```bash
-$ ./run-installer-complet.bat
-```
-
--   Powershell (minimal):
-
-```powershell
-PS > ./run-installer-minimal.ps1
-```
-
--   Powershell (complet):
-
-```powershell
-PS > ./run-installer-complet.ps1
-```
+1. Exécuter le programme depuis une invite de commande ou en double-cliquant dessus.
 
 #### Installation UNIX
 
-1. Télécharger l'installateur de l'application.
-
-    - Installation rapide : `run-installer-minimal.sh`
-    - Installation complète (personnalisation possible) : `run-installer-complet.sh`
+1. Télécharger l'installateur de l'application : `run-installer.sh`
 
 2. Exécuter le programme depuis une invite de commande:
 
--   Bash (minimal):
-
 ```bash
-$ ./run-installer-minimal.sh
-```
-
--   Bash (complet):
-
-```bash
-$ ./run-installer-complet.sh
+$ bash ./run-installer-minimal.sh
 ```
 
 ### Version standalone

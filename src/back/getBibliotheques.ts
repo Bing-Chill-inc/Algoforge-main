@@ -12,6 +12,7 @@ const explorerDossier = (dossier: string) => {
 		nom: string;
 		contenu: {
 			nom?: string;
+			nomCourt?: string;
 			descriptif?: string;
 			algo?: string;
 			path?: string;
@@ -29,11 +30,13 @@ const explorerDossier = (dossier: string) => {
 		const cheminDossier = path.join(dossier, nomDossier);
 		const structureDossier = {
 			nom: lireContenuFichier(path.join(cheminDossier, "nom.txt")),
+			nomCourt: lireContenuFichier(path.join(cheminDossier, "noCourt.txt")),
 			contenu: [],
 		} as {
 			nom: string;
 			contenu: {
 				nom?: string;
+				nomCourt?: string;
 				descriptif?: string;
 				algo?: string;
 				path?: string;
@@ -49,6 +52,10 @@ const explorerDossier = (dossier: string) => {
 						lireContenuFichier(
 							path.join(cheminComplet, "nom.txt"),
 						) || nomFichier,
+					nomCourt:
+						lireContenuFichier(
+							path.join(cheminComplet, "nomCourt.txt"),
+						),
 					descriptif:
 						lireContenuFichier(
 							path.join(cheminComplet, "descriptif.html"),
