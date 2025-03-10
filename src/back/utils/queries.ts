@@ -1,3 +1,4 @@
+import { Repository } from "typeorm";
 import { AppDataSource } from "../db/data-source";
 import { PermAlgorithme } from "../db/schemas/PermAlgorithme.schema";
 import { PermDossier } from "../db/schemas/PermDossier.schema";
@@ -41,8 +42,12 @@ export async function getOwnerOfDir(dirId: number): Promise<Utilisateur> {
  * @returns Droits de l'utilisateur sur le dossier ou null si l'utilisateur n'a pas de droits.
  * @category Utils
  */
-export async function rightsOfUserOnDir(userId: number, dirId: number): Promise<Droits | null> {
-	const permDirRepository = AppDataSource.getRepository(PermDossier);
+export async function rightsOfUserOnDir(
+	userId: number,
+	dirId: number,
+): Promise<Droits | null> {
+	const permDirRepository: Repository<PermDossier> =
+		AppDataSource.getRepository(PermDossier);
 
 	let permsDir: PermDossier;
 	let highestRights: Droits = null;
@@ -69,7 +74,7 @@ export async function rightsOfUserOnDir(userId: number, dirId: number): Promise<
 
 		// Sinon, on continue, en stockant les droits les plus hauts.
 		else {
-			const parentDir = permsDir[0].dossier.idParent;
+			const parentDir: number = permsDir[0].dossier.idParent;
 			if (parentDir) {
 				dirId = parentDir;
 			}
@@ -89,7 +94,6 @@ export async function rightsOfUserOnDir(userId: number, dirId: number): Promise<
 // NOTE: permsAlgo[0].algorithme.dossier.id ne fonctionnera probablement pas
 // en raison de soit erreur de conception dans Dossier, soit d'implémentation
 // dans await permAlgoRepository.find()...
-// TODO : Modifier cette fonction aussi
 /**
  * Vérifie les droits d'un utilisateur sur un algorithme.
  * @param userId L'identifiant de l'utilisateur.
@@ -97,29 +101,69 @@ export async function rightsOfUserOnDir(userId: number, dirId: number): Promise<
  * @returns Droits de l'utilisateur sur l'algorithme ou null si l'utilisateur n'a pas de droits.
  * @category Utils
  */
-export async function rightsOfUserOnAlgo(userId: number, algoId: number): Promise<Droits | null> {
-	const permAlgoRepository = AppDataSource.getRepository(PermAlgorithme);
+export async function rightsOfUserOnAlgo(
+	userId: number,
+	algoId: number,
+): Promise<Droits | null> {
+	const permAlgoRepository: Repository<PermAlgorithme> =
+		AppDataSource.getRepository(PermAlgorithme);
 
 	// Récupère les permissions de l'utilisateur sur l'algorithme donné.
-	const permsAlgo = await permAlgoRepository.findOne({
+	const permsAlgo: PermAlgorithme = await permAlgoRepository.findOne({
 		relations: { utilisateur: true, algorithme: true },
 		where: { idAlgorithme: algoId, idUtilisateur: userId },
 	});
 
+	const algoRights: Droits = <Droits>permsAlgo.droits;
+
 	// Si l'utilisateur a les droits propriétaires, on renvoie les droits propriétaires.
-	if (permsAlgo && permsAlgo.droits === Droits.Owner) {
+	if (permsAlgo && algoRights === Droits.Owner) {
 		return Droits.Owner;
 	}
 
 	// Récupère les droits de l'utilisateur sur le dossier de l'algorithme.
-	const rights = await rightsOfUserOnDir(
+	const dirRights: Droits = await rightsOfUserOnDir(
 		userId,
 		permsAlgo.algorithme.dossier.id,
 	);
 
-	// TODO : traiter le cas où rights est null, et où il faut renvoyer les perms sur l'algo direct
+	// Sinon, on compare les droits de l'utilisateur sur le dossier et l'algorithme, et on renvoie le plus élevé.
+	if (
+		!algoRights ||
+		dirRights === Droits.Owner ||
+		dirRights === Droits.ReadWrite
+	) {
+		return dirRights;
+	}
 
-	return rights;
+	return algoRights;
 }
 
-// TODO : Fonction pour compter le nombre de dossiers jusqu'au dossier parent, pour limiter le nombre d'imbrications (7 max)
+// NOTE : Compter le nombre de dossiers jusqu'au dossier parent, pour limiter le nombre d'imbrications (7 max)
+
+/**
+ * Compte le nombre de dossiers parents d'un dossier.
+ * @param dirId L'identifiant du dossier.
+ * @returns Le nombre de dossiers parents.
+ * @category Utils
+ */
+export async function countParents(dirId: number): Promise<number> {
+	const permDirRepository = AppDataSource.getRepository(PermDossier);
+
+	let permsDir: PermDossier;
+	let count = 0;
+
+	// Récupère le dossier parent du dossier donné.
+	permsDir = await permDirRepository.findOne({
+		relations: { dossier: true },
+		where: { idDossier: dirId },
+	});
+
+	// Compte le nombre de dossiers parents jusqu'à la racine.
+	while (permsDir[0].dossier.idParent !== null) {
+		count++;
+		dirId = permsDir[0].dossier.idParent;
+	}
+
+	return count;
+}
