@@ -59,7 +59,7 @@ app.get("/", (_, res) => {
 app.post("/edit", (req, res) => {
 	const { corpAlgo, nomFichier } = req.body;
 	let content = readFileSync(
-		path.join(__dirname, "/../front-editeur/src/index.html"),
+		path.join(__dirname, "/../front-editeur/out/index.html"),
 		"utf8",
 	);
 
