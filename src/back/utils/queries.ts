@@ -35,89 +35,91 @@ export async function getOwnerOfDir(dirId: number): Promise<Utilisateur> {
 }
 
 /**
- * Vérifie si un utilisateur a des droits sur un dossier.
+ * Vérifie les droits d'un utilisateur sur un dossier.
  * @param userId L'identifiant de l'utilisateur.
  * @param dirId L'identifiant du dossier.
- * @returns true si l'utilisateur a des droits sur le dossier, false sinon.
+ * @returns Droits de l'utilisateur sur le dossier ou null si l'utilisateur n'a pas de droits.
  * @category Utils
  */
-export async function hasRightsUserOnDir(userId: number, dirId: number) {
+export async function rightsOfUserOnDir(userId: number, dirId: number): Promise<Droits | null> {
 	const permDirRepository = AppDataSource.getRepository(PermDossier);
 
-	let permsDir: PermDossier[];
-	let hasRightsResult = false;
+	let permsDir: PermDossier;
+	let highestRights: Droits = null;
+	let rights: Droits;
 	do {
+		rights = null;
+
 		// Récupère les permissions de l'utilisateur sur le dossier donné.
-		permsDir = await permDirRepository.find({
+		permsDir = await permDirRepository.findOne({
 			relations: { utilisateur: true, dossier: true },
 			where: { idDossier: dirId, idUtilisateur: userId },
 		});
 
-		// Vérifie si l'utilisateur a des droits sur le dossier.
-		let hasRightsOnDir = false;
-		for (const perm of permsDir) {
-			if (
-				perm.droits === Droits.Owner ||
-				perm.droits === Droits.ReadWrite ||
-				perm.droits === Droits.ReadOnly
-			) {
-				hasRightsOnDir = true;
-				break;
-			}
+		// Stocke les droits de l'utilisateur sur le dossier.
+		if (permsDir) {
+			rights = <Droits>permsDir.droits;
 		}
 
-		// Si l'utilisateur n'a pas de droits sur le dossier, on remonte d'un niveau.
-		if (!hasRightsOnDir) {
+		// Si l'utilisateur a les droits propriétaires, on sort de la boucle.
+		if (rights === Droits.Owner) {
+			highestRights = Droits.Owner;
+			break;
+		}
+
+		// Sinon, on continue, en stockant les droits les plus hauts.
+		else {
 			const parentDir = permsDir[0].dossier.idParent;
 			if (parentDir) {
 				dirId = parentDir;
 			}
-		}
-		// Sinon, on sort de la boucle.
-		else {
-			hasRightsResult = true;
-			break;
+
+			if (
+				rights &&
+				(highestRights === null || highestRights != Droits.ReadWrite)
+			) {
+				highestRights = rights;
+			}
 		}
 	} while (permsDir[0].dossier.idParent !== null);
 
-	return hasRightsResult;
+	return highestRights;
 }
 
 // NOTE: permsAlgo[0].algorithme.dossier.id ne fonctionnera probablement pas
 // en raison de soit erreur de conception dans Dossier, soit d'implémentation
 // dans await permAlgoRepository.find()...
-export async function hasRightsOnAlgo(userId: number, algoId: number) {
+// TODO : Modifier cette fonction aussi
+/**
+ * Vérifie les droits d'un utilisateur sur un algorithme.
+ * @param userId L'identifiant de l'utilisateur.
+ * @param algoId L'identifiant de l'algorithme.
+ * @returns Droits de l'utilisateur sur l'algorithme ou null si l'utilisateur n'a pas de droits.
+ * @category Utils
+ */
+export async function rightsOfUserOnAlgo(userId: number, algoId: number): Promise<Droits | null> {
 	const permAlgoRepository = AppDataSource.getRepository(PermAlgorithme);
 
-	// Réupère les permissions de l'utilisateur sur l'algorithme donné.
-	const permsAlgo = await permAlgoRepository.find({
+	// Récupère les permissions de l'utilisateur sur l'algorithme donné.
+	const permsAlgo = await permAlgoRepository.findOne({
 		relations: { utilisateur: true, algorithme: true },
 		where: { idAlgorithme: algoId, idUtilisateur: userId },
 	});
 
-	// Vérifie si l'utilisateur a des droits sur l'algorithme.
-	let hasRights = false;
-	for (const perm of permsAlgo) {
-		if (
-			perm.droits === Droits.Owner ||
-			perm.droits === Droits.ReadWrite ||
-			perm.droits === Droits.ReadOnly
-		) {
-			hasRights = true;
-			break;
-		}
+	// Si l'utilisateur a les droits propriétaires, on renvoie les droits propriétaires.
+	if (permsAlgo && permsAlgo.droits === Droits.Owner) {
+		return Droits.Owner;
 	}
 
-	if (!hasRights) {
-		// Vérifie si l'utilisateur a des droits sur le dossier contenant l'algorithme.
-		hasRights = await hasRightsUserOnDir(
-			userId,
-			permsAlgo[0].algorithme.dossier.id,
-		);
-	}
+	// Récupère les droits de l'utilisateur sur le dossier de l'algorithme.
+	const rights = await rightsOfUserOnDir(
+		userId,
+		permsAlgo.algorithme.dossier.id,
+	);
 
-	return hasRights;
+	// TODO : traiter le cas où rights est null, et où il faut renvoyer les perms sur l'algo direct
+
+	return rights;
 }
 
-// TODO: parcours récursif qui remonte les dossiers parent,
-// renvoyant leur nombres + leur permissions additionnées
+// TODO : Fonction pour compter le nombre de dossiers jusqu'au dossier parent, pour limiter le nombre d'imbrications (7 max)
