@@ -5,9 +5,10 @@
     <h1>AlgoForge</h1>
 </div>
 <a id="table-des-matières" class="tsd-anchor"></a><h2 class="tsd-anchor-link">Table des matières<a href="#table-des-matières" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="assets/icons.svg#icon-anchor"></use></svg></a></h2><ul>
+<li><a href="#table-des-mati%C3%A8res">Table des matières</a></li>
 <li><a href="#pitch">Pitch</a></li>
-<li><a href="#fonctionnalit%C3%A9s-de-lapplication">Fonctionnalités de l'application (WIP)</a></li>
-<li><a href="#utilisation--installation">Utilisation</a>
+<li><a href="#fonctionnalit%C3%A9s-de-lapplication">Fonctionnalités de l'application</a></li>
+<li><a href="#utilisation--installation">Utilisation / Installation</a>
 <ul>
 <li><a href="#version-en-ligne">Version en ligne</a></li>
 <li><a href="#version-docker">Version docker</a>
@@ -20,14 +21,14 @@
 <li><a href="#version-standalone">Version standalone</a>
 <ul>
 <li><a href="#programmes-requis-1">Programmes requis</a></li>
-<li><a href="#installation-windowsunix">Installation (Windows/UNIX)</a></li>
+<li><a href="#installation-windowsunix">Installation (Windows/UNIX):</a></li>
 </ul>
 </li>
-<li><a href="#version-de-bureau">Version de bureau (WIP)</a></li>
+<li><a href="#version-de-bureau">Version de bureau</a></li>
 </ul>
 </li>
 <li><a href="#identit%C3%A9-collaborateurs">Identité collaborateurs</a></li>
-<li><a href="#structure-des-dossiers">Structure des dossiers (WIP)</a></li>
+<li><a href="#structure-des-dossiers">Structure des dossiers</a></li>
 </ul>
 <a id="pitch" class="tsd-anchor"></a><h2 class="tsd-anchor-link">Pitch<a href="#pitch" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="assets/icons.svg#icon-anchor"></use></svg></a></h2><p><strong>AlgoForge</strong> est une application de <strong>conception d'algorithmes</strong> qui offre de nombreux avantages aux utilisateurs. Notre produit a pour objectif de faire mieux que ce que l’on connaît depuis déjà plus de 15 ans. Il se veut simple, épuré et surtout rapide d’utilisation.</p>
 <p>A la demande de beaucoup d’étudiants et d’enseignants impliqués dans le processus de création d’algorithmes, nous imaginons un <strong>outil répondant à ces attentes</strong>. C’est pour cela qu’il nous tient à cœur de le rendre <strong>gratuit et open source</strong>.</p>
@@ -75,68 +76,21 @@ Docker doit être démarré quand vous voulez utiliser l’application.</p>
 <li>Télécharger l'installateur de l'application. Nous vous proposons 2 méthodes pour cela:</li>
 </ol>
 <ul>
-<li>Sans Powershell:
-<ul>
-<li>installation rapide en un clic: <code>run-installer-minimal.bat</code></li>
-<li>installation complète (personnalisation possible): <code>run-installer-full.bat</code></li>
+<li>Sans Powershell: <code>run-installer.bat</code></li>
+<li>Avec Powershell: <code>run-installer.ps1</code></li>
 </ul>
-</li>
-<li>Avec Powershell:
-<ul>
-<li>installation rapide en un clic: <code>run-installer-minimal.ps1</code></li>
-<li>installation complète (personnalisation possible): <code>run-installer-full.ps1</code></li>
-</ul>
-</li>
-</ul>
-<ol start="2">
-<li>Exécuter le programme depuis une invite de commande avec l'une des commandes suivantes:</li>
+<ol>
+<li>Exécuter le programme depuis une invite de commande ou en double-cliquant dessus.</li>
 </ol>
-<ul>
-<li>Bash (minimal):</li>
-</ul>
-<pre><code class="bash"><span class="hl-0">$</span><span class="hl-1"> </span><span class="hl-2">./run-installer-minimal.bat</span>
-</code><button type="button">Copy</button></pre>
-
-<ul>
-<li>Bash (complet):</li>
-</ul>
-<pre><code class="bash"><span class="hl-0">$</span><span class="hl-1"> </span><span class="hl-2">./run-installer-complet.bat</span>
-</code><button type="button">Copy</button></pre>
-
-<ul>
-<li>Powershell (minimal):</li>
-</ul>
-<pre><code class="powershell">PS > ./run-installer-minimal.ps1
-</code><button type="button">Copy</button></pre>
-
-<ul>
-<li>Powershell (complet):</li>
-</ul>
-<pre><code class="powershell">PS > ./run-installer-complet.ps1
-</code><button type="button">Copy</button></pre>
-
 <a id="installation-unix" class="tsd-anchor"></a><h4 class="tsd-anchor-link">Installation UNIX<a href="#installation-unix" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="assets/icons.svg#icon-anchor"></use></svg></a></h4><ol>
 <li>
-<p>Télécharger l'installateur de l'application.</p>
-<ul>
-<li>Installation rapide : <code>run-installer-minimal.sh</code></li>
-<li>Installation complète (personnalisation possible) : <code>run-installer-complet.sh</code></li>
-</ul>
+<p>Télécharger l'installateur de l'application : <code>run-installer.sh</code></p>
 </li>
 <li>
 <p>Exécuter le programme depuis une invite de commande:</p>
 </li>
 </ol>
-<ul>
-<li>Bash (minimal):</li>
-</ul>
-<pre><code class="bash"><span class="hl-0">$</span><span class="hl-1"> </span><span class="hl-2">./run-installer-minimal.sh</span>
-</code><button type="button">Copy</button></pre>
-
-<ul>
-<li>Bash (complet):</li>
-</ul>
-<pre><code class="bash"><span class="hl-0">$</span><span class="hl-1"> </span><span class="hl-2">./run-installer-complet.sh</span>
+<pre><code class="bash"><span class="hl-0">$</span><span class="hl-1"> </span><span class="hl-2">bash</span><span class="hl-1"> </span><span class="hl-2">./run-installer-minimal.sh</span>
 </code><button type="button">Copy</button></pre>
 
 <a id="version-standalone" class="tsd-anchor"></a><h3 class="tsd-anchor-link">Version standalone<a href="#version-standalone" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="assets/icons.svg#icon-anchor"></use></svg></a></h3><a id="programmes-requis-1" class="tsd-anchor"></a><h4 class="tsd-anchor-link">Programmes requis<a href="#programmes-requis-1" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="assets/icons.svg#icon-anchor"></use></svg></a></h4><ul>
