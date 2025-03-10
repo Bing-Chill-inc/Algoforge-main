@@ -18,6 +18,7 @@ export const UserSet = {
 		email: "unittestuser2@algoforge.fr",
 		password: "unittest2",
 		pseudo: "UnitTestUser2",
+		urlPfp: "https://avatars.githubusercontent.com/u/46644925?v=4",
 	},
 	unitTestAlgo1: {
 		id: 110,

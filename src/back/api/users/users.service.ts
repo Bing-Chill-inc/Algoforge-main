@@ -288,6 +288,9 @@ export class UsersService {
 		if (!data.currentPassword) {
 			return new BadRequestRes(Responses.General.Missing_data);
 		}
+		if (!data.pseudo && !data.urlPfp && !data.newPassword) {
+			return new BadRequestRes(Responses.General.Missing_data);
+		}
 
 		const validationErrors = await validateClass(data);
 		if (validationErrors) {
@@ -311,10 +314,12 @@ export class UsersService {
 		// Mise à jour de l'utilisateur
 		if (data.pseudo) {
 			user.pseudo = data.pseudo;
-		} else if (data.newPassword) {
+		}
+		if (data.newPassword) {
 			user.mdpHash = hashString(data.newPassword);
-		} else {
-			return new BadRequestRes(Responses.General.Missing_data);
+		}
+		if (data.urlPfp) {
+			user.urlPfp = data.urlPfp;
 		}
 
 		// Enregistrement de l'utilisateur

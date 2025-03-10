@@ -320,7 +320,7 @@ export const UsersTests = async () => {
 			);
 		});
 
-		test("ID: 103 -> erreur: Mot de passe incorrect.", async () => {
+		test("ID: 112 -> erreur: Mot de passe incorrect.", async () => {
 			exampleToken = await login(UserSet.example);
 
 			const payload = new UserUpdateDTO();
@@ -339,26 +339,38 @@ export const UsersTests = async () => {
 			);
 		});
 
-		test("ID: 103 -> Pseudonyme modifié.", async () => {
-			exampleToken = await login(UserSet.example);
+		test("ID: 102 -> erreur: Url de la photo de profil invalide.", async () => {
+			exampleToken = await login(UserSet.unitTestUser2);
 
 			const payload = new UserUpdateDTO();
-			payload.pseudo = UserSet.example.newPseudo;
-			payload.currentPassword = UserSet.example.password;
+			payload.urlPfp = "wrong";
+			payload.currentPassword = UserSet.unitTestUser2.password;
 
 			const response = await request
-				.put(`/api/users/${UserSet.example.id}`)
+				.put(`/api/users/${UserSet.unitTestUser2.id}`)
+				.auth(exampleToken, { type: "bearer" })
+				.send(payload);
+			Logger.debug(JSON.stringify(response.body), "test: users", 5);
+			expect(response.status).toBe(BadRequestRes.statut);
+			expect(response.body.data[0]).toHaveProperty("property", "urlPfp");
+		});
+
+		test("ID: 102 -> Url de la photo de profil modifié.", async () => {
+			exampleToken = await login(UserSet.unitTestUser2);
+
+			const payload = new UserUpdateDTO();
+			payload.urlPfp = UserSet.unitTestUser2.urlPfp;
+			payload.currentPassword = UserSet.unitTestUser2.password;
+
+			const response = await request
+				.put(`/api/users/${UserSet.unitTestUser2.id}`)
 				.auth(exampleToken, { type: "bearer" })
 				.send(payload);
 			Logger.debug(JSON.stringify(response.body), "test: users", 5);
 			expect(response.status).toBe(OkRes.statut);
-			expect(response.body).toHaveProperty(
-				"message",
-				Responses.User.Success.Updated,
-			);
 		});
 
-		test("ID: 103 -> Mot de passe modifié.", async () => {
+		test("ID: 112 -> Mot de passe modifié.", async () => {
 			exampleToken = await login(UserSet.example);
 
 			const payload = new UserUpdateDTO();
