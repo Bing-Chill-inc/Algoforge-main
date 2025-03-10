@@ -1,0 +1,160 @@
+<!DOCTYPE html><html class="default" lang="fr" data-base="."><head><meta charset="utf-8"/><meta http-equiv="x-ua-compatible" content="IE=edge"/><title>Algoforge/Back-end</title><meta name="description" content="Documentation for Algoforge/Back-end"/><meta name="viewport" content="width=device-width, initial-scale=1"/><link rel="stylesheet" href="assets/style.css"/><link rel="stylesheet" href="assets/highlight.css"/><script defer src="assets/main.js"></script><script async src="assets/icons.js" id="tsd-icons-script"></script><script async src="assets/search.js" id="tsd-search-script"></script><script async src="assets/navigation.js" id="tsd-nav-script"></script><script async src="assets/hierarchy.js" id="tsd-hierarchy-script"></script><link rel="stylesheet" href="assets/typedoc-github-style.css"/></head><body><script>document.documentElement.dataset.theme = localStorage.getItem("tsd-theme") || "os";document.body.style.display="none";setTimeout(() => app?app.showPage():document.body.style.removeProperty("display"),500)</script><header class="tsd-page-toolbar"><div class="tsd-toolbar-contents container"><div class="table-cell" id="tsd-search"><div class="field"><label for="tsd-search-field" class="tsd-widget tsd-toolbar-icon search no-caption"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><use href="assets/icons.svg#icon-search"></use></svg></label><input type="text" id="tsd-search-field" aria-label="Search"/></div><div class="field"><div id="tsd-toolbar-links"></div></div><ul class="results"><li class="state loading">Preparing search index...</li><li class="state failure">The search index is not available</li></ul><a href="index.html" class="title">Algoforge/Back-end</a></div><div class="table-cell" id="tsd-widgets"><a href="#" class="tsd-widget tsd-toolbar-icon menu no-caption" data-toggle="menu" aria-label="Menu"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><use href="assets/icons.svg#icon-menu"></use></svg></a></div></div></header><div class="container container-main"><div class="col-content"><div class="tsd-page-title"><h1>Algoforge/Back-end</h1></div><div class="tsd-panel tsd-typography"><div align=center>
+    <img src="media/logo.png" style="width:128px" alt="Le logo d'AlgoForge"/>
+    </br>
+    </br>
+    <h1>AlgoForge</h1>
+</div>
+<a id="table-des-matières" class="tsd-anchor"></a><h2 class="tsd-anchor-link">Table des matières<a href="#table-des-matières" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="assets/icons.svg#icon-anchor"></use></svg></a></h2><ul>
+<li><a href="#table-des-mati%C3%A8res">Table des matières</a></li>
+<li><a href="#pitch">Pitch</a></li>
+<li><a href="#fonctionnalit%C3%A9s-de-lapplication">Fonctionnalités de l'application</a></li>
+<li><a href="#utilisation--installation">Utilisation / Installation</a>
+<ul>
+<li><a href="#version-en-ligne">Version en ligne</a></li>
+<li><a href="#version-docker">Version docker</a>
+<ul>
+<li><a href="#programmes-requis">Programmes requis</a></li>
+<li><a href="#installation-windows">Installation Windows</a></li>
+<li><a href="#installation-unix">Installation UNIX</a></li>
+</ul>
+</li>
+<li><a href="#version-standalone">Version standalone</a>
+<ul>
+<li><a href="#programmes-requis-1">Programmes requis</a></li>
+<li><a href="#installation-windowsunix">Installation (Windows/UNIX):</a></li>
+</ul>
+</li>
+<li><a href="#version-de-bureau">Version de bureau</a></li>
+</ul>
+</li>
+<li><a href="#identit%C3%A9-collaborateurs">Identité collaborateurs</a></li>
+<li><a href="#structure-des-dossiers">Structure des dossiers</a></li>
+</ul>
+<a id="pitch" class="tsd-anchor"></a><h2 class="tsd-anchor-link">Pitch<a href="#pitch" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="assets/icons.svg#icon-anchor"></use></svg></a></h2><p><strong>AlgoForge</strong> est une application de <strong>conception d'algorithmes</strong> qui offre de nombreux avantages aux utilisateurs. Notre produit a pour objectif de faire mieux que ce que l’on connaît depuis déjà plus de 15 ans. Il se veut simple, épuré et surtout rapide d’utilisation.</p>
+<p>A la demande de beaucoup d’étudiants et d’enseignants impliqués dans le processus de création d’algorithmes, nous imaginons un <strong>outil répondant à ces attentes</strong>. C’est pour cela qu’il nous tient à cœur de le rendre <strong>gratuit et open source</strong>.</p>
+<p>Parce que AlgoForge n’est pas seulement une application qui permet de concevoir des algorithmes, c’est aussi une <strong>clé</strong> pour beaucoup d’étudiants vers une expérience <strong>d'apprentissage</strong> sans tracas inutile qui pourrait être évité avec le bon outil.</p>
+<p>Cet outil, nous le savons, se doit de répondre à tous les problèmes de ses prédécesseurs et même si cela n’est pas tâche aisée, nous savons que son existence profitera à de nombreuses personnes.</p>
+<p>Si AlgoForge sait se différencier de ses concurrents, c’est parce qu'elle est conçue par et pour des étudiants qui ont eu le temps d'appréhender les problèmes récurrents mais aussi les avantages notables des différentes applications de conception d’algorithmes, nos concurrents qui nous ont permis de guider une réflexion dans la création d'AlgoForge.</p>
+<p>Pour pallier les problèmes rencontrés lors de l’utilisation de Tabula Rasa, l’interface d'AlgoForge s'adaptera à la résolution de l’écran sur lequel il est utilisé. Le rendu dynamique de l'algorithme dans l'application sera similaire au rendu obtenu en utilisant les fonctions d'exportation.</p>
+<p>Dans le rendu dynamique, les cases auront une taille flexible et le texte qu’elles contiennent ne reviendra pas à la ligne sauf si nécessaire pour une meilleure lisibilité. Le texte sera clairement visible dans ce mode de rendu car il aura la taille appropriée pour s'adapter à la boîte. Lors du rendu en png, jpg, pdf ou svg, la taille du texte s'adaptera aux boîtes pour éviter les débordements, et le texte ne débordera pas.</p>
+<p>Et comme la taille du texte sera définie pour chaque boîte individuellement, même si une instruction est un peu longue, cela n'aura pas d'impact sur la taille du texte de tout le document. De plus, puisque le rendu dynamique sera similaire au rendu final, il sera facile de prédire le rendu du logiciel avant qu'il ne soit exporté. L’application proposera également une commande de retour arrière (&quot;CTRL+Z&quot;) et d’autres raccourcis claviers, ce qui sera très utile pour la conception d'algorithmes.</p>
+<p>C’est pour toutes ces raisons que notre application saura satisfaire ses utilisateurs, que ce soit les étudiants ou les enseignants du BUT informatique de Bayonne, elle fluidifiera la conception d’algorithmes et rendra cette tâche redondante un peu plus agréable.</p>
+<p><strong>AlgoForge</strong> est également <strong>indépendant du système</strong> d’exploitation de par sa nature d’application web, fonctionnant sur n'importe quel ordinateur avec un navigateur web, ce qui la rend compatible avec tous les systèmes d'exploitation. En outre, étant basée sur le web, elle est disponible en ligne, à tout moment et de n'importe où, sans <strong>aucune limitation de temps ou de lieu</strong>.</p>
+<p>L'application proposera également, dans la mesure du possible, une <strong>assistance à la conception</strong> en détectant certaines erreurs de conception (exemples : Pas de conditions d’arrêt dans une structure itérative, plus de 7 sous-problèmes,…). Enfin, la plateforme collaborative permet aux utilisateurs de <strong>travailler ensemble</strong> sur des projets et de partager leurs algorithmes avec d'autres membres de la communauté, ce qui facilite le travail en groupe et accélère le processus créatif.</p>
+<p>En somme, <strong>AlgoForge</strong> est une application de conception d'algorithmes pratique et facile à utiliser, qui offre un respect parfait du formalisme de l’IUT informatique de Bayonne et permet une collaboration entre les utilisateurs par le biais de partage d’algorithmes. Sa gratuité et sa particularité d’être une application web en font un choix idéal pour les étudiants en informatique et tous ceux qui cherchent à concevoir des algorithmes rapidement et efficacement.</p>
+<p>Précédemment nommé I Need Algo, <strong>AlgoForge</strong> a changé de nom pour aborder un aspect plus professionnel et sérieux. Nous apprécions le côté humoristique du jeu de mots avec Anne Hidalgo. Mais, sachant qu’il ne fait en fait pas vraiment de sens avec l’application et que cette boutade n’est intemporelle, nous avons opté pour ce nouveau nom que nous pensons plus élégant et qui durera dans le temps.</p>
+<a id="fonctionnalités-de-lapplication" class="tsd-anchor"></a><h2 class="tsd-anchor-link">Fonctionnalités de l'application<a href="#fonctionnalités-de-lapplication" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="assets/icons.svg#icon-anchor"></use></svg></a></h2><ul>
+<li>Espace cloud pour la gestion des algorithmes:
+<ul>
+<li>Dossiers pour organiser les algorithmes.</li>
+<li>Partage d'algorithmes possible avec d'autres utilisateurs, en lecture seule ou en lecture/écriture.</li>
+</ul>
+</li>
+<li>Editeur d'algorithme complet:
+<ul>
+<li>Plusieurs thèmes.</li>
+<li>Importation d'algorithmes.</li>
+<li>Exportation d'algorithmes sous différent formats, avec une sélection ou tout l'algorithme.</li>
+<li>Bibliotheque d'algorithmes, privée et publique.</li>
+<li>Décomposition des algorithmes sur un autre plan de travail pour une meilleure lisibilité.</li>
+<li>Zoom dynamique, raccourcis clavier, menu contextuel complet.</li>
+</ul>
+</li>
+</ul>
+<a id="utilisation--installation" class="tsd-anchor"></a><h2 class="tsd-anchor-link">Utilisation / Installation<a href="#utilisation--installation" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="assets/icons.svg#icon-anchor"></use></svg></a></h2><p>AlgoForge est utilisable de deux manières différentes: en ligne sur un navigateur ou en local sur un ordinateur (avec une installation simple docker-compose ou même manuelle).</p>
+<a id="version-en-ligne" class="tsd-anchor"></a><h3 class="tsd-anchor-link">Version en ligne<a href="#version-en-ligne" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="assets/icons.svg#icon-anchor"></use></svg></a></h3><p>Pour utiliser AlgoForge en ligne, vous pouvez vous rendre sur ce lien : <a href="https://algoforge.fr/">https://algoforge.fr/</a></p>
+<a id="version-docker" class="tsd-anchor"></a><h3 class="tsd-anchor-link">Version docker<a href="#version-docker" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="assets/icons.svg#icon-anchor"></use></svg></a></h3><p>La version docker de l'application comprend par défaut une base de données PostgreSQL ainsi que l'application PGAdmin pour la gestion de la base de données. Nous vous proposons dans cette section des installateurs automatiques pour Windows et UNIX.</p>
+<a id="programmes-requis" class="tsd-anchor"></a><h4 class="tsd-anchor-link">Programmes requis<a href="#programmes-requis" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="assets/icons.svg#icon-anchor"></use></svg></a></h4><ul>
+<li>Rendre disponible 2 ports: l'un pour l'application et l'autre pour PGAdmin. (par défaut 5205 et 5300)</li>
+<li>Installer <a href="https://git-scm.com/downloads">git</a>.</li>
+<li>Installer <a href="https://docker.com">Docker</a>.</li>
+</ul>
+<div class="tsd-alert tsd-alert-caution"><div class="tsd-alert-title"><svg width="16" height="16" viewBox="0 0 16 16"><use href="assets/icons.svg#icon-alertCaution"></use></svg><span>Caution</span></div><p>
+Docker doit être démarré quand vous voulez utiliser l’application.</p>
+</div>
+<a id="installation-windows" class="tsd-anchor"></a><h4 class="tsd-anchor-link">Installation Windows<a href="#installation-windows" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="assets/icons.svg#icon-anchor"></use></svg></a></h4><ol>
+<li>Télécharger l'installateur de l'application. Nous vous proposons 2 méthodes pour cela:</li>
+</ol>
+<ul>
+<li>Sans Powershell: <code>run-installer.bat</code></li>
+<li>Avec Powershell: <code>run-installer.ps1</code></li>
+</ul>
+<ol>
+<li>Exécuter le programme depuis une invite de commande ou en double-cliquant dessus.</li>
+</ol>
+<a id="installation-unix" class="tsd-anchor"></a><h4 class="tsd-anchor-link">Installation UNIX<a href="#installation-unix" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="assets/icons.svg#icon-anchor"></use></svg></a></h4><ol>
+<li>
+<p>Télécharger l'installateur de l'application : <code>run-installer.sh</code></p>
+</li>
+<li>
+<p>Exécuter le programme depuis une invite de commande:</p>
+</li>
+</ol>
+<pre><code class="bash"><span class="hl-0">$</span><span class="hl-1"> </span><span class="hl-2">bash</span><span class="hl-1"> </span><span class="hl-2">./run-installer-minimal.sh</span>
+</code><button type="button">Copy</button></pre>
+
+<a id="version-standalone" class="tsd-anchor"></a><h3 class="tsd-anchor-link">Version standalone<a href="#version-standalone" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="assets/icons.svg#icon-anchor"></use></svg></a></h3><a id="programmes-requis-1" class="tsd-anchor"></a><h4 class="tsd-anchor-link">Programmes requis<a href="#programmes-requis-1" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="assets/icons.svg#icon-anchor"></use></svg></a></h4><ul>
+<li>Rendre disponible 1 port pour l'application. (5205 par défaut)</li>
+<li>Installer <a href="https://git-scm.com/downloads">git</a>.</li>
+<li>Installer <a href="https://bun.sh">Bun</a>, testé avec la version 1.1.34.</li>
+</ul>
+<a id="installation-windowsunix" class="tsd-anchor"></a><h4 class="tsd-anchor-link">Installation (Windows/UNIX):<a href="#installation-windowsunix" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="assets/icons.svg#icon-anchor"></use></svg></a></h4><ol>
+<li>Télécharger le programme grâce à la commande git suivante:</li>
+</ol>
+<pre><code><span class="hl-3">git</span><span class="hl-1"> </span><span class="hl-3">clone</span><span class="hl-1"> --</span><span class="hl-3">depth</span><span class="hl-1"> </span><span class="hl-4">1</span><span class="hl-1"> --</span><span class="hl-3">recurse</span><span class="hl-1">-</span><span class="hl-3">submodules</span><span class="hl-1"> </span><span class="hl-5">https</span><span class="hl-1">:</span><span class="hl-6">//github.com/Bing-Chill-inc/Algoforge-main.git</span>
+</code><button>Copy</button></pre>
+
+<ol start="2">
+<li>Se placer dans le dossier Algoforge:</li>
+</ol>
+<pre><code><span class="hl-3">cd</span><span class="hl-1"> </span><span class="hl-3">Algoforge</span>
+</code><button>Copy</button></pre>
+
+<ol start="3">
+<li>Mettre à jour les sous-modules (nécessaire)</li>
+</ol>
+<pre><code><span class="hl-3">git</span><span class="hl-1"> </span><span class="hl-3">submodule</span><span class="hl-1"> </span><span class="hl-3">update</span><span class="hl-1"> --</span><span class="hl-3">init</span><span class="hl-1"> --</span><span class="hl-3">recursive</span>
+</code><button>Copy</button></pre>
+
+<ol start="4">
+<li>Renommer le fichier template.env en .env:</li>
+</ol>
+<pre><code><span class="hl-3">mv</span><span class="hl-1"> </span><span class="hl-3">template</span><span class="hl-1">.</span><span class="hl-3">env</span><span class="hl-1"> .</span><span class="hl-3">env</span>
+</code><button>Copy</button></pre>
+
+<ol start="5">
+<li>
+<p>(optionnel) Modifier le fichier .env pour modifier les informations de connexion à la base de données.</p>
+</li>
+<li>
+<p>Se placer dans le dossier back-end:</p>
+</li>
+</ol>
+<pre><code><span class="hl-3">cd</span><span class="hl-1"> </span><span class="hl-3">src</span><span class="hl-1">/</span><span class="hl-3">back</span><span class="hl-1">-</span><span class="hl-3">end</span>
+</code><button>Copy</button></pre>
+
+<ol start="7">
+<li>Lancer l’application avec la commande suivante:</li>
+</ol>
+<pre><code><span class="hl-3">bun</span><span class="hl-1"> </span><span class="hl-3">run</span><span class="hl-1"> </span><span class="hl-3">prod</span>
+</code><button>Copy</button></pre>
+
+<p><em>(Cette dernière va directement télécharger et installer les dépendances nécessaires)</em></p>
+<p>L'application est en train de se démarrer en arrière plan ! Ouvrez un navigateur et entrez l'adresse: <a href="http://localhost:5205">http://localhost:5205</a> (par défaut)</p>
+<a id="version-de-bureau" class="tsd-anchor"></a><h3 class="tsd-anchor-link">Version de bureau<a href="#version-de-bureau" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="assets/icons.svg#icon-anchor"></use></svg></a></h3><p>WIP</p>
+<a id="identité-collaborateurs" class="tsd-anchor"></a><h2 class="tsd-anchor-link">Identité collaborateurs<a href="#identité-collaborateurs" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="assets/icons.svg#icon-anchor"></use></svg></a></h2><ul>
+<li>Esteban BACKES: <a href="https://github.com/Eliossore"><strong>@Eliossore</strong></a></li>
+<li>Jokin SUARES: <a href="https://github.com/Feror-BotMaker"><strong>@Feror-BotMaker</strong></a></li>
+<li>Maxime JACOB-SAUSSEREAU: <a href="https://github.com/Fetnmax"><strong>@Fetnmax</strong></a></li>
+<li>Fabien SPROCQ: <a href="https://github.com/Sprocq"><strong>@Sprocq</strong></a></li>
+<li>Samuel CURRAN: <a href="https://github.com/SamuelCURRAN0"><strong>@SamuelCURRAN0</strong></a></li>
+<li>Mathieu FOISSAC: <a href="https://github.com/ToxykAuBleu"><strong>@ToxykAuBleu</strong></a></li>
+<li>Adrien HIRIBARREN TOUYA: <a href="https://github.com/Alakamar"><strong>@Alakamar</strong></a></li>
+<li>Lucas MARROT: <a href="https://github.com/LucasMarrot"><strong>@LucasMarrot</strong></a></li>
+<li>Romain LABORDE: <a href="https://github.com/RomLabo"><strong>@RomLabo</strong></a></li>
+</ul>
+<a id="structure-des-dossiers" class="tsd-anchor"></a><h2 class="tsd-anchor-link">Structure des dossiers<a href="#structure-des-dossiers" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="assets/icons.svg#icon-anchor"></use></svg></a></h2><p>(Work In Progress)</p>
+<ul>
+<li>Le dossier src héberge le Code de l'algorithme</li>
+</ul>
+</div></div><div class="col-sidebar"><div class="page-menu"><div class="tsd-navigation settings"><details class="tsd-accordion"><summary class="tsd-accordion-summary"><h3><svg width="20" height="20" viewBox="0 0 24 24" fill="none"><use href="assets/icons.svg#icon-chevronDown"></use></svg>Settings</h3></summary><div class="tsd-accordion-details"><div class="tsd-filter-visibility"><span class="settings-label">Member Visibility</span><ul id="tsd-filter-options"><li class="tsd-filter-item"><label class="tsd-filter-input"><input type="checkbox" id="tsd-filter-protected" name="protected"/><svg width="32" height="32" viewBox="0 0 32 32" aria-hidden="true"><rect class="tsd-checkbox-background" width="30" height="30" x="1" y="1" rx="6" fill="none"></rect><path class="tsd-checkbox-checkmark" d="M8.35422 16.8214L13.2143 21.75L24.6458 10.25" stroke="none" stroke-width="3.5" stroke-linejoin="round" fill="none"></path></svg><span>Protected</span></label></li><li class="tsd-filter-item"><label class="tsd-filter-input"><input type="checkbox" id="tsd-filter-private" name="private"/><svg width="32" height="32" viewBox="0 0 32 32" aria-hidden="true"><rect class="tsd-checkbox-background" width="30" height="30" x="1" y="1" rx="6" fill="none"></rect><path class="tsd-checkbox-checkmark" d="M8.35422 16.8214L13.2143 21.75L24.6458 10.25" stroke="none" stroke-width="3.5" stroke-linejoin="round" fill="none"></path></svg><span>Private</span></label></li><li class="tsd-filter-item"><label class="tsd-filter-input"><input type="checkbox" id="tsd-filter-inherited" name="inherited" checked/><svg width="32" height="32" viewBox="0 0 32 32" aria-hidden="true"><rect class="tsd-checkbox-background" width="30" height="30" x="1" y="1" rx="6" fill="none"></rect><path class="tsd-checkbox-checkmark" d="M8.35422 16.8214L13.2143 21.75L24.6458 10.25" stroke="none" stroke-width="3.5" stroke-linejoin="round" fill="none"></path></svg><span>Inherited</span></label></li><li class="tsd-filter-item"><label class="tsd-filter-input"><input type="checkbox" id="tsd-filter-external" name="external"/><svg width="32" height="32" viewBox="0 0 32 32" aria-hidden="true"><rect class="tsd-checkbox-background" width="30" height="30" x="1" y="1" rx="6" fill="none"></rect><path class="tsd-checkbox-checkmark" d="M8.35422 16.8214L13.2143 21.75L24.6458 10.25" stroke="none" stroke-width="3.5" stroke-linejoin="round" fill="none"></path></svg><span>External</span></label></li></ul></div><div class="tsd-theme-toggle"><label class="settings-label" for="tsd-theme">Theme</label><select id="tsd-theme"><option value="os">OS</option><option value="light">Light</option><option value="dark">Dark</option></select></div></div></details></div><details open class="tsd-accordion tsd-page-navigation"><summary class="tsd-accordion-summary"><h3><svg width="20" height="20" viewBox="0 0 24 24" fill="none"><use href="assets/icons.svg#icon-chevronDown"></use></svg>On This Page</h3></summary><div class="tsd-accordion-details"><a href="#table-des-matières"><span>Table des matières</span></a><a href="#pitch"><span>Pitch</span></a><a href="#fonctionnalités-de-lapplication"><span>Fonctionnalités de l&#39;application</span></a><a href="#utilisation--installation"><span>Utilisation / <wbr/>Installation</span></a><ul><li><a href="#version-en-ligne"><span>Version en ligne</span></a></li><li><a href="#version-docker"><span>Version docker</span></a></li><li><ul><li><a href="#programmes-requis"><span>Programmes requis</span></a></li><li><a href="#installation-windows"><span>Installation <wbr/>Windows</span></a></li><li><a href="#installation-unix"><span>Installation UNIX</span></a></li></ul></li><li><a href="#version-standalone"><span>Version standalone</span></a></li><li><ul><li><a href="#programmes-requis-1"><span>Programmes requis</span></a></li><li><a href="#installation-windowsunix"><span>Installation (<wbr/>Windows/UNIX):</span></a></li></ul></li><li><a href="#version-de-bureau"><span>Version de bureau</span></a></li></ul><a href="#identité-collaborateurs"><span>Identité collaborateurs</span></a><a href="#structure-des-dossiers"><span>Structure des dossiers</span></a></div></details></div><div class="site-menu"><nav class="tsd-navigation"><a href="modules.html">Algoforge/Back-end</a><ul class="tsd-small-nested-navigation" id="tsd-nav-container"><li>Loading...</li></ul></nav></div></div></div><footer><p class="tsd-generator">Generated using <a href="https://typedoc.org/" target="_blank">TypeDoc</a> with <a href="https://github.com/JulianWowra/typedoc-github-theme" target="_blank">typedoc-github-theme</a></p></footer><div class="overlay"></div></body></html>

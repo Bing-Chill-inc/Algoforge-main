@@ -25,6 +25,7 @@ import { PermDossier } from "../../db/schemas/PermDossier.schema";
 import { PermAlgorithme } from "../../db/schemas/PermAlgorithme.schema";
 import { AlgosService } from "../algos/algos.service";
 import { Responses } from "../../constants/responses.const";
+import { hashString } from "../../utils/hash";
 
 /**
  * Service pour les utilisateurs.
@@ -76,8 +77,7 @@ export class UsersService {
 		}
 
 		// Hashage du mot de passe
-		const salt = bcrypt.genSaltSync(10);
-		const hash = bcrypt.hashSync(data.password, salt);
+		const hash = hashString(data.password);
 
 		// Création de l'utilisateur
 		const newUser = new Utilisateur();
@@ -288,6 +288,9 @@ export class UsersService {
 		if (!data.currentPassword) {
 			return new BadRequestRes(Responses.General.Missing_data);
 		}
+		if (!data.pseudo && !data.urlPfp && !data.newPassword) {
+			return new BadRequestRes(Responses.General.Missing_data);
+		}
 
 		const validationErrors = await validateClass(data);
 		if (validationErrors) {
@@ -311,11 +314,12 @@ export class UsersService {
 		// Mise à jour de l'utilisateur
 		if (data.pseudo) {
 			user.pseudo = data.pseudo;
-		} else if (data.newPassword) {
-			const salt = bcrypt.genSaltSync(10);
-			user.mdpHash = bcrypt.hashSync(data.newPassword, salt);
-		} else {
-			return new BadRequestRes(Responses.General.Missing_data);
+		}
+		if (data.newPassword) {
+			user.mdpHash = hashString(data.newPassword);
+		}
+		if (data.urlPfp) {
+			user.urlPfp = data.urlPfp;
 		}
 
 		// Enregistrement de l'utilisateur
