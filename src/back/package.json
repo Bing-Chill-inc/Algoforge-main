@@ -36,7 +36,7 @@
 		"@types/cors": "^2.8.17",
 		"@types/express": "^5.0.0",
 		"@types/supertest": "^6.0.2",
-		"tsx": "^4.19.2",
+		"tsx": "^4.19.3",
 		"typedoc": "^0.27.6",
 		"typedoc-github-theme": "^0.2.1",
 		"typedoc-plugin-extras": "^3.1.0",
