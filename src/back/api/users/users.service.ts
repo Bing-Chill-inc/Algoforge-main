@@ -26,6 +26,7 @@ import { PermAlgorithme } from "../../db/schemas/PermAlgorithme.schema";
 import { AlgosService } from "../algos/algos.service";
 import { Responses } from "../../constants/responses.const";
 import { hashString } from "../../utils/hash";
+import { fetch } from "bun";
 
 /**
  * Service pour les utilisateurs.
@@ -319,6 +320,13 @@ export class UsersService {
 			user.mdpHash = hashString(data.newPassword);
 		}
 		if (data.urlPfp) {
+			const requestUrl = await fetch(data.urlPfp);
+			if (
+				!requestUrl.ok ||
+				!requestUrl.headers?.get("content-type")?.includes("image")
+			) {
+				return new BadRequestRes(Responses.User.Invalid_profile_url);
+			}
 			user.urlPfp = data.urlPfp;
 		}
 

@@ -355,6 +355,25 @@ export const UsersTests = async () => {
 			expect(response.body.data[0]).toHaveProperty("property", "urlPfp");
 		});
 
+		test("ID: 102 -> erreur: Url de la photo de profil n'est pas une image.", async () => {
+			exampleToken = await login(UserSet.unitTestUser2);
+
+			const payload = new UserUpdateDTO();
+			payload.urlPfp = "https://google.com";
+			payload.currentPassword = UserSet.unitTestUser2.password;
+
+			const response = await request
+				.put(`/api/users/${UserSet.unitTestUser2.id}`)
+				.auth(exampleToken, { type: "bearer" })
+				.send(payload);
+			Logger.debug(JSON.stringify(response.body), "test: users", 5);
+			expect(response.status).toBe(BadRequestRes.statut);
+			expect(response.body).toHaveProperty(
+				"message",
+				Responses.User.Invalid_profile_url,
+			);
+		});
+
 		test("ID: 102 -> Url de la photo de profil modifié.", async () => {
 			exampleToken = await login(UserSet.unitTestUser2);
 
