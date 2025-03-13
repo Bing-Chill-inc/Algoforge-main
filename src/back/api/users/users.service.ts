@@ -198,6 +198,10 @@ export class UsersService {
 		if (!bcrypt.compareSync(data.password, user.mdpHash)) {
 			return new UnauthorizedRes(Responses.User.Invalid_password);
 		}
+		// Vérification de l'utilisateur
+		if (!user.isVerified) {
+			return new UnauthorizedRes(Responses.User.Not_verified);
+		}
 
 		// Suppression du hash du mot de passe avant renvoi
 		user.mdpHash = undefined;
