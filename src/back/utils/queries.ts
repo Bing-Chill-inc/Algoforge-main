@@ -4,6 +4,7 @@ import { PermAlgorithme } from "../db/schemas/PermAlgorithme.schema";
 import { PermDossier } from "../db/schemas/PermDossier.schema";
 import { Utilisateur } from "../db/schemas/Utilisateur.schema";
 import { Droits } from "../types/droits.enum";
+import { Algorithme } from "../db/schemas/Algorithme.schema";
 
 /**
  * Récupère l'utilisateur propriétaire d'un algorithme.
@@ -46,6 +47,8 @@ export async function rightsOfUserOnDir(
 	userId: number,
 	dirId: number,
 ): Promise<Droits | null> {
+	if (!userId || !dirId) return null;
+
 	const permDirRepository: Repository<PermDossier> =
 		AppDataSource.getRepository(PermDossier);
 
@@ -107,25 +110,33 @@ export async function rightsOfUserOnAlgo(
 ): Promise<Droits | null> {
 	const permAlgoRepository: Repository<PermAlgorithme> =
 		AppDataSource.getRepository(PermAlgorithme);
+	const algoRepository: Repository<Algorithme> =
+		AppDataSource.getRepository(Algorithme);
 
 	// Récupère les permissions de l'utilisateur sur l'algorithme donné.
-	const permsAlgo: PermAlgorithme = await permAlgoRepository.findOne({
+	const permAlgo: PermAlgorithme | null = await permAlgoRepository.findOne({
 		relations: { utilisateur: true, algorithme: true },
 		where: { idAlgorithme: algoId, idUtilisateur: userId },
 	});
 
-	const algoRights: Droits = <Droits>permsAlgo.droits;
+	const algoRights: Droits = permAlgo ? <Droits>permAlgo.droits : null;
 
 	// Si l'utilisateur a les droits propriétaires, on renvoie les droits propriétaires.
-	if (permsAlgo && algoRights === Droits.Owner) {
+	if (permAlgo && algoRights === Droits.Owner) {
 		return Droits.Owner;
 	}
 
+	// On récupère l'algorithme, plus précisément le dossier de l'algorithme.
+	const algo: Algorithme | null = await algoRepository.findOne({
+		where: { id: algoId },
+	});
 	// Récupère les droits de l'utilisateur sur le dossier de l'algorithme.
-	const dirRights: Droits = await rightsOfUserOnDir(
-		userId,
-		permsAlgo.algorithme.dossier.id,
-	);
+	// Vérifie si algo?.idDossier est null
+	if (algo?.idDossier === null || algo?.idDossier === undefined) {
+		return algoRights;
+	}
+
+	const dirRights: Droits = await rightsOfUserOnDir(userId, algo.idDossier);
 
 	// Sinon, on compare les droits de l'utilisateur sur le dossier et l'algorithme, et on renvoie le plus élevé.
 	if (

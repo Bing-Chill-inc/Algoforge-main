@@ -4,11 +4,13 @@ import {
 	Column,
 	OneToMany,
 	ManyToOne,
+	JoinColumn,
 } from "typeorm";
 import type { Relation } from "typeorm";
 import { Dossier } from "./Dossier.schema";
 import { PermAlgorithme } from "./PermAlgorithme.schema";
 
+// TODO: stocker le hash de l'algorithme pour réaliser des comparaisons.
 /**
  * Modèle de données pour les algorithmes.
  * Un algorithme peut être associé à un dossier.
@@ -59,7 +61,10 @@ export class Algorithme {
 	 * @public
 	 * @type {Dossier}
 	 */
+	@Column({ type: "int", nullable: true, name: "iddossier" })
+	idDossier: number;
 	@ManyToOne(() => Dossier, (dossier) => dossier.algos)
+	@JoinColumn({ name: "iddossier" })
 	dossier: Relation<Dossier>;
 
 	/**

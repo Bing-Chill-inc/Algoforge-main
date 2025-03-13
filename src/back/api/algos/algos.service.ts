@@ -16,11 +16,11 @@ import {
 	ForbiddenRes,
 	InternalServerErrorRes,
 	NotFoundRes,
-	OkRes
+	OkRes,
 } from "../../types/response.entity";
 import path from "path";
 import { Logger } from "../../utils/logger";
-import { getOwnerOfAlgo } from "../../utils/queries";
+import { rightsOfUserOnAlgo, rightsOfUserOnDir } from "../../utils/queries";
 import { Responses } from "../../constants/responses.const";
 
 /**
@@ -47,13 +47,17 @@ export class AlgosService {
 	 * @param dirId Id du dossier.
 	 * @returns Les algorithmes de l'utilisateur.
 	 */
-	// TODO : Vérifier les droits de l'utilisateur (query)
+	// NOTE: dirId est de quel type lors de l'appel de la fonction ? (number ou null)
 	async getAlgosPermsOfUser(id: number, dirId: number) {
 		const permAlgoRepository =
 			AppDataSource.manager.getRepository(PermAlgorithme);
 
 		// Récupération des algorithmes de l'utilisateur.
 		if (dirId) {
+			// Vérification des droits de l'utilisateur sur le dossier.
+			// TODO: pas terminé.
+			const rights = await rightsOfUserOnDir(id, dirId);
+
 			return await permAlgoRepository.find({
 				relations: { algorithme: true },
 				where: {
@@ -81,7 +85,6 @@ export class AlgosService {
 	 * @param id Id de l'algorithme.
 	 * @returns L'algorithme.
 	 */
-	// TODO : Vérifier les droits de l'utilisateur (query)
 	async getAlgo(id: number, requestedUserId: number) {
 		const algoRepository = AppDataSource.manager.getRepository(Algorithme);
 
@@ -93,19 +96,8 @@ export class AlgosService {
 		if (!algo) return null;
 
 		// Vérification des droits de l'utilisateur.
-		let hasRights = false;
-		for (const perm of algo.permAlgorithmes) {
-			if (
-				perm.idUtilisateur === requestedUserId &&
-				(perm.droits === Droits.Owner ||
-					perm.droits === Droits.ReadWrite ||
-					perm.droits === Droits.ReadOnly)
-			) {
-				hasRights = true;
-				break;
-			}
-		}
-		if (!hasRights) return null;
+		const rights = await rightsOfUserOnAlgo(requestedUserId, id);
+		if (!rights) return null;
 
 		// Récupération de l'algorithme dans le système de fichiers.
 		const algoData = this.readAlgoFromDisk(id);
@@ -119,7 +111,6 @@ export class AlgosService {
 	 * @param algo Données de l'algorithme à créer.
 	 * @returns L'algorithme créé.
 	 */
-	// TODO : Vérifier les droits de l'utilisateur (query)
 	async createAlgo(algo: AlgoCreateDTO) {
 		// Vérification des droits de l'utilisateur.
 		if (algo.requestedUserId !== algo.ownerId) {
@@ -167,14 +158,15 @@ export class AlgosService {
 	 */
 	// TODO: mettre à jour les permissions de l'algorithme.
 	// TODO : Si l'utilisateur renvoie le même algo, ne rien faire
-	// TODO : Modifier l'id du dossier
 	async updateAlgo(algo: AlgoUpdateDTO) {
 		// Récupération de l'algorithme.
 		const algoToUpdate = await this.getAlgo(algo.id, algo.requestedUserId);
 		if (!algoToUpdate) return null;
 
-		// TODO : Vérification des droits de l'utilisateur (query)
-
+		// Vérification des droits de l'utilisateur.
+		const rights = await rightsOfUserOnAlgo(algo.id, algo.requestedUserId);
+		if (!rights || rights === Droits.ReadWrite || rights === Droits.Owner)
+			return new ForbiddenRes(Responses.General.Forbidden);
 
 		// Validation de l'algorithme.
 		const validationResult = AlgoValidator.validateAlgo(algo.sourceCode);
@@ -188,6 +180,10 @@ export class AlgosService {
 		// Mise à jour de l'algorithme.
 		algoToUpdate.nom = algo.nom;
 		algoToUpdate.dateModification = new Date().getTime();
+
+		if (algo.dossierId) {
+			algoToUpdate.idDossier = algo.dossierId;
+		}
 
 		// Enregistrement de l'algorithme.
 		const savedAlgo = await algoRepository.save(algoToUpdate);
@@ -204,7 +200,6 @@ export class AlgosService {
 	 * @param requestedUserId Id de l'utilisateur qui demande la suppression.
 	 * @returns L'algorithme supprimé.
 	 */
-	// TODO : Vérifier les droits de l'utilisateur (query)
 	async deleteAlgo(id: number, requestedUserId: number) {
 		const algoRepository = AppDataSource.manager.getRepository(Algorithme);
 
@@ -218,9 +213,8 @@ export class AlgosService {
 		if (!algo) return null;
 
 		// Vérification des droits de l'utilisateur.
-		const ownerAlgo = await getOwnerOfAlgo(id);
-		if (ownerAlgo.id != requestedUserId)
-			return new ForbiddenRes(Responses.General.Forbidden);
+		const rights = await rightsOfUserOnAlgo(requestedUserId, id);
+		if (!rights) return new ForbiddenRes(Responses.General.Forbidden);
 
 		// Suppression de l'algorithme.
 		try {

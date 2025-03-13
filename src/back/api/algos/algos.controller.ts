@@ -193,6 +193,9 @@ export class AlgosController {
 		if (Array.isArray(permsAlgorithme) && permsAlgorithme?.length > 0) {
 			data.permsAlgorithme = permsAlgorithme;
 		}
+		if (req.body.dossierId) {
+			data.dossierId = req.body.dossierId;
+		}
 
 		const updatedAlgo = await this.algosService.updateAlgo(data);
 

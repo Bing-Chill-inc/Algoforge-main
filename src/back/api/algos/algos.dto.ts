@@ -64,6 +64,10 @@ export class AlgoUpdateDTO {
 	@IsOptional()
 	permsAlgorithme?: PermAlgorithme[];
 
+	@IsNumber()
+	@IsOptional()
+	dossierId?: number;
+
 	@IsJSON()
 	sourceCode: string;
 }
