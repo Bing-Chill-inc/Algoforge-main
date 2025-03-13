@@ -59,7 +59,6 @@ const ProblemeSchema = BaseProblemeSchema.extend({
 });
 
 // -> Dictionnaire de données
-// TODO: compléter avec les valeurs possibles du dictionnaire de données.
 const DictionnaireDonneeSchema = z.object({
 	typeElement: TypeElementEnum.extract([TypeElement.DictionnaireDonnee]),
 	types: z.record(z.string()).optional(),
