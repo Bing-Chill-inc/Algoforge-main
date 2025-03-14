@@ -16,7 +16,7 @@ import { Algorithme } from "./Algorithme.schema";
  * @hideconstructor
  * @category Database
  */
-@Entity()
+@Entity({ name: "dossier" })
 export class Dossier {
 	/**
 	 * Identifiant du dossier.
@@ -34,6 +34,15 @@ export class Dossier {
 	 */
 	@Column({ type: "varchar", length: 255, default: "Nouveau dossier" })
 	nom: string;
+	
+	/**
+	 * ID du dossier parent
+	 * Si null, le dossier est à la racine.
+	 * @public
+	 * @type {number}
+	 */
+	@Column({ type: "int", nullable: true, name: "idparent" })
+	idParent: number;
 
 	/**
 	 * Dossier parent.
@@ -42,7 +51,7 @@ export class Dossier {
 	 * @type {Dossier}
 	 */
 	@OneToOne(() => Dossier, (dossier) => dossier.id)
-	idParent: Dossier;
+	dossier: Dossier;
 
 	/**
 	 * Date de création du dossier.
@@ -50,7 +59,7 @@ export class Dossier {
 	 * @public
 	 * @type {number}
 	 */
-	@Column({ type: "bigint" })
+	@Column({ type: "bigint", name: "datecreation" })
 	dateCreation: number;
 
 	/**
@@ -59,7 +68,7 @@ export class Dossier {
 	 * @public
 	 * @type {number}
 	 */
-	@Column({ type: "bigint" })
+	@Column({ type: "bigint", name: "datemodification" })
 	dateModification: number;
 
 	/**

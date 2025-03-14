@@ -3,7 +3,16 @@ import { Utilisateur } from "../../db/schemas/Utilisateur.schema";
 import { Token } from "../../db/schemas/Token.schema";
 import { AppDataSource } from "../../db/data-source";
 import { UserLoginDTO, UserRegisterDTO, UserUpdateDTO } from "./users.dto";
-import { Res } from "../../types/response.entity";
+import {
+	BadRequestRes,
+	CreatedRes,
+	ForbiddenRes,
+	InternalServerErrorRes,
+	NotFoundRes,
+	OkRes,
+	Res,
+	UnauthorizedRes,
+} from "../../types/response.entity";
 import { createMailToken } from "../../utils/mailConfirmToken";
 import { validateClass } from "../../utils/classValidator";
 import { Logger } from "../../utils/logger";
@@ -16,6 +25,9 @@ import { PermDossier } from "../../db/schemas/PermDossier.schema";
 import { PermAlgorithme } from "../../db/schemas/PermAlgorithme.schema";
 import { AlgosService } from "../algos/algos.service";
 import { MailService } from "../../mail/mail.service";
+import { Responses } from "../../constants/responses.const";
+import { hashString } from "../../utils/hash";
+import { fetch } from "bun";
 
 /**
  * Service pour les utilisateurs.
@@ -48,11 +60,14 @@ export class UsersService {
 	async register(data: UserRegisterDTO) {
 		// Vérification de la présence des données
 		if (!data.email || !data.password || !data.pseudo) {
-			return new Res(400, "Il manque des données");
+			return new BadRequestRes(Responses.General.Missing_data);
 		}
 		const validationErrors = await validateClass(data);
 		if (validationErrors) {
-			return new Res(400, "Données invalides", validationErrors);
+			return new BadRequestRes(
+				Responses.General.Invalid_data,
+				validationErrors,
+			);
 		}
 
 		// Vérification de l'unicité de l'email, requête à la DB avec TypeORM
@@ -61,12 +76,11 @@ export class UsersService {
 		});
 
 		if (userMails.some((user) => user.adresseMail === data.email)) {
-			return new Res(409, "Email déjà utilisé");
+			return new Res(409, Responses.User.Email_already_exists);
 		}
 
 		// Hashage du mot de passe
-		const salt = bcrypt.genSaltSync(10);
-		const hash = bcrypt.hashSync(data.password, salt);
+		const hash = hashString(data.password);
 
 		// Création de l'utilisateur
 		const newUser = new Utilisateur();
@@ -80,16 +94,17 @@ export class UsersService {
 
 		// Gestions des erreurs
 		if (!savedUser) {
-			return new Res(500, "Erreur lors de la création de l'utilisateur");
+			return new InternalServerErrorRes(
+				Responses.User.Errors.While_creating_user,
+			);
 		}
 
 		// Génération du token de confirmation
 		const mailToken = await createMailToken(savedUser.id);
 
 		if (!mailToken) {
-			return new Res(
-				500,
-				"Erreur lors de la création du token de confirmation",
+			return new InternalServerErrorRes(
+				Responses.Token.Errors.While_creating_token,
 			);
 		}
 
@@ -119,7 +134,7 @@ export class UsersService {
 		savedUser.mdpHash = undefined;
 
 		// Retour de la réponse
-		return new Res(201, "Utilisateur créé", savedUser);
+		return new CreatedRes(Responses.User.Success.Created, savedUser);
 	}
 
 	// POST /confirm
@@ -137,7 +152,7 @@ export class UsersService {
 			id = decoded.split("_")[0];
 			dateInscription = decoded.split("_")[1].slice(3);
 		} catch (err) {
-			return new Res(400, "Token invalide");
+			return new BadRequestRes(Responses.Token.Invalid);
 		}
 
 		// On récupère l'utilisateur dans la DB
@@ -145,12 +160,14 @@ export class UsersService {
 
 		// Vérification de l'utilisateur (s'il existe et s'il n'est pas déjà vérifié)
 		if (!user || user.isVerified) {
-			return new Res(404, "Utilisateur introuvable ou déjà vérifié");
+			return new NotFoundRes(
+				Responses.User.Not_found_or_already_verified,
+			);
 		}
 
 		// Vérification de la date d'inscription
 		if (user.dateInscription.toString() !== dateInscription) {
-			return new Res(400, "Token invalide");
+			return new BadRequestRes(Responses.Token.Invalid);
 		}
 
 		// Mise à jour du statut "vérfié" de l'utilisateur
@@ -158,13 +175,12 @@ export class UsersService {
 
 		// Enregistrement de l'utilisateur
 		if (!(await this.utilisateursRepository.save(user))) {
-			return new Res(
-				500,
-				"Erreur lors de la confirmation de l'inscription",
+			return new InternalServerErrorRes(
+				Responses.User.Errors.While_confirming_user,
 			);
 		}
 
-		return new Res(200, "Inscription confirmée");
+		return new OkRes(Responses.User.Success.Confirmed);
 	}
 
 	// POST /login
@@ -176,11 +192,14 @@ export class UsersService {
 	async login(data: UserLoginDTO) {
 		// Vérification de la présence des données
 		if (!data.email || !data.password) {
-			return new Res(400, "Il manque des données");
+			return new BadRequestRes(Responses.General.Missing_data);
 		}
 		const validationErrors = await validateClass(data);
 		if (validationErrors) {
-			return new Res(400, "Données invalides", validationErrors);
+			return new BadRequestRes(
+				Responses.General.Invalid_data,
+				validationErrors,
+			);
 		}
 
 		// Recherche de l'utilisateur dans la DB
@@ -189,12 +208,16 @@ export class UsersService {
 		});
 
 		if (!user) {
-			return new Res(404, "Utilisateur introuvable");
+			return new NotFoundRes(Responses.User.Not_found);
 		}
 
 		// Vérification du mot de passe
 		if (!bcrypt.compareSync(data.password, user.mdpHash)) {
-			return new Res(401, "Mot de passe incorrect");
+			return new UnauthorizedRes(Responses.User.Invalid_password);
+		}
+		// Vérification de l'utilisateur
+		if (!user.isVerified) {
+			return new UnauthorizedRes(Responses.User.Not_verified);
 		}
 
 		// Suppression du hash du mot de passe avant renvoi
@@ -219,10 +242,10 @@ export class UsersService {
 		user.tokens = [savedToken];
 
 		// Retour de la réponse
-		return new Res(200, "Connexion réussie", user);
+		return new OkRes(Responses.Auth.Success.Logged_in, user);
 	}
 
-	// POST /logout
+	// GET /logout
 	/** Déconnexion de l'utilisateur, utilisé lors de sa déconnexion.
 	 *
 	 * @param token Token de l'utilisateur à déconnecter.
@@ -235,10 +258,10 @@ export class UsersService {
 		});
 
 		if (deletedToken.affected <= 0) {
-			return new Res(404, "Token introuvable");
+			return new NotFoundRes(Responses.Token.Not_found);
 		}
 
-		return new Res(200, "Déconnexion réussie");
+		return new OkRes(Responses.Auth.Success.Logged_out);
 	}
 
 	// POST /recover
@@ -250,7 +273,7 @@ export class UsersService {
 	recover(email: string) {
 		// TODO: Récupération du mot de passe par mail (envoi d'un mail de récupération)
 
-		return new Res(200, "Mail de récupération envoyé");
+		return new OkRes("Mail de récupération envoyé");
 	}
 
 	// GET /:id
@@ -266,31 +289,37 @@ export class UsersService {
 		});
 
 		if (!user) {
-			return new Res(404, "Utilisateur introuvable");
+			return new NotFoundRes(Responses.User.Not_found);
 		}
 
 		// Suppression du hash du mot de passe avant renvoi
 		user.mdpHash = undefined;
 
 		// Retour de la réponse
-		return new Res(200, "Utilisateur trouvé", user);
+		return new OkRes(Responses.User.Success.Found, user);
 	}
 
 	// PUT /:id
 	async updateUser(id: number, data: UserUpdateDTO) {
 		// Vérification des droits de l'utilisateur.
 		if (data.requestedUserId !== id) {
-			return new Res(403, "Permission refusée");
+			return new ForbiddenRes(Responses.General.Forbidden);
 		}
 
 		// Vérification de la présence des données
 		if (!data.currentPassword) {
-			return new Res(400, "Il manque des données");
+			return new BadRequestRes(Responses.General.Missing_data);
+		}
+		if (!data.pseudo && !data.urlPfp && !data.newPassword) {
+			return new BadRequestRes(Responses.General.Missing_data);
 		}
 
 		const validationErrors = await validateClass(data);
 		if (validationErrors) {
-			return new Res(400, "Données invalides", validationErrors);
+			return new BadRequestRes(
+				Responses.General.Invalid_data,
+				validationErrors,
+			);
 		}
 
 		// Récupération de l'utilisateur dans la DB
@@ -299,19 +328,27 @@ export class UsersService {
 		});
 
 		if (!user) {
-			return new Res(404, "Utilisateur introuvable");
+			return new NotFoundRes(Responses.User.Not_found);
 		} else if (!bcrypt.compareSync(data.currentPassword, user.mdpHash)) {
-			return new Res(401, "Mot de passe incorrect");
+			return new UnauthorizedRes(Responses.User.Invalid_password);
 		}
 
 		// Mise à jour de l'utilisateur
 		if (data.pseudo) {
 			user.pseudo = data.pseudo;
-		} else if (data.newPassword) {
-			const salt = bcrypt.genSaltSync(10);
-			user.mdpHash = bcrypt.hashSync(data.newPassword, salt);
-		} else {
-			return new Res(400, "Il manque des données");
+		}
+		if (data.newPassword) {
+			user.mdpHash = hashString(data.newPassword);
+		}
+		if (data.urlPfp) {
+			const requestUrl = await fetch(data.urlPfp);
+			if (
+				!requestUrl.ok ||
+				!requestUrl.headers?.get("content-type")?.includes("image")
+			) {
+				return new BadRequestRes(Responses.User.Invalid_profile_url);
+			}
+			user.urlPfp = data.urlPfp;
 		}
 
 		// Enregistrement de l'utilisateur
@@ -321,7 +358,7 @@ export class UsersService {
 		savedUser.mdpHash = undefined;
 
 		// Retour de la réponse
-		return new Res(200, "Utilisateur mis à jour", savedUser);
+		return new OkRes(Responses.User.Success.Updated, savedUser);
 	}
 
 	// DELETE /:id
@@ -337,9 +374,9 @@ export class UsersService {
 		});
 
 		if (!user) {
-			return new Res(404, "Utilisateur introuvable");
+			return new NotFoundRes(Responses.User.Not_found);
 		} else if (user.id !== requestedUserId) {
-			return new Res(403, "Permission refusée");
+			return new ForbiddenRes(Responses.General.Forbidden);
 		}
 
 		// // Suppression des tokens de l'utilisateur.
@@ -375,16 +412,23 @@ export class UsersService {
 		// Suppression de l'utilisateur.
 		const deletedUser = await this.utilisateursRepository.delete(user.id);
 
-		return new Res(200, "Utilisateur supprimé", deletedUser);
+		return new OkRes(Responses.User.Success.Deleted, deletedUser);
 	}
 
-	/** Vérification de la validité du token.
-	 *
+	/**
+	 * Vérification de la validité du token.
 	 * @param token Token à vérifier.
 	 * @returns Réponse de la vérification du token.
+	 * @example
+	 * // Retours possibles :
+	 * { status: 400, message: "Token manquant" }
+	 * { status: 401, message: "Token invalide" }
+	 * { status: 401, message: "Utilisateur non vérifié" }
+	 * { status: 401, message: "Token expiré" }
+	 * { status: 200, message: "Token valide", data: Token }
 	 */
 	async verify(token: string) {
-		if (!token) return new Res(400, "Token manquant");
+		if (!token) return new BadRequestRes(Responses.Token.Missing);
 
 		// On compare le token avec la DB
 		const tokenDB = await this.tokensRepository.findOne({
@@ -393,14 +437,14 @@ export class UsersService {
 		});
 
 		if (!tokenDB) {
-			return new Res(401, "Token invalide");
+			return new UnauthorizedRes(Responses.Token.Invalid);
 		} else if (tokenDB.utilisateur.isVerified === false) {
-			return new Res(401, "Utilisateur non vérifié");
+			return new UnauthorizedRes(Responses.User.Not_verified);
 		} else if (tokenDB.dateExpiration < new Date().getTime()) {
 			// Suppression du token expiré
 			await this.tokensRepository.delete(tokenDB.token);
 
-			return new Res(401, "Token expiré");
+			return new UnauthorizedRes(Responses.Token.Expired);
 		} else {
 			// Prolongation de la date d'expiration de 48h
 			tokenDB.dateExpiration = new Date(
@@ -410,7 +454,7 @@ export class UsersService {
 
 			tokenDB.utilisateur.mdpHash = undefined;
 
-			return new Res(200, "Token valide", tokenDB);
+			return new OkRes(Responses.Token.Valid, tokenDB);
 		}
 	}
 
@@ -426,11 +470,11 @@ export class UsersService {
 		});
 
 		if (!user) {
-			return new Res(404, "Utilisateur introuvable");
+			return new NotFoundRes(Responses.User.Not_found);
 		}
 
 		user.mdpHash = undefined;
 
-		return new Res(200, "Utilisateur trouvé", user);
+		return new OkRes(Responses.User.Success.Found, user);
 	}
 }

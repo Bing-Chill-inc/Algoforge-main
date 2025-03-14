@@ -1,4 +1,4 @@
-import { Entity, Column, PrimaryColumn, ManyToOne } from "typeorm";
+import { Entity, Column, PrimaryColumn, ManyToOne, JoinColumn } from "typeorm";
 import type { Relation } from "typeorm";
 import { Utilisateur } from "./Utilisateur.schema";
 
@@ -10,7 +10,7 @@ import { Utilisateur } from "./Utilisateur.schema";
  * @hideconstructor
  * @category Database
  */
-@Entity()
+@Entity({ name: "token" })
 export class Token {
 	/**
 	 * Valeur du token. Identifiant unique.
@@ -26,7 +26,7 @@ export class Token {
 	 * @public
 	 * @type {number}
 	 */
-	@Column({ type: "bigint" })
+	@Column({ type: "bigint", name: "datecreation" })
 	dateCreation: number;
 
 	/**
@@ -35,7 +35,7 @@ export class Token {
 	 * @public
 	 * @type {number}
 	 */
-	@Column({ type: "bigint" })
+	@Column({ type: "bigint", name: "dateexpiration" })
 	dateExpiration: number;
 
 	/**
@@ -45,5 +45,6 @@ export class Token {
 	 * @see {@link Utilisateur}
 	 */
 	@ManyToOne(() => Utilisateur, (utilisateur) => utilisateur.tokens)
+	@JoinColumn({ name: "idutilisateur" })
 	utilisateur: Relation<Utilisateur>;
 }

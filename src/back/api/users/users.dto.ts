@@ -4,6 +4,7 @@ import {
 	IsNumber,
 	IsOptional,
 	IsString,
+	IsUrl,
 	Length,
 } from "class-validator";
 
@@ -53,6 +54,11 @@ export class UserUpdateDTO {
 
 	@IsNotEmpty()
 	currentPassword: string;
+
+	@IsOptional()
+	@IsUrl()
+	@Length(0, 255)
+	urlPfp?: string;
 
 	@IsOptional()
 	@Length(8, 255)

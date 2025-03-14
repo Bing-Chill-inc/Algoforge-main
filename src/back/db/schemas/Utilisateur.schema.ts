@@ -1,4 +1,10 @@
-import { Entity, PrimaryGeneratedColumn, Column, OneToMany } from "typeorm";
+import {
+	Entity,
+	PrimaryGeneratedColumn,
+	Column,
+	OneToMany,
+	JoinColumn,
+} from "typeorm";
 import type { Relation } from "typeorm";
 import { Token } from "./Token.schema";
 import { PermDossier } from "./PermDossier.schema";
@@ -12,7 +18,7 @@ import { PermAlgorithme } from "./PermAlgorithme.schema";
  * @hideconstructor
  * @category Database
  */
-@Entity()
+@Entity({ name: "utilisateur" })
 export class Utilisateur {
 	/**
 	 * Identifiant de l'utilisateur.
@@ -27,7 +33,7 @@ export class Utilisateur {
 	 * @public
 	 * @type {string}
 	 */
-	@Column({ type: "varchar", length: 255 })
+	@Column({ type: "varchar", length: 255, name: "adressemail" })
 	adresseMail: string;
 
 	/**
@@ -43,7 +49,7 @@ export class Utilisateur {
 	 * @public
 	 * @type {string}
 	 */
-	@Column({ type: "varchar", length: 255 })
+	@Column({ type: "varchar", length: 255, name: "mdphash" })
 	mdpHash: string;
 
 	/**
@@ -52,7 +58,7 @@ export class Utilisateur {
 	 * @public
 	 * @type {number}
 	 */
-	@Column({ type: "bigint" })
+	@Column({ type: "bigint", name: "dateinscription" })
 	dateInscription: number;
 
 	/**
@@ -69,7 +75,7 @@ export class Utilisateur {
 	 * @public
 	 * @type {string}
 	 */
-	@Column({ type: "varchar", length: 255, nullable: true })
+	@Column({ type: "varchar", length: 255, nullable: true, name: "urlpfp" })
 	urlPfp: string;
 
 	/**
@@ -79,7 +85,7 @@ export class Utilisateur {
 	 * @type {boolean}
 	 * @default false
 	 */
-	@Column({ type: "boolean", default: false })
+	@Column({ type: "boolean", default: false, name: "isverified" })
 	isVerified: boolean;
 
 	/**
@@ -89,6 +95,7 @@ export class Utilisateur {
 	 * @see {@link Token}
 	 */
 	@OneToMany(() => Token, (token) => token.utilisateur)
+	@JoinColumn({ name: "idutilisateur" })
 	tokens: Token[];
 
 	/**

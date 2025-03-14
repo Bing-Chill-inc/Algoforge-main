@@ -1,4 +1,4 @@
-import { readFileSync } from "fs";
+import { readFileSync, watch } from "fs";
 import express from "express";
 import cors from "cors";
 import path from "path";
@@ -6,6 +6,7 @@ import type RouteHandler from "./types/RouteHandler";
 import { loggerMiddleware } from "./middlewares/logger.middleware";
 import { errorMiddleware } from "./middlewares/error.middleware";
 import { Logger } from "./utils/logger";
+import { $ } from "bun";
 Logger.filePath = `../../logs/`;
 Logger.log("Starting application...", "main");
 
@@ -28,7 +29,26 @@ app.get(getBibliothèque.route, getBibliothèque.callback);
 
 app.get(iconHandler.route, iconHandler.callback);
 
-app.use("/edit", express.static(path.join(__dirname, "/../front-editeur/src")));
+// Préparation du bundle de l'éditeur - SmeltJS.
+const SmeltJS = async () => {
+	console.log(await $`bun i`.cwd(`../front-editeur`).text());
+
+	// Si le contenu du dossier ../front-editeur change, il faut relancer la commande.
+
+	watch(
+		path.join(__dirname, "/../front-editeur/src"),
+		{ recursive: true },
+		async () => {
+			console.log(await $`bun SmeltJS.ts`.cwd(`../front-editeur`).text());
+		},
+	);
+
+	console.log(await $`bun SmeltJS.ts`.cwd(`../front-editeur`).text());
+};
+
+SmeltJS();
+
+app.use("/edit", express.static(path.join(__dirname, "/../front-editeur/out")));
 app.use("/cloud", express.static(path.join(__dirname, "/../front-cloud/dist")));
 
 app.get("/", (_, res) => {

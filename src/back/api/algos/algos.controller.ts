@@ -3,9 +3,16 @@ import expressAsyncHandler from "express-async-handler";
 import { AlgosService } from "./algos.service";
 import { Logger } from "../../utils/logger";
 import { AlgoCreateDTO, AlgoUpdateDTO } from "./algos.dto";
-import { Res } from "../../types/response.entity";
-import { AuthService } from "../auth/auth.service";
+import {
+	BadRequestRes,
+	CreatedRes,
+	NotFoundRes,
+	OkRes,
+	Res,
+} from "../../types/response.entity";
 import { Utilisateur } from "../../db/schemas/Utilisateur.schema";
+import { authMiddleware } from "../../middlewares/auth.middleware";
+import { Responses } from "../../constants/responses.const";
 
 /**
  * Contrôleur pour les algorithmes.
@@ -22,18 +29,19 @@ import { Utilisateur } from "../../db/schemas/Utilisateur.schema";
 export class AlgosController {
 	public router: Router;
 	private usersService: AlgosService;
-	private authService: AuthService;
 
 	constructor() {
 		Logger.debug("Initializing...", "AlgosController");
 		this.router = Router();
 		this.usersService = new AlgosService();
-		this.authService = new AuthService();
 		this.init();
 		Logger.debug("Done !", "AlgosController");
 	}
 
 	private init() {
+		// Vérification des droits de l'utilisateur sur toutes les routes.
+		this.router.use(authMiddleware);
+
 		this.router.get(
 			"/byUserId/:id",
 			expressAsyncHandler(this.getAlgosOfUser.bind(this)),
@@ -54,10 +62,6 @@ export class AlgosController {
 
 	// GET /byUserId/:id
 	private async getAlgosOfUser(req: Request, res: Response) {
-		// Vérification des droits de l'utilisateur
-		const hasRights = await this.authService.verifyUser(req, res);
-		if (!hasRights) return res;
-
 		// Récupération des données de la requête
 		const { id } = req.params;
 
@@ -65,19 +69,17 @@ export class AlgosController {
 
 		if (!algos || algos.length === 0) {
 			return res
-				.status(404)
-				.json(new Res(404, "Aucun algorithme trouvé"));
+				.status(NotFoundRes.statut)
+				.json(new NotFoundRes(Responses.Algo.By_User.Not_found));
 		}
 
-		return res.status(200).json(new Res(200, "Algorithmes trouvés", algos));
+		return res
+			.status(OkRes.statut)
+			.json(new OkRes(Responses.Algo.By_User.Found, algos));
 	}
 
 	// GET /:id
 	private async getAlgo(req: Request, res: Response) {
-		// Vérification des droits de l'utilisateur
-		const hasRights = await this.authService.verifyUser(req, res);
-		if (!hasRights) return res;
-
 		// Récupération des données de la requête
 		const { id } = req.params;
 		const user = res.locals.user as Utilisateur;
@@ -85,22 +87,24 @@ export class AlgosController {
 		const algo = await this.usersService.getAlgo(+id, user.id);
 
 		if (!algo) {
-			return res.status(404).json(new Res(404, "Algorithme non trouvé"));
+			return res
+				.status(NotFoundRes.statut)
+				.json(new NotFoundRes(Responses.Algo.Not_found));
 		}
 
-		return res.status(200).json(new Res(200, "Algorithme trouvé", algo));
+		return res
+			.status(OkRes.statut)
+			.json(new OkRes(Responses.Algo.Success.Found, algo));
 	}
 
 	// POST /
 	private async createAlgo(req: Request, res: Response) {
-		// Vérification des droits de l'utilisateur
-		const hasRights = await this.authService.verifyUser(req, res);
-		if (!hasRights) return res;
-
 		// Récupération des données de la requête
 		const { ownerId, nom, sourceCode } = req.body;
 		if (!ownerId || !nom || !sourceCode) {
-			return res.status(400).json(new Res(400, "Données manquantes"));
+			return res
+				.status(BadRequestRes.statut)
+				.json(new BadRequestRes(Responses.General.Missing_data));
 		}
 
 		const data = new AlgoCreateDTO();
@@ -114,20 +118,20 @@ export class AlgosController {
 			return res.status(result.statut).json(result);
 		}
 
-		return res.status(201).json(new Res(201, "Algorithme créé", result));
+		return res
+			.status(CreatedRes.statut)
+			.json(new CreatedRes(Responses.Algo.Success.Created, result));
 	}
 
 	// PUT /:id
 	private async updateAlgo(req: Request, res: Response) {
-		// Vérification des droits de l'utilisateur
-		const hasRights = await this.authService.verifyUser(req, res);
-		if (!hasRights) return res;
-
 		// Récupération des données de la requête
 		const { id } = req.params;
 		const { nom, permsAlgorithme, sourceCode } = req.body;
 		if (!id || !nom || !permsAlgorithme || !sourceCode) {
-			return res.status(400).json(new Res(400, "Données manquantes"));
+			return res
+				.status(BadRequestRes.statut)
+				.json(new BadRequestRes(Responses.General.Missing_data));
 		}
 
 		const data = new AlgoUpdateDTO();
@@ -142,20 +146,18 @@ export class AlgosController {
 		const updatedAlgo = await this.usersService.updateAlgo(data);
 
 		if (!updatedAlgo) {
-			return res.status(404).json(new Res(404, "Algorithme non trouvé"));
+			return res
+				.status(404)
+				.json(new NotFoundRes(Responses.Algo.Not_found));
 		}
 
 		return res
-			.status(200)
-			.json(new Res(200, "Algorithme mis à jour", updatedAlgo));
+			.status(OkRes.statut)
+			.json(new OkRes(Responses.Algo.Success.Updated, updatedAlgo));
 	}
 
 	// DELETE /:id
 	private async deleteAlgo(req: Request, res: Response) {
-		// Vérification des droits de l'utilisateur
-		const hasRights = await this.authService.verifyUser(req, res);
-		if (!hasRights) return res;
-
 		// Récupération des données de la requête
 		const { id } = req.params;
 
@@ -165,13 +167,15 @@ export class AlgosController {
 		);
 
 		if (!result) {
-			return res.status(404).json(new Res(404, "Algorithme non trouvé"));
+			return res
+				.status(NotFoundRes.statut)
+				.json(new NotFoundRes(Responses.Algo.Not_found));
 		} else if (result instanceof Res) {
 			return res.status(result.statut).json(result);
 		}
 
 		return res
-			.status(200)
-			.json(new Res(200, "Algorithme supprimé", result));
+			.status(OkRes.statut)
+			.json(new OkRes(Responses.Algo.Success.Deleted, result));
 	}
 }

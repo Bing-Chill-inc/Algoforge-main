@@ -11,10 +11,18 @@ import { PermAlgorithme } from "../../db/schemas/PermAlgorithme.schema";
 import { Droits } from "../../types/droits.enum";
 import { AlgoCreateDTO, AlgoUpdateDTO } from "./algos.dto";
 import { AlgoValidator } from "../../utils/algoValidator";
-import { Res } from "../../types/response.entity";
+import {
+	BadRequestRes,
+	ForbiddenRes,
+	InternalServerErrorRes,
+	NotFoundRes,
+	OkRes,
+	Res,
+} from "../../types/response.entity";
 import path from "path";
 import { Logger } from "../../utils/logger";
 import { getOwnerOfAlgo } from "../../utils/queries";
+import { Responses } from "../../constants/responses.const";
 
 /**
  * Service pour les algorithmes.
@@ -97,16 +105,13 @@ export class AlgosService {
 	async createAlgo(algo: AlgoCreateDTO) {
 		// Vérification des droits de l'utilisateur.
 		if (algo.requestedUserId !== algo.ownerId) {
-			return new Res(
-				403,
-				"Vous n'avez pas les droits pour créer cet algorithme",
-			);
+			return new ForbiddenRes(Responses.Algo.Forbidden_create);
 		}
 
 		// Validation de l'algorithme.
 		const validationResult = AlgoValidator.validateAlgo(algo.sourceCode);
 		if (!validationResult.success) {
-			return new Res(400, "Algorithme invalide", validationResult);
+			return new BadRequestRes(Responses.Algo.Invalid, validationResult);
 		}
 
 		const algoRepository = AppDataSource.manager.getRepository(Algorithme);
@@ -169,17 +174,14 @@ export class AlgosService {
 				(perm.droits === Droits.Owner ||
 					perm.droits === Droits.ReadWrite)
 			) {
-				return new Res(
-					403,
-					"Vous n'avez pas les droits pour modifier cet algorithme",
-				);
+				return new ForbiddenRes(Responses.Algo.Forbidden_update);
 			}
 		}
 
 		// Validation de l'algorithme.
 		const validationResult = AlgoValidator.validateAlgo(algo.sourceCode);
 		if (!validationResult.success) {
-			return new Res(400, "Algorithme invalide", validationResult);
+			return new BadRequestRes(Responses.Algo.Invalid, validationResult);
 		}
 		algo.sourceCode = JSON.parse(JSON.stringify(validationResult.data));
 
@@ -218,30 +220,29 @@ export class AlgosService {
 		// Vérification des droits de l'utilisateur.
 		const ownerAlgo = await getOwnerOfAlgo(id);
 		if (ownerAlgo.id != requestedUserId)
-			return new Res(403, "Permission refusée");
+			return new ForbiddenRes(Responses.General.Forbidden);
 
 		// Suppression de l'algorithme.
 		try {
 			// Suppression des permissions de l'algorithme.
-			algo.permAlgorithmes.forEach(async (perm) => {
+			for (const perm of algo.permAlgorithmes) {
 				await AppDataSource.manager
 					.getRepository(PermAlgorithme)
 					.delete(perm);
-			});
+			}
 			delete algo.permAlgorithmes;
 			// Suppression de l'algorithme en base de données.
 			const deletedAlgo = await algoRepository.delete(algo.id);
 
 			// Suppression de l'algorithme du système de fichiers.
 			const result = this.deleteAlgoFromDisk(id);
-			if (!result) return new Res(404, "Algorithme non trouvé");
-			return new Res(200, "Algorithme supprimé", deletedAlgo);
+			if (!result) return new NotFoundRes(Responses.Algo.Not_found);
+			return new OkRes(Responses.Algo.Success.Deleted, deletedAlgo);
 		} catch (error) {
 			if (error instanceof Error)
 				Logger.error(error.stack, "AlgosService: deleteAlgo");
-			return new Res(
-				500,
-				"Erreur lors de la suppression de l'algorithme",
+			return new InternalServerErrorRes(
+				Responses.Algo.Errors.While_deleting_algo,
 			);
 		}
 	}
