@@ -438,7 +438,10 @@ export class UsersService {
 
 		if (!tokenDB) {
 			return new UnauthorizedRes(Responses.Token.Invalid);
-		} else if (tokenDB.utilisateur.isVerified === false) {
+		} else if (
+			this.mailService.active &&
+			tokenDB.utilisateur.isVerified === false
+		) {
 			return new UnauthorizedRes(Responses.User.Not_verified);
 		} else if (tokenDB.dateExpiration < new Date().getTime()) {
 			// Suppression du token expiré

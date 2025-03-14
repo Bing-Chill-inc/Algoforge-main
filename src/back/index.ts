@@ -46,8 +46,6 @@ const SmeltJS = async () => {
 	console.log(await $`bun SmeltJS.ts`.cwd(`../front-editeur`).text());
 };
 
-SmeltJS();
-
 app.use("/edit", express.static(path.join(__dirname, "/../front-editeur/out")));
 app.use("/cloud", express.static(path.join(__dirname, "/../front-cloud/dist")));
 
@@ -128,6 +126,14 @@ const dbConnexion = new Promise((resolve, reject) => {
 });
 // Init mail connection
 const mailConnexion = new Promise((resolve, reject) => {
+	if (process.env.MAIL_ENABLED !== "true") {
+		Logger.warn(
+			"Mail service is not active. No mail will be sent.",
+			"mail: service",
+		);
+		resolve(null);
+		return;
+	}
 	const retryTimes = parseInt(process.env.RETRY_MANY_TIMES || "3", 10);
 	let attempts = 1;
 
@@ -165,7 +171,7 @@ const mailConnexion = new Promise((resolve, reject) => {
 // Starting application
 import { AlgosController } from "./api/algos/algos.controller";
 import { UsersController } from "./api/users/users.controller";
-Promise.all([dbConnexion, mailConnexion])
+Promise.all([dbConnexion, mailConnexion, SmeltJS()])
 	.then(async () => {
 		// Handling API logs.
 		app.use(loggerMiddleware);
