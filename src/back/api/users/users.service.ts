@@ -15,6 +15,7 @@ import { Droits } from "../../types/droits.enum";
 import { PermDossier } from "../../db/schemas/PermDossier.schema";
 import { PermAlgorithme } from "../../db/schemas/PermAlgorithme.schema";
 import { AlgosService } from "../algos/algos.service";
+import { MailService } from "../../mail/mail.service";
 
 /**
  * Service pour les utilisateurs.
@@ -36,6 +37,7 @@ export class UsersService {
 		AppDataSource.getRepository(PermAlgorithme);
 
 	algoService: AlgosService = new AlgosService();
+	mailService: MailService = new MailService();
 
 	// POST /register
 	/** Création et enregistrement d'un nouvel utilisateur, utilisé lors de son inscription.
@@ -91,12 +93,27 @@ export class UsersService {
 			);
 		}
 
-		// TODO: Envoi du mail de confirmation
+		// Envoi du mail de confirmation
 		Logger.debug(
 			`Mail de confirmation (token): ${mailToken}`,
 			"UsersService",
 			2,
 		);
+		try {
+			await this.mailService.sendConfirmationMail(
+				savedUser.adresseMail,
+				savedUser,
+				mailToken,
+			);
+		} catch (err) {
+			// Suppression de l'utilisateur en cas d'erreur
+			await this.utilisateursRepository.delete(savedUser.id);
+
+			return new Res(
+				500,
+				"Erreur lors de l'envoi du mail de confirmation",
+			);
+		}
 
 		// Suppression du hash du mot de passe
 		savedUser.mdpHash = undefined;

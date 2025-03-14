@@ -16,4 +16,9 @@ export const UserSet = {
 		password: "testtest2",
 		pseudo: "Test2",
 	},
+	validUser: {
+		email: "contact@toxykaubleu.fr",
+		password: "toxykaubleu:)",
+		pseudo: "ToxykAuBleu",
+	},
 };
