@@ -41,7 +41,7 @@ export class Utilisateur {
 	 * @public
 	 * @type {string}
 	 */
-	@Column({ type: "varchar", length: 255 })
+	@Column({ type: "varchar", length: 30 })
 	pseudo: string;
 
 	/**

@@ -88,6 +88,9 @@ export class UsersService {
 		newUser.mdpHash = hash;
 		newUser.pseudo = data.pseudo;
 		newUser.dateInscription = new Date().getTime();
+		newUser.urlPfp = `https://api.dicebear.com/9.x/bottts-neutral/svg?seed=${encodeURIComponent(
+			data.pseudo,
+		)}`;
 
 		// Enregistrement de l'utilisateur
 		const savedUser = await this.utilisateursRepository.save(newUser);
