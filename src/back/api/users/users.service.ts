@@ -219,7 +219,7 @@ export class UsersService {
 			return new UnauthorizedRes(Responses.User.Invalid_password);
 		}
 		// Vérification de l'utilisateur
-		if (!user.isVerified) {
+		if (this.mailService.active && !user.isVerified) {
 			return new UnauthorizedRes(Responses.User.Not_verified);
 		}
 
