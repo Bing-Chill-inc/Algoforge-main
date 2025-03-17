@@ -21,6 +21,7 @@ import {
 	UserUpdateDTO,
 } from "../api/users/users.dto";
 import { createMailToken } from "../utils/mailConfirmToken";
+import { mocked } from "../mail/transporter";
 
 const utilisateursRepository = AppDataSource.getRepository(Utilisateur);
 
@@ -126,6 +127,14 @@ export const UsersTests = async () => {
 				`Token de confirmation: ${confirmToken}`,
 				"test: users",
 				5,
+			);
+			const mails = mocked.mock.getSentMail();
+			expect(mails).toHaveLength(1);
+			expect(mails[0].from).toBe(process.env.MAIL_USER);
+			expect(mails[0].to).toBe(UserSet.example.email);
+			expect(mails[0].subject).toBe("Confirmation mail");
+			expect(mails[0].html.toString()).toContain(
+				confirmToken.slice(0, 10),
 			);
 		});
 
