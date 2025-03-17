@@ -55,6 +55,10 @@ app.get("/", (_, res) => {
 	res.redirect("/edit");
 });
 
+app.get("/favicon.ico", (_, res) => {
+	res.sendFile(path.join(__dirname, "favicon.ico"));
+});
+
 // Ouverture de algorithme en paramètre.
 app.post("/edit", (req, res) => {
 	const { corpAlgo, nomFichier } = req.body;
