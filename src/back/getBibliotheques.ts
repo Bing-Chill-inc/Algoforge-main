@@ -30,7 +30,9 @@ const explorerDossier = (dossier: string) => {
 		const cheminDossier = path.join(dossier, nomDossier);
 		const structureDossier = {
 			nom: lireContenuFichier(path.join(cheminDossier, "nom.txt")),
-			nomCourt: lireContenuFichier(path.join(cheminDossier, "noCourt.txt")),
+			nomCourt: lireContenuFichier(
+				path.join(cheminDossier, "noCourt.txt"),
+			),
 			contenu: [],
 		} as {
 			nom: string;
@@ -43,7 +45,7 @@ const explorerDossier = (dossier: string) => {
 			}[];
 		};
 
-		const fichiers = fs.readdirSync(cheminDossier);
+		const fichiers = fs.readdirSync(cheminDossier).sort();
 		fichiers.forEach((nomFichier) => {
 			const cheminComplet = path.join(cheminDossier, nomFichier);
 			if (fs.statSync(cheminComplet).isDirectory()) {
@@ -52,10 +54,9 @@ const explorerDossier = (dossier: string) => {
 						lireContenuFichier(
 							path.join(cheminComplet, "nom.txt"),
 						) || nomFichier,
-					nomCourt:
-						lireContenuFichier(
-							path.join(cheminComplet, "nomCourt.txt"),
-						),
+					nomCourt: lireContenuFichier(
+						path.join(cheminComplet, "nomCourt.txt"),
+					),
 					descriptif:
 						lireContenuFichier(
 							path.join(cheminComplet, "descriptif.html"),
