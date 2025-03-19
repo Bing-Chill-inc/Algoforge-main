@@ -10,7 +10,8 @@ check_requirements() {
 # Cloner le dépôt GitHub.
 clone_repository() {
     if [ -d "Algoforge" ]; then
-        if [ "$(pwd)" != "$(pwd)/Algoforge" ]; then
+        if [ "$(basename "$(pwd)")" == "Algoforge" ]; then
+			echo "⚙️ Le dossier 'Algoforge' existe déjà et vous êtes actuellement dedans. Passage à l'étape suivante..."
 			return
         fi
         echo "⚙️ Le dossier 'Algoforge' existe déjà. Passage à l'étape suivante..."
@@ -55,7 +56,7 @@ del_repository() {
 	if [ "$del_response" = "o" ] || [ "$del_response" = "O" ] || [ "$del_response" = "" ]; then
     	[ -d "Algoforge" ] && rm -rf Algoforge
     	[ -d "Algoforge-main" ] && rm -rf Algoforge-main
-		[ "$(pwd)" != "$(pwd)/Algoforge" ] && cd .. && rm -rf Algoforge
+		[ "$(basename "$(pwd)")" == "Algoforge" ] && cd .. && rm -rf Algoforge
 	fi
 	exit 1
 }
