@@ -35,11 +35,24 @@ update_repository() {
 
 # Renommer le fichier template-local.env en .env.
 rename_env_file() {
+	if [ -f ".env" ]; then
+		echo "⚠️ Le fichier '.env' existe déjà. Voulez-vous le réinitialiser ?."
+		echo "Voulez-vous le réinitialiser ? (o/N)"
+		read response
+		if [ "$response" = "o" ] || [ "$response" = "O" ]; then
+			rm .env || { echo "⚠️ Échec de la suppression du fichier '.env'."; del_repository; exit 1; }
+		else
+			echo "⚙️ Démarrage de l'application avec le fichier '.env' existant..."
+			return
+		fi
+	fi
+
 	if [ ! -f "template-local.env" ]; then
     	echo "⚠️ Le fichier 'template-local.env' est introuvable. Assurez-vous que le dépôt a été cloné correctement."
     	exit 1
 	fi
-	mv template-local.env .env || { echo "⚠️ Échec du renommage du fichier 'template-local.env' en '.env'."; del_repository; exit 1; }
+	cp template-local.env template-local-copy.env || { echo "⚠️ Échec de la copie du fichier 'template-local.env'."; del_repository; exit 1; }
+	mv template-local-copy.env .env || { echo "⚠️ Échec du renommage du fichier 'template-local.env' en '.env'."; del_repository; exit 1; }
 }
 
 # Lancer l'application avec bun.

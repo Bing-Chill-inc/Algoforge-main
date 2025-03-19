@@ -18,7 +18,7 @@
     - [Installation UNIX](#installation-unix)
   - [Version standalone](#version-standalone)
     - [Programmes requis](#programmes-requis-1)
-  - [Installation automatique (UNIX)](#installation-automatique-unix)
+    - [Installation automatique (UNIX)](#installation-automatique-unix)
     - [Installation manuelle (Windows/UNIX)](#installation-manuelle-windowsunix)
   - [Version de bureau](#version-de-bureau)
 - [Identité collaborateurs](#identité-collaborateurs)
@@ -112,7 +112,7 @@ La version docker de l'application comprend par défaut une base de données Pos
 - Installer [git](https://git-scm.com/downloads).
 - Installer [Bun](https://bun.sh), testé avec la version 1.2.5.
 
-### Installation automatique (UNIX)
+#### Installation automatique (UNIX)
 
 1. Télécharger l'installateur de l'application : `run-local.sh`
 2. Exécuter le programme depuis une invite de commande:
