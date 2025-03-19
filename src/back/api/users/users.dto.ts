@@ -4,6 +4,7 @@ import {
 	IsNumber,
 	IsOptional,
 	IsString,
+	IsUrl,
 	Length,
 } from "class-validator";
 
@@ -13,7 +14,7 @@ import {
  * @category Utilisateurs
  */
 export class UserRegisterDTO {
-	@Length(3, 255)
+	@Length(3, 30)
 	@IsNotEmpty()
 	pseudo: string;
 
@@ -48,11 +49,16 @@ export class UserLoginDTO {
  */
 export class UserUpdateDTO {
 	@IsOptional()
-	@Length(3, 255)
+	@Length(3, 30)
 	pseudo?: string;
 
 	@IsNotEmpty()
 	currentPassword: string;
+
+	@IsOptional()
+	@IsUrl()
+	@Length(0, 255)
+	urlPfp?: string;
 
 	@IsOptional()
 	@Length(8, 255)

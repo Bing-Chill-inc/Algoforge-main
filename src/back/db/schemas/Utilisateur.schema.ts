@@ -1,4 +1,10 @@
-import { Entity, PrimaryGeneratedColumn, Column, OneToMany } from "typeorm";
+import {
+	Entity,
+	PrimaryGeneratedColumn,
+	Column,
+	OneToMany,
+	JoinColumn,
+} from "typeorm";
 import type { Relation } from "typeorm";
 import { Token } from "./Token.schema";
 import { PermDossier } from "./PermDossier.schema";
@@ -35,7 +41,7 @@ export class Utilisateur {
 	 * @public
 	 * @type {string}
 	 */
-	@Column({ type: "varchar", length: 255 })
+	@Column({ type: "varchar", length: 30 })
 	pseudo: string;
 
 	/**
@@ -89,6 +95,7 @@ export class Utilisateur {
 	 * @see {@link Token}
 	 */
 	@OneToMany(() => Token, (token) => token.utilisateur)
+	@JoinColumn({ name: "idutilisateur" })
 	tokens: Token[];
 
 	/**
