@@ -9,13 +9,16 @@ check_requirements() {
 
 # Cloner le dépôt GitHub.
 clone_repository() {
-	echo "⚙️ Téléchargement de l'application depuis GitHub..."
-	if [ -d "Algoforge" ]; then
-    	echo "⚠️ Le dossier 'Algoforge' existe déjà. Veuillez le supprimer ou choisir un autre emplacement."
-    	del_repository
-    	exit 1
-	fi
+    if [ -d "Algoforge" ]; then
+        if [ "$(pwd)" != "$(pwd)/Algoforge" ]; then
+			return
+        fi
+        echo "⚙️ Le dossier 'Algoforge' existe déjà. Passage à l'étape suivante..."
+        cd Algoforge || { echo "⚠️ Le dossier 'Algoforge' n'existe pas. Vérifiez le nom du dossier."; exit 1; }
+        return
+    fi
 
+	echo "⚙️ Téléchargement de l'application depuis GitHub..."
 	git clone --depth 1 --recurse-submodules https://github.com/Bing-Chill-inc/Algoforge-main.git || { echo "Échec du clonage du dépôt. Vérifiez votre connexion internet."; exit 1; }
 	mv Algoforge-main Algoforge || { echo "⚠️ Échec du renommage du dossier 'Algoforge-main' en 'Algoforge'."; del_repository; exit 1; }
 	cd Algoforge || { echo "⚠️ Le dossier 'Algoforge' n'existe pas. Vérifiez le clonage du dépôt."; exit 1; }
@@ -23,6 +26,8 @@ clone_repository() {
 
 # Mettre à jour le dépôt GitHub.
 update_repository() {
+	echo "⚙️ Mise à jour des sous-modules..."
+	git pull || { echo "⚠️ Échec de la mise à jour du dépôt. Vérifiez votre connexion internet."; del_repository; exit 1; }
 	echo "⚙️ Mise à jour des sous-modules..."
 	git submodule update --init --recursive || { echo "⚠️ Échec de la mise à jour des sous-modules."; del_repository; exit 1; }
 }
@@ -50,6 +55,7 @@ del_repository() {
 	if [ "$del_response" = "o" ] || [ "$del_response" = "O" ] || [ "$del_response" = "" ]; then
     	[ -d "Algoforge" ] && rm -rf Algoforge
     	[ -d "Algoforge-main" ] && rm -rf Algoforge-main
+		[ "$(pwd)" != "$(pwd)/Algoforge" ] && cd .. && rm -rf Algoforge
 	fi
 	exit 1
 }
