@@ -14,7 +14,8 @@
 		"isolatedModules": true,
 		"emitDecoratorMetadata": true,
 		"experimentalDecorators": true,
-		"skipLibCheck": true
+		"skipLibCheck": true,
+		"downlevelIteration": true
 	},
 
 	"exclude": ["node_modules", "*.sqlite", "docs"],

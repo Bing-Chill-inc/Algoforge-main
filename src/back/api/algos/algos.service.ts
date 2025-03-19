@@ -44,21 +44,29 @@ export class AlgosService {
 	/**
 	 * Récupère les permissions des algorithmes que l'utilisateur a le droit de voir (propriétaire, écriture+lecture, lecture seule).
 	 * @param id Id de l'utilisateur.
+	 * @param requestedUserId Id de l'utilisateur qui demande les algorithmes.
 	 * @param dirId Id du dossier.
 	 * @returns Les algorithmes de l'utilisateur.
 	 */
 	// NOTE: dirId est de quel type lors de l'appel de la fonction ? (number ou null)
-	async getAlgosPermsOfUser(id: number, dirId: number) {
+	async getAlgosPermsOfUser(
+		id: number,
+		requestedUserId: number,
+		dirId: number,
+	) {
 		const permAlgoRepository =
 			AppDataSource.manager.getRepository(PermAlgorithme);
 
 		// Récupération des algorithmes de l'utilisateur.
 		if (dirId) {
 			// Vérification des droits de l'utilisateur sur le dossier.
-			// TODO: pas terminé.
-			const rights = await rightsOfUserOnDir(id, dirId);
+			const rights = await rightsOfUserOnDir(requestedUserId, dirId);
+			if (!rights) {
+				return new ForbiddenRes(Responses.General.Forbidden);
+			}
 
-			return await permAlgoRepository.find({
+			// Récupération des algorithmes de l'utilisateur dans le dossier.
+			const algos = await permAlgoRepository.find({
 				relations: { algorithme: true },
 				where: {
 					idUtilisateur: id,
@@ -69,20 +77,46 @@ export class AlgosService {
 					},
 				},
 			});
+
+			if (!algos) {
+				return new NotFoundRes(Responses.Algo.By_User.Not_found);
+			}
+			return new OkRes(Responses.Algo.By_User.Found, algos);
 		} else {
-			return await permAlgoRepository.find({
+			const algos = await permAlgoRepository.find({
 				relations: { algorithme: true },
 				where: {
 					idUtilisateur: id,
 					algorithme: { dossier: null },
 				},
 			});
+
+			if (!algos) {
+				return new NotFoundRes(Responses.Algo.By_User.Not_found);
+			}
+
+			// Vérifier que l'utilisateur a le droit de voir ces algorithmes.
+			for (const [index, algo] of algos.entries()) {
+				const rights = await rightsOfUserOnAlgo(
+					requestedUserId,
+					algo.idAlgorithme,
+				);
+				if (!rights) {
+					algos.splice(index, 1);
+				}
+			}
+			if (algos.length === 0) {
+				return new NotFoundRes(Responses.Algo.By_User.Not_found);
+			}
+
+			return new OkRes(Responses.Algo.By_User.Found, algos);
 		}
 	}
 
 	/**
 	 * Récupère un algorithme.
 	 * @param id Id de l'algorithme.
+	 * @param requestedUserId Id de l'utilisateur qui demande l'algorithme.
 	 * @returns L'algorithme.
 	 */
 	async getAlgo(id: number, requestedUserId: number) {

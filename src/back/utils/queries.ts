@@ -33,7 +33,7 @@ export async function getOwnerOfDir(dirId: number): Promise<Utilisateur> {
 		relations: { utilisateur: true },
 		where: { idDossier: dirId, droits: Droits.Owner },
 	});
-	return owner.utilisateur;
+	return owner ? owner.utilisateur : null;
 }
 
 /**

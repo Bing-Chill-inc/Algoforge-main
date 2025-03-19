@@ -61,36 +61,45 @@ export class AlgosController {
 		);
 	}
 
-	// GET /byUserId/:id
-	// Si dirId est null, on se situe à la racine, sinon on se situe dans un dossier
+	/**
+	 * GET /byUserId/:id ?dirId=:dirId
+	 * Récupérer les algorithmes d'un utlisateur.
+	 * @param req.params.id Id de l'utilisateur.
+	 * @param req.params.dirId Id du dossier dans lequel on recherche les algorithmes.
+	 * @remarks
+	 * Besoin d'être connecté, voir: {@link UsersService.verify}
+	 * Si algorithmes trouvés, voir la structure suivante: {@link PermAlgorithme}
+	 * @example
+	 * // Retours possibles :
+	 * {status: 404, message: "Dossier non trouvé" }
+	 * {status: 404, message: "Aucun algorithme trouvé" }
+	 * {status: 200, message: "Algorithmes trouvés", data: [new PermAlgorithme()] }
+	 */
 	private async getAlgosPermsOfUser(req: Request, res: Response) {
-		let { id, dirId } = req.params;
+		let { id } = req.params;
+		const { dirId } = req.query as { dirId: string };
+		const user = res.locals.user as Utilisateur;
 
 		// Si dirId est null, on se situe à la racine, sinon on se situe dans un dossier, on récupère l'owner du dossier
 		if (dirId) {
 			// Récupérer l'owner du dossier
-			id = String((await getOwnerOfDir(+dirId)).id);
-
-			if (!id) {
-				return res.status(404).json(new Res(404, "Dossier non trouvé"));
+			const owner = await getOwnerOfDir(+dirId);
+			if (!owner) {
+				return res
+					.status(NotFoundRes.statut)
+					.json(new NotFoundRes(Responses.Dir.Not_found));
 			}
+			id = String(owner.id);
 		}
 
 		// Récupération des permissions des algorithmes de l'utilisateur dans le dossier
-		const algosPerms = await this.algosService.getAlgosPermsOfUser(
+		const algosPermsResponse = await this.algosService.getAlgosPermsOfUser(
 			+id,
+			user.id,
 			+dirId,
 		);
 
-		if (!algosPerms || algosPerms.length === 0) {
-			return res
-				.status(NotFoundRes.statut)
-				.json(new NotFoundRes(Responses.Algo.By_User.Not_found));
-		}
-
-		return res
-			.status(OkRes.statut)
-			.json(new OkRes(Responses.Algo.By_User.Found, algosPerms));
+		return res.status(algosPermsResponse.statut).json(algosPermsResponse);
 	}
 
 	/**
@@ -99,6 +108,7 @@ export class AlgosController {
 	 * @param req.params.id Id de l'algorithme
 	 * @remarks
 	 * Besoin d'être connecté, voir: {@link UsersService.verify}
+	 * Pour accéder au code source de l'algorithme, lire la propriété sourceCode.
 	 * @example
 	 * // Retours possibles :
 	 * {status: 404, message: "Algorithme non trouvé" }
