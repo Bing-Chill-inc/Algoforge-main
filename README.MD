@@ -18,7 +18,7 @@
     - [Installation UNIX](#installation-unix)
   - [Version standalone](#version-standalone)
     - [Programmes requis](#programmes-requis-1)
-    - [Installation (Windows/UNIX):](#installation-windowsunix)
+    - [Installation (Windows/UNIX)](#installation-windowsunix)
   - [Version de bureau](#version-de-bureau)
 - [Identité collaborateurs](#identité-collaborateurs)
 - [Structure des dossiers](#structure-des-dossiers)
@@ -53,16 +53,16 @@ Précédemment nommé I Need Algo, **AlgoForge** a changé de nom pour aborder u
 
 ## Fonctionnalités de l'application
 
--   Espace cloud pour la gestion des algorithmes:
-    -   Dossiers pour organiser les algorithmes.
-    -   Partage d'algorithmes possible avec d'autres utilisateurs, en lecture seule ou en lecture/écriture.
--   Editeur d'algorithme complet:
-    -   Plusieurs thèmes.
-    -   Importation d'algorithmes.
-    -   Exportation d'algorithmes sous différent formats, avec une sélection ou tout l'algorithme.
-    -   Bibliotheque d'algorithmes, privée et publique.
-    -   Décomposition des algorithmes sur un autre plan de travail pour une meilleure lisibilité.
-    -   Zoom dynamique, raccourcis clavier, menu contextuel complet.
+- Espace cloud pour la gestion des algorithmes:
+  - Dossiers pour organiser les algorithmes.
+  - Partage d'algorithmes possible avec d'autres utilisateurs, en lecture seule ou en lecture/écriture.
+- Editeur d'algorithme complet:
+  - Plusieurs thèmes.
+  - Importation d'algorithmes.
+  - Exportation d'algorithmes sous différent formats, avec une sélection ou tout l'algorithme.
+  - Bibliotheque d'algorithmes, privée et publique.
+  - Décomposition des algorithmes sur un autre plan de travail pour une meilleure lisibilité.
+  - Zoom dynamique, raccourcis clavier, menu contextuel complet.
 
 ## Utilisation / Installation
 
@@ -70,7 +70,7 @@ AlgoForge est utilisable de deux manières différentes: en ligne sur un navigat
 
 ### Version en ligne
 
-Pour utiliser AlgoForge en ligne, vous pouvez vous rendre sur ce lien : https://algoforge.fr/
+Pour utiliser AlgoForge en ligne, vous pouvez vous rendre sur ce lien : <https://algoforge.fr/>
 
 ### Version docker
 
@@ -78,9 +78,9 @@ La version docker de l'application comprend par défaut une base de données Pos
 
 #### Programmes requis
 
--   Rendre disponible 2 ports: l'un pour l'application et l'autre pour PGAdmin. (par défaut 5205 et 5300)
--   Installer [git](https://git-scm.com/downloads).
--   Installer [Docker](https://docker.com).
+- Rendre disponible 2 ports: l'un pour l'application et l'autre pour PGAdmin. (par défaut 5205 et 5300)
+- Installer [git](https://git-scm.com/downloads).
+- Installer [Docker](https://docker.com).
 
 > [!CAUTION]
 > Docker doit être démarré quand vous voulez utiliser l’application.
@@ -89,8 +89,8 @@ La version docker de l'application comprend par défaut une base de données Pos
 
 1. Télécharger l'installateur de l'application. Nous vous proposons 2 méthodes pour cela:
 
--   Sans Powershell: `run-installer.bat`
--   Avec Powershell: `run-installer.ps1`
+- Sans Powershell: `run-installer.bat`
+- Avec Powershell: `run-installer.ps1`
 
 1. Exécuter le programme depuis une invite de commande ou en double-cliquant dessus.
 
@@ -101,60 +101,63 @@ La version docker de l'application comprend par défaut une base de données Pos
 2. Exécuter le programme depuis une invite de commande:
 
 ```bash
-$ bash ./run-installer-minimal.sh
+./run-installer-minimal.sh
 ```
 
 ### Version standalone
 
 #### Programmes requis
 
--   Rendre disponible 1 port pour l'application. (5205 par défaut)
--   Installer [git](https://git-scm.com/downloads).
--   Installer [Bun](https://bun.sh), testé avec la version 1.1.34.
+- Rendre disponible 1 port pour l'application. (5205 par défaut)
+- Installer [git](https://git-scm.com/downloads).
+- Installer [Bun](https://bun.sh), testé avec la version 1.2.5.
 
-#### Installation (Windows/UNIX):
+#### Installation (Windows/UNIX)
 
 1. Télécharger le programme grâce à la commande git suivante:
 
-```
+```bash
 git clone --depth 1 --recurse-submodules https://github.com/Bing-Chill-inc/Algoforge-main.git
 ```
 
 2. Se placer dans le dossier Algoforge:
 
-```
-cd Algoforge
+```bash
+cd Algoforge-main
 ```
 
 3. Mettre à jour les sous-modules (nécessaire)
 
-```
+```bash
 git submodule update --init --recursive
 ```
 
 4. Renommer le fichier template.env en .env:
 
-```
-mv template.env .env
+```bash
+mv template-local.env .env
 ```
 
 5. (optionnel) Modifier le fichier .env pour modifier les informations de connexion à la base de données.
 
+> [!CAUTION]
+> Si on veut utiliser cette version standalone en local, il faut laisser la configuration sqlite.
+
 6. Se placer dans le dossier back-end:
 
-```
-cd src/back-end
+```bash
+cd src/back
 ```
 
 7. Lancer l’application avec la commande suivante:
 
-```
+```bash
 bun run prod
 ```
 
 _(Cette dernière va directement télécharger et installer les dépendances nécessaires)_
 
-L'application est en train de se démarrer en arrière plan ! Ouvrez un navigateur et entrez l'adresse: http://localhost:5205 (par défaut)
+L'application est en train de se démarrer en arrière plan ! Ouvrez un navigateur et entrez l'adresse: <http://localhost:5205> (par défaut)
 
 ### Version de bureau
 
@@ -162,18 +165,18 @@ WIP
 
 ## Identité collaborateurs
 
--   Esteban BACKES: [**@Eliossore**](https://github.com/Eliossore)
--   Jokin SUARES: [**@Feror-BotMaker**](https://github.com/Feror-BotMaker)
--   Maxime JACOB-SAUSSEREAU: [**@Fetnmax**](https://github.com/Fetnmax)
--   Fabien SPROCQ: [**@Sprocq**](https://github.com/Sprocq)
--   Samuel CURRAN: [**@SamuelCURRAN0**](https://github.com/SamuelCURRAN0)
--   Mathieu FOISSAC: [**@ToxykAuBleu**](https://github.com/ToxykAuBleu)
--   Adrien HIRIBARREN TOUYA: [**@Alakamar**](https://github.com/Alakamar)
--   Lucas MARROT: [**@LucasMarrot**](https://github.com/LucasMarrot)
--   Romain LABORDE: [**@RomLabo**](https://github.com/RomLabo)
+- Esteban BACKES: [**@Eliossore**](https://github.com/Eliossore)
+- Jokin SUARES: [**@Feror-BotMaker**](https://github.com/Feror-BotMaker)
+- Maxime JACOB-SAUSSEREAU: [**@Fetnmax**](https://github.com/Fetnmax)
+- Fabien SPROCQ: [**@Sprocq**](https://github.com/Sprocq)
+- Samuel CURRAN: [**@SamuelCURRAN0**](https://github.com/SamuelCURRAN0)
+- Mathieu FOISSAC: [**@ToxykAuBleu**](https://github.com/ToxykAuBleu)
+- Adrien HIRIBARREN TOUYA: [**@Alakamar**](https://github.com/Alakamar)
+- Lucas MARROT: [**@LucasMarrot**](https://github.com/LucasMarrot)
+- Romain LABORDE: [**@RomLabo**](https://github.com/RomLabo)
 
 ## Structure des dossiers
 
 (Work In Progress)
 
--   Le dossier src héberge le Code de l'algorithme
+- Le dossier src héberge le Code de l'algorithme
