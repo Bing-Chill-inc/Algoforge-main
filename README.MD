@@ -18,7 +18,8 @@
     - [Installation UNIX](#installation-unix)
   - [Version standalone](#version-standalone)
     - [Programmes requis](#programmes-requis-1)
-    - [Installation (Windows/UNIX)](#installation-windowsunix)
+  - [Installation automatique (UNIX)](#installation-automatique-unix)
+    - [Installation manuelle (Windows/UNIX)](#installation-manuelle-windowsunix)
   - [Version de bureau](#version-de-bureau)
 - [Identité collaborateurs](#identité-collaborateurs)
 - [Structure des dossiers](#structure-des-dossiers)
@@ -70,7 +71,7 @@ AlgoForge est utilisable de deux manières différentes: en ligne sur un navigat
 
 ### Version en ligne
 
-Pour utiliser AlgoForge en ligne, vous pouvez vous rendre sur ce lien : <https://algoforge.fr/>
+Pour utiliser AlgoForge en ligne, vous pouvez vous rendre sur ce lien : [https://algoforge.fr/](https://algoforge.fr/)
 
 ### Version docker
 
@@ -89,19 +90,18 @@ La version docker de l'application comprend par défaut une base de données Pos
 
 1. Télécharger l'installateur de l'application. Nous vous proposons 2 méthodes pour cela:
 
-- Sans Powershell: `run-installer.bat`
-- Avec Powershell: `run-installer.ps1`
+- Sans Powershell: `run-docker.bat`
+- Avec Powershell: `run-docker.ps1`
 
 1. Exécuter le programme depuis une invite de commande ou en double-cliquant dessus.
 
 #### Installation UNIX
 
-1. Télécharger l'installateur de l'application : `run-installer.sh`
-
+1. Télécharger l'installateur de l'application : `run-docker.sh`
 2. Exécuter le programme depuis une invite de commande:
 
 ```bash
-./run-installer-minimal.sh
+./run-docker.sh
 ```
 
 ### Version standalone
@@ -112,7 +112,16 @@ La version docker de l'application comprend par défaut une base de données Pos
 - Installer [git](https://git-scm.com/downloads).
 - Installer [Bun](https://bun.sh), testé avec la version 1.2.5.
 
-#### Installation (Windows/UNIX)
+### Installation automatique (UNIX)
+
+1. Télécharger l'installateur de l'application : `run-local.sh`
+2. Exécuter le programme depuis une invite de commande:
+
+```bash
+./run-local.sh
+```
+
+#### Installation manuelle (Windows/UNIX)
 
 1. Télécharger le programme grâce à la commande git suivante:
 
@@ -132,7 +141,7 @@ cd Algoforge-main
 git submodule update --init --recursive
 ```
 
-4. Renommer le fichier template.env en .env:
+4. Renommer le fichier template-local.env en .env:
 
 ```bash
 mv template-local.env .env
@@ -157,7 +166,7 @@ bun run prod
 
 _(Cette dernière va directement télécharger et installer les dépendances nécessaires)_
 
-L'application est en train de se démarrer en arrière plan ! Ouvrez un navigateur et entrez l'adresse: <http://localhost:5205> (par défaut)
+L'application est en train de se démarrer en arrière plan ! Ouvrez un navigateur et entrez l'adresse: [http://localhost:5205](http://localhost:5205) (par défaut)
 
 ### Version de bureau
 

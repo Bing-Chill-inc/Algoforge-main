@@ -32,13 +32,13 @@ update_repository() {
 	git submodule update --init --recursive || { echo "⚠️ Échec de la mise à jour des sous-modules."; del_repository; exit 1; }
 }
 
-# Renommer le fichier template-quick.env en .env.
+# Renommer le fichier template-local.env en .env.
 rename_env_file() {
-	if [ ! -f "template-quick.env" ]; then
-    	echo "⚠️ Le fichier 'template-quick.env' est introuvable. Assurez-vous que le dépôt a été cloné correctement."
+	if [ ! -f "template-local.env" ]; then
+    	echo "⚠️ Le fichier 'template-local.env' est introuvable. Assurez-vous que le dépôt a été cloné correctement."
     	exit 1
 	fi
-	mv template-quick.env .env || { echo "⚠️ Échec du renommage du fichier 'template-quick.env' en '.env'."; del_repository; exit 1; }
+	mv template-local.env .env || { echo "⚠️ Échec du renommage du fichier 'template-local.env' en '.env'."; del_repository; exit 1; }
 }
 
 # Lancer l'application avec bun.

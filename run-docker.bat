@@ -44,12 +44,12 @@ if %errorlevel% neq 0 (
     exit /b 1
 )
 
-:: Renommage du fichier template.env en .env
-if not exist template.env (
-    echo Le fichier 'template.env' est introuvable.
+:: Renommage du fichier template-docker.env en .env
+if not exist template-docker.env (
+    echo Le fichier 'template-docker.env' est introuvable.
     exit /b 1
 )
-copy /y template.env .env
+copy /y template-docker.env .env
 
 :: Configuration des ports
 :pgadmin_port

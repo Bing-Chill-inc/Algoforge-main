@@ -42,13 +42,13 @@ function Update-Repository {
     }
 }
 
-# Renommer le fichier template.env en .env.
+# Renommer le fichier template-docker.env en .env.
 function Rename-Env-File {
-    if (-not (Test-Path "template.env")) {
-        Write-Host "Le fichier 'template.env' est introuvable." -ForegroundColor Red
+    if (-not (Test-Path "template-docker.env")) {
+        Write-Host "Le fichier 'template-docker.env' est introuvable." -ForegroundColor Red
         exit 1
     }
-    Copy-Item -Path "template.env" -Destination ".env" -Force
+    Copy-Item -Path "template-docker.env" -Destination ".env" -Force
 }
 
 # Configuration des ports.

@@ -28,13 +28,13 @@ update_repository() {
 	git submodule update --init --recursive || { echo "⚠️ Échec de la mise à jour des sous-modules."; del_repository; exit 1; }
 }
 
-# Renommer le fichier template.env en .env.
+# Renommer le fichier template-docker.env en .env.
 rename_env_file() {
-	if [ ! -f "template.env" ]; then
-    	echo "⚠️ Le fichier 'template.env' est introuvable. Assurez-vous que le dépôt a été cloné correctement."
+	if [ ! -f "template-docker.env" ]; then
+    	echo "⚠️ Le fichier 'template-docker.env' est introuvable. Assurez-vous que le dépôt a été cloné correctement."
     	exit 1
 	fi
-	mv template.env .env || { echo "⚠️ Échec du renommage du fichier 'template.env' en '.env'."; del_repository; exit 1; }
+	mv template-docker.env .env || { echo "⚠️ Échec du renommage du fichier 'template-docker.env' en '.env'."; del_repository; exit 1; }
 }
 
 # Modifier le fichier .env pour ajouter les informations de connexion à la base de données.
