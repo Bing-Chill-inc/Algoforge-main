@@ -21,6 +21,7 @@ import {
 	UserUpdateDTO,
 } from "../api/users/users.dto";
 import { createMailToken } from "../utils/mailConfirmToken";
+import { mocked } from "../mail/transporter";
 
 const utilisateursRepository = AppDataSource.getRepository(Utilisateur);
 
@@ -126,6 +127,14 @@ export const UsersTests = async () => {
 				`Token de confirmation: ${confirmToken}`,
 				"test: users",
 				5,
+			);
+			const mails = mocked.mock.getSentMail();
+			expect(mails).toHaveLength(1);
+			expect(mails[0].from).toBe(process.env.MAIL_USER);
+			expect(mails[0].to).toBe(UserSet.example.email);
+			expect(mails[0].subject).toBe("Confirmation mail");
+			expect(mails[0].html.toString()).toContain(
+				confirmToken.slice(0, 10),
 			);
 		});
 
@@ -353,6 +362,25 @@ export const UsersTests = async () => {
 			Logger.debug(JSON.stringify(response.body), "test: users", 5);
 			expect(response.status).toBe(BadRequestRes.statut);
 			expect(response.body.data[0]).toHaveProperty("property", "urlPfp");
+		});
+
+		test("ID: 102 -> erreur: Url de la photo de profil n'est pas une image.", async () => {
+			exampleToken = await login(UserSet.unitTestUser2);
+
+			const payload = new UserUpdateDTO();
+			payload.urlPfp = "https://google.com";
+			payload.currentPassword = UserSet.unitTestUser2.password;
+
+			const response = await request
+				.put(`/api/users/${UserSet.unitTestUser2.id}`)
+				.auth(exampleToken, { type: "bearer" })
+				.send(payload);
+			Logger.debug(JSON.stringify(response.body), "test: users", 5);
+			expect(response.status).toBe(BadRequestRes.statut);
+			expect(response.body).toHaveProperty(
+				"message",
+				Responses.User.Invalid_profile_url,
+			);
 		});
 
 		test("ID: 102 -> Url de la photo de profil modifié.", async () => {

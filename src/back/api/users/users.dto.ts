@@ -14,7 +14,7 @@ import {
  * @category Utilisateurs
  */
 export class UserRegisterDTO {
-	@Length(3, 255)
+	@Length(3, 30)
 	@IsNotEmpty()
 	pseudo: string;
 
@@ -49,7 +49,7 @@ export class UserLoginDTO {
  */
 export class UserUpdateDTO {
 	@IsOptional()
-	@Length(3, 255)
+	@Length(3, 30)
 	pseudo?: string;
 
 	@IsNotEmpty()

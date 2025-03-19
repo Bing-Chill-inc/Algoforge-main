@@ -319,6 +319,24 @@ export const AlgosTests = async () => {
 			// Vérification du résultat.
 			expect(result).toHaveProperty("success", true);
 		});
+		test("Algo référence n°6. -> aucune erreur: Dictionnaire vide.", async () => {
+			// Validation de l'algorithme.
+			const result = validationAlgo("algo-6");
+			// Vérification du résultat.
+			expect(result).toHaveProperty("success", true);
+		});
+		test("Algo référence n°7. -> aucune erreur: Dictionnaire valide.", async () => {
+			// Validation de l'algorithme.
+			const result = validationAlgo("algo-7");
+			// Vérification du résultat.
+			expect(result).toHaveProperty("success", true);
+		});
+		test("Algo référence n°8. -> 2 erreurs: Dictionnaire avec types de données invalides.", async () => {
+			// Validation de l'algorithme.
+			const result = validationAlgo("algo-8");
+			// Vérification du résultat.
+			expect(result.error.issues).toBeArrayOfSize(2);
+		});
 		test("Algo référence n°10. -> aucune erreur.", async () => {
 			// Validation de l'algorithme.
 			const result = validationAlgo("algo-complet");

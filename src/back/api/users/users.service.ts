@@ -24,8 +24,10 @@ import { Droits } from "../../types/droits.enum";
 import { PermDossier } from "../../db/schemas/PermDossier.schema";
 import { PermAlgorithme } from "../../db/schemas/PermAlgorithme.schema";
 import { AlgosService } from "../algos/algos.service";
+import { MailService } from "../../mail/mail.service";
 import { Responses } from "../../constants/responses.const";
 import { hashString } from "../../utils/hash";
+import { fetch } from "bun";
 
 /**
  * Service pour les utilisateurs.
@@ -47,6 +49,7 @@ export class UsersService {
 		AppDataSource.getRepository(PermAlgorithme);
 
 	algoService: AlgosService = new AlgosService();
+	mailService: MailService = new MailService();
 
 	// POST /register
 	/** Création et enregistrement d'un nouvel utilisateur, utilisé lors de son inscription.
@@ -85,6 +88,9 @@ export class UsersService {
 		newUser.mdpHash = hash;
 		newUser.pseudo = data.pseudo;
 		newUser.dateInscription = new Date().getTime();
+		newUser.urlPfp = `https://api.dicebear.com/9.x/bottts-neutral/svg?seed=${encodeURIComponent(
+			data.pseudo,
+		)}`;
 
 		// Enregistrement de l'utilisateur
 		const savedUser = await this.utilisateursRepository.save(newUser);
@@ -105,12 +111,27 @@ export class UsersService {
 			);
 		}
 
-		// TODO: Envoi du mail de confirmation
+		// Envoi du mail de confirmation
 		Logger.debug(
 			`Mail de confirmation (token): ${mailToken}`,
 			"UsersService",
 			2,
 		);
+		try {
+			await this.mailService.sendConfirmationMail(
+				savedUser.adresseMail,
+				savedUser,
+				mailToken,
+			);
+		} catch (err) {
+			// Suppression de l'utilisateur en cas d'erreur
+			await this.utilisateursRepository.delete(savedUser.id);
+
+			return new Res(
+				500,
+				"Erreur lors de l'envoi du mail de confirmation",
+			);
+		}
 
 		// Suppression du hash du mot de passe
 		savedUser.mdpHash = undefined;
@@ -196,6 +217,10 @@ export class UsersService {
 		// Vérification du mot de passe
 		if (!bcrypt.compareSync(data.password, user.mdpHash)) {
 			return new UnauthorizedRes(Responses.User.Invalid_password);
+		}
+		// Vérification de l'utilisateur
+		if (this.mailService.active && !user.isVerified) {
+			return new UnauthorizedRes(Responses.User.Not_verified);
 		}
 
 		// Suppression du hash du mot de passe avant renvoi
@@ -319,6 +344,13 @@ export class UsersService {
 			user.mdpHash = hashString(data.newPassword);
 		}
 		if (data.urlPfp) {
+			const requestUrl = await fetch(data.urlPfp);
+			if (
+				!requestUrl.ok ||
+				!requestUrl.headers?.get("content-type")?.includes("image")
+			) {
+				return new BadRequestRes(Responses.User.Invalid_profile_url);
+			}
 			user.urlPfp = data.urlPfp;
 		}
 
@@ -409,7 +441,10 @@ export class UsersService {
 
 		if (!tokenDB) {
 			return new UnauthorizedRes(Responses.Token.Invalid);
-		} else if (tokenDB.utilisateur.isVerified === false) {
+		} else if (
+			this.mailService.active &&
+			tokenDB.utilisateur.isVerified === false
+		) {
 			return new UnauthorizedRes(Responses.User.Not_verified);
 		} else if (tokenDB.dateExpiration < new Date().getTime()) {
 			// Suppression du token expiré

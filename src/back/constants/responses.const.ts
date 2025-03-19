@@ -5,6 +5,7 @@ export const Responses = {
 			"Utilisateur introuvable ou déjà vérifié.",
 		Not_verified: "Utilisateur non vérifié.",
 		Invalid_password: "Mot de passe incorrect.",
+		Invalid_profile_url: "URL de photo de profil invalide.",
 		Not_found: "Utilisateur introuvable.",
 		Errors: {
 			While_creating_user: "Erreur lors de la création de l'utilisateur.",
