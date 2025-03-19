@@ -1,0 +1,6 @@
+version: 2
+updates:
+  - package-ecosystem: "bun"
+    directory: "/src/back/"
+    schedule:
+      interval: "daily"
