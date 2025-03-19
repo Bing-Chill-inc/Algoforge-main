@@ -47,7 +47,8 @@
 			"packagerConfig": {
 				"extraResource": [
 					"../front-editeur/src"
-				]
+				],
+				"icon": "./icons/AlgoForge"
 			},
 			"makers": [
 				{
