@@ -9,11 +9,12 @@ check_requirements() {
 
 # Cloner le dépôt GitHub.
 clone_repository() {
+	if [ "$(basename "$(pwd)")" == "Algoforge" ]; then
+		echo "⚙️ Le dossier 'Algoforge' existe déjà et vous êtes actuellement dedans. Passage à l'étape suivante..."
+		return
+	fi
+
     if [ -d "Algoforge" ]; then
-        if [ "$(basename "$(pwd)")" == "Algoforge" ]; then
-			echo "⚙️ Le dossier 'Algoforge' existe déjà et vous êtes actuellement dedans. Passage à l'étape suivante..."
-			return
-        fi
         echo "⚙️ Le dossier 'Algoforge' existe déjà. Passage à l'étape suivante..."
         cd Algoforge || { echo "⚠️ Le dossier 'Algoforge' n'existe pas. Vérifiez le nom du dossier."; exit 1; }
         return
