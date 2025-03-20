@@ -7,6 +7,7 @@ import { AuthService } from "../auth/auth.service";
 import { Utilisateur } from "../../db/schemas/Utilisateur.schema";
 import { authMiddleware } from "../../middlewares/auth.middleware";
 import { Responses } from "../../constants/responses.const";
+import { customLimitMiddleware } from "../../middlewares/ratelimit.middleware";
 
 /**
  * Contrôleur pour les utilisateurs.
@@ -40,6 +41,7 @@ export class UsersController {
 	private init() {
 		this.router.post(
 			"/register",
+			customLimitMiddleware(300, 10),
 			expressAsyncHandler(this.register.bind(this)),
 		);
 		this.router.get(
