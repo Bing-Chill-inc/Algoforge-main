@@ -6,7 +6,7 @@ on:
             - main
 
 jobs:
-    build:
+    tests:
         runs-on: ubuntu-latest
         steps:
             - name: Checkout repository
@@ -21,5 +21,5 @@ jobs:
             - name: Install dependencies
               run: cd src/back && bun install
 
-            - name: Build typedoc
+            - name: Run tests
               run: cd src/back && bun test --env-file=../../template-test.env ./tests/setup.test.ts
