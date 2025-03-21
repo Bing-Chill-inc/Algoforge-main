@@ -20,4 +20,4 @@ jobs:
               run: cd src/back && bun install
 
             - name: Build typedoc
-              run: cd src/back && bun test --env-file=../../template-local.env ./tests/setup.test.ts
+              run: cd src/back && bun test --env-file=../../template-test.env ./tests/setup.test.ts
