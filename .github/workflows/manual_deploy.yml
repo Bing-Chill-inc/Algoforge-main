@@ -1,4 +1,4 @@
-name: Deploy Docusaurus to GitHub Pages
+name: Deploy Typedoc to GitHub Pages
 
 on:
     push:
@@ -19,13 +19,13 @@ jobs:
             - name: Install dependencies
               run: cd src/back && bun install
 
-            - name: Build Docusaurus project
-              run: bun run doc
+            - name: Build typedoc
+              run: cd src/back && bun run doc
 
             - name: Upload Pages artifact
               uses: actions/upload-pages-artifact@v3
               with:
-                  path: ./docs
+                  path: src/back/docs/
 
     deploy:
         runs-on: ubuntu-latest
