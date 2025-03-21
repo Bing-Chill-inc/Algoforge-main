@@ -225,11 +225,11 @@ export class AlgosService {
 		// Suppression de l'algorithme.
 		try {
 			// Suppression des permissions de l'algorithme.
-			algo.permAlgorithmes.forEach(async (perm) => {
+			for (const perm of algo.permAlgorithmes) {
 				await AppDataSource.manager
 					.getRepository(PermAlgorithme)
 					.delete(perm);
-			});
+			}
 			delete algo.permAlgorithmes;
 			// Suppression de l'algorithme en base de données.
 			const deletedAlgo = await algoRepository.delete(algo.id);
