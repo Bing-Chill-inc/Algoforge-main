@@ -483,4 +483,18 @@ export class UsersService {
 
 		return new OkRes(Responses.User.Success.Found, user);
 	}
+
+	async getQuota(id: number) {
+		// Récupération du nombre d'algorithmes de l'utilisateur.
+		const nbrAlgos = await this.permsAlgorithmesRepository.count({
+			where: { idUtilisateur: id },
+		})
+		// Définition de la limite d'algorithmes.
+		const max = Number(process.env.QUOTA_ALGO) || 500;
+
+		return new OkRes(Responses.User.Success.Quota, {
+			used: nbrAlgos,
+			max,
+		});
+	}
 }

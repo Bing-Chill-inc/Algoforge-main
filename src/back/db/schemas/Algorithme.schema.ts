@@ -4,6 +4,7 @@ import {
 	Column,
 	OneToMany,
 	ManyToOne,
+	JoinColumn,
 } from "typeorm";
 import type { Relation } from "typeorm";
 import { Dossier } from "./Dossier.schema";
@@ -68,5 +69,6 @@ export class Algorithme {
 	 * @type {Algorithme[]}
 	 */
 	@OneToMany(() => PermAlgorithme, (permAlgo) => permAlgo.algorithme)
+	@JoinColumn({ name: "id", referencedColumnName: "idalgorithme" })
 	permAlgorithmes: Relation<PermAlgorithme[]>;
 }

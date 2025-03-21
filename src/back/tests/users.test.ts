@@ -473,6 +473,20 @@ export const UsersTests = async () => {
 			);
 		});
 	});
+
+	describe("Users: GET /api/users/quota", async () => {
+		test("succès: Quota de l'utilisateur trouvés.", async () => {
+			const token = await login(UserSet.unitTestUser1);
+
+			const response = await request
+				.get("/api/users/quota")
+				.auth(token, { type: "bearer" });
+
+			Logger.debug(JSON.stringify(response.body), "test: users", 5);
+			expect(response.status).toBe(OkRes.statut);
+		});
+	});
+
 	describe("Users: POST /api/users/recover", async () => {
 		test.todo("erreur: Email introuvable.");
 		test.todo("succès: Mail de récupération envoyé");

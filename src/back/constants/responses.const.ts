@@ -18,6 +18,7 @@ export const Responses = {
 			Deleted: "Utilisateur supprimé.",
 			Confirmed: "Inscription confirmée.",
 			Found: "Utilisateur trouvé.",
+			Quota: "Quota de l'utilisateur trouvé.",
 		},
 	},
 	Token: {

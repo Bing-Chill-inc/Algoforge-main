@@ -44,7 +44,7 @@ export class PermAlgorithme {
 	 * @see {@link Utilisateur}
 	 */
 	@ManyToOne(() => Utilisateur, (utilisateur) => utilisateur.permAlgorithmes)
-	@JoinColumn({ name: "idutilisateur" })
+	@JoinColumn({ name: "idutilisateur", referencedColumnName: "id" })
 	utilisateur: Relation<Utilisateur>;
 
 	/**
@@ -54,6 +54,6 @@ export class PermAlgorithme {
 	 * @see {@link Algorithme}
 	 */
 	@ManyToOne(() => Algorithme, (algorithme) => algorithme.permAlgorithmes)
-	@JoinColumn({ name: "idalgorithme" })
+	@JoinColumn({ name: "idalgorithme", referencedColumnName: "id" })
 	algorithme: Relation<Algorithme>;
 }

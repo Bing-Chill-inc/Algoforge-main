@@ -56,6 +56,12 @@ export class UsersController {
 		);
 
 		this.router.get(
+			"/quota",
+			authMiddleware,
+			expressAsyncHandler(this.getQuota.bind(this)),
+		);
+
+		this.router.get(
 			"/:id",
 			authMiddleware,
 			expressAsyncHandler(this.getUser.bind(this)),
@@ -72,6 +78,8 @@ export class UsersController {
 			authMiddleware,
 			expressAsyncHandler(this.deleteUser.bind(this)),
 		);
+
+		
 	}
 
 	/**
@@ -282,6 +290,24 @@ export class UsersController {
 
 		// S'il a les droits, on supprime l'utilisateur
 		const reponse = await this.usersService.deleteUser(id, requestedUserId);
+
+		return res
+			.status(reponse.statut)
+			.json({ message: reponse.message, data: reponse.data });
+	}
+
+	/**
+	 * GET /quota
+	 * Récupérer le quota de l'utilisateur.
+	 * @remarks
+	 * Besoin d'être connecté, voir: {@link UsersService.verify}
+	 * @example
+	 * // Retours possibles :
+	 * {status: 200, message: "Quota récupéré", data: {used: number, total: number} }
+	 */
+	private async getQuota(req: Request, res: Response) {
+		const userId = (res.locals.user as Utilisateur).id;
+		const reponse = await this.usersService.getQuota(userId);
 
 		return res
 			.status(reponse.statut)
