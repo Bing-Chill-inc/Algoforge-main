@@ -112,25 +112,27 @@ export class UsersService {
 		}
 
 		// Envoi du mail de confirmation
-		Logger.debug(
-			`Mail de confirmation (token): ${mailToken}`,
-			"UsersService",
-			2,
-		);
-		try {
-			await this.mailService.sendConfirmationMail(
-				savedUser.adresseMail,
-				savedUser,
-				mailToken,
+		if (this.mailService.active) {
+			Logger.debug(
+				`Mail de confirmation (token): ${mailToken}`,
+				"UsersService",
+				2,
 			);
-		} catch (err) {
-			// Suppression de l'utilisateur en cas d'erreur
-			await this.utilisateursRepository.delete(savedUser.id);
+			try {
+				await this.mailService.sendConfirmationMail(
+					savedUser.adresseMail,
+					savedUser,
+					mailToken,
+				);
+			} catch (err) {
+				// Suppression de l'utilisateur en cas d'erreur
+				await this.utilisateursRepository.delete(savedUser.id);
 
-			return new Res(
-				500,
-				"Erreur lors de l'envoi du mail de confirmation",
-			);
+				return new Res(
+					500,
+					"Erreur lors de l'envoi du mail de confirmation",
+				);
+			}
 		}
 
 		// Suppression du hash du mot de passe
@@ -219,7 +221,7 @@ export class UsersService {
 			return new UnauthorizedRes(Responses.User.Invalid_password);
 		}
 		// Vérification de l'utilisateur
-		if (this.mailService.active && !user.isVerified) {
+		if (this.mailService.active && user.isVerified === false) {
 			return new UnauthorizedRes(Responses.User.Not_verified);
 		}
 
@@ -488,7 +490,7 @@ export class UsersService {
 		// Récupération du nombre d'algorithmes de l'utilisateur.
 		const nbrAlgos = await this.permsAlgorithmesRepository.count({
 			where: { idUtilisateur: id },
-		})
+		});
 		// Définition de la limite d'algorithmes.
 		const max = Number(process.env.QUOTA_ALGO) || 500;
 

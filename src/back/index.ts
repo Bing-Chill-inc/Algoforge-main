@@ -130,7 +130,7 @@ const dbConnexion = new Promise((resolve, reject) => {
 });
 // Init mail connection
 const mailConnexion = new Promise((resolve, reject) => {
-	if (process.env.MAIL_ENABLED !== "true") {
+	if (!MailService.shouldBeActive()) {
 		Logger.warn(
 			"Mail service is not active. No mail will be sent.",
 			"mail: service",
@@ -175,6 +175,7 @@ const mailConnexion = new Promise((resolve, reject) => {
 // Starting application
 import { AlgosController } from "./api/algos/algos.controller";
 import { UsersController } from "./api/users/users.controller";
+import { MailService } from "./mail/mail.service";
 Promise.all([dbConnexion, mailConnexion, SmeltJS()])
 	.then(async () => {
 		// Handling API logs.

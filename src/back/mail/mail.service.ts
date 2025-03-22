@@ -13,13 +13,20 @@ export class MailService {
 	active: boolean;
 
 	constructor() {
+		this.active = MailService.shouldBeActive();
+	}
+
+	/**
+	 * Détermine si le service de mail doit est actif ou non.
+	 * @returns true si doit être actif, false sinon.
+	 */
+	static shouldBeActive(): boolean {
 		if (process.env.BUILD === "test") {
-			this.active = true;
+			return true;
 		} else if (process.env.MAIL_ACTIVE === "true") {
-			this.active = true;
-		} else {
-			this.active = false;
+			return true;
 		}
+		return false;
 	}
 
 	/**
