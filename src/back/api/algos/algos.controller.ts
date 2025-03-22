@@ -151,6 +151,10 @@ export class AlgosController {
 				.json(new NotFoundRes(Responses.Algo.Not_found));
 		}
 
+		if (updatedAlgo instanceof Res) {
+			return res.status(updatedAlgo.statut).json(updatedAlgo);
+		}
+
 		return res
 			.status(OkRes.statut)
 			.json(new OkRes(Responses.Algo.Success.Updated, updatedAlgo));

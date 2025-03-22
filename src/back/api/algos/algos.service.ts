@@ -159,6 +159,8 @@ export class AlgosService {
 		ownerPerm.idUtilisateur = ownerAlgo.id;
 		ownerPerm.idAlgorithme = algoToUpdate.id;
 		ownerPerm.droits = Droits.Owner;
+
+		// FIXME: peut contenir des doublons d'owner.
 		if (
 			!algoToUpdate.permAlgorithmes ||
 			algoToUpdate.permAlgorithmes.length === 0
@@ -169,10 +171,10 @@ export class AlgosService {
 		}
 
 		for (const perm of algoToUpdate.permAlgorithmes) {
-			if (
+			if (!(
 				perm.idUtilisateur === algo.requestedUserId &&
 				(perm.droits === Droits.Owner ||
-					perm.droits === Droits.ReadWrite)
+					perm.droits === Droits.ReadWrite))
 			) {
 				return new ForbiddenRes(Responses.Algo.Forbidden_update);
 			}
