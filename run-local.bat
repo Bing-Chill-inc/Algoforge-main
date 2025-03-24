@@ -6,6 +6,7 @@ call :check_requirements
 call :clone_repository
 call :update_repository
 call :rename_env_file
+call :check_database_type
 call :start_application
 
 goto :eof
@@ -100,6 +101,24 @@ rename template-local-copy.env .env || (
     echo Echec du renommage du fichier 'template-local.env' en '.env'.
     call :del_repository
     exit /b 1
+)
+exit /b 0
+
+:check_database_type
+echo Verification du type de base de donnees...
+for /f "tokens=2 delims==" %%a in ('findstr /b "DATABASE_TYPE=" .env') do set "db_type=%%a"
+for /f "tokens=2 delims==" %%a in ('findstr /b "DATABASE_NAME=" .env') do set "db_name=%%a"
+if not "!db_type!" == "sqlite" (
+    echo Le type de base de donnees est incorrect. Ajustement a 'sqlite'.
+    (echo DATABASE_TYPE=sqlite) > temp.env
+    findstr /v "DATABASE_TYPE=" .env >> temp.env
+    move /y temp.env .env > nul
+)
+if not "!db_name!" == "db_algoforge.sqlite" (
+    echo Le nom de la base de donnees est incorrect. Ajustement a 'db_algoforge.sqlite'.
+    (echo DATABASE_NAME=db_algoforge.sqlite) > temp.env
+    findstr /v "DATABASE_NAME=" .env >> temp.env
+    move /y temp.env .env > nul
 )
 exit /b 0
 

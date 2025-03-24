@@ -126,6 +126,21 @@ function Rename-EnvFile {
     }
 }
 
+# Vérification et ajustement du type de base de données.
+function Check-Database-Type {
+    Write-Host "Verification du type de base de donnees..."
+    $db_type = (Get-Content -Path ".env" | Select-String -Pattern "^DATABASE_TYPE=").ToString().Split("=")[1].Trim()
+    $db_name = (Get-Content -Path ".env" | Select-String -Pattern "^DATABASE_NAME=").ToString().Split("=")[1].Trim()
+    if ($db_type -ne "sqlite") {
+        Write-Host "Le type de base de donnees est incorrect. Ajustement a 'sqlite'." -ForegroundColor Yellow
+        (Get-Content .env) | ForEach-Object { $_ -replace "^DATABASE_TYPE=.*", "DATABASE_TYPE=sqlite" } | Set-Content .env
+    }
+    if ($db_name -ne "db_algoforge.sqlite") {
+        Write-Host "Le nom de la base de donnees est incorrect. Ajustement a 'db_algoforge.sqlite'." -ForegroundColor Yellow
+        (Get-Content .env) | ForEach-Object { $_ -replace "^DATABASE_NAME=.*", "DATABASE_NAME=db_algoforge.sqlite" } | Set-Content .env
+    }
+}
+
 # Lancer l'application avec bun.
 function Start-Application {
     Write-Host "Demarrage de l'application avec Bun..."
@@ -174,6 +189,7 @@ Check-Requirements
 Clone-Repository
 Update-Repository
 Rename-EnvFile
+Check-Database-Type
 Start-Application
 
 # Recuperation du port a partir du fichier .env.

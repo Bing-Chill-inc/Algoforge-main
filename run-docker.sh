@@ -8,37 +8,72 @@ check_requirements() {
 	docker compose version >/dev/null 2>&1 || { echo >&2 "⚠️ Docker Compose n'est pas installé. Veuillez l'installer depuis https://docs.docker.com/compose/install/."; exit 1; }
 }
 
-# Cloner le dépôt GitHub.
-clone_repository() {
-	echo "⚙️ Téléchargement de l'application depuis GitHub..."
-	if [ -d "Algoforge" ]; then
-    	echo "⚠️ Le dossier 'Algoforge' existe déjà. Veuillez le supprimer ou choisir un autre emplacement."
-    	del_repository
-    	exit 1
+# Cloner ou mettre à jour le dépôt GitHub.
+clone_or_update_repository() {
+	if [ "$(basename "$(pwd)")" == "Algoforge" ]; then
+		echo "⚙️ Le dossier 'Algoforge' existe déjà et vous êtes actuellement dedans. Mise à jour du dépôt..."
+		git pull || { echo "⚠️ Échec de la mise à jour du dépôt. Vérifiez votre connexion internet."; exit 1; }
+		git submodule update --init --recursive || { echo "⚠️ Échec de la mise à jour des sous-modules."; exit 1; }
+		return
 	fi
 
-	git clone --depth 1 --recurse-submodules https://github.com/Bing-Chill-inc/Algoforge-main.git || { echo "Échec du clonage du dépôt. Vérifiez votre connexion internet."; exit 1; }
-	mv Algoforge-main Algoforge || { echo "⚠️ Échec du renommage du dossier 'Algoforge-main' en 'Algoforge'."; del_repository; exit 1; }
-	cd Algoforge || { echo "⚠️ Le dossier 'Algoforge' n'existe pas. Vérifiez le clonage du dépôt."; exit 1; }
-}
+	if [ -d "Algoforge" ]; then
+		echo "⚙️ Le dossier 'Algoforge' existe déjà. Mise à jour du dépôt..."
+		cd Algoforge || { echo "⚠️ Le dossier 'Algoforge' n'existe pas. Vérifiez le nom du dossier."; exit 1; }
+		git pull || { echo "⚠️ Échec de la mise à jour du dépôt. Vérifiez votre connexion internet."; exit 1; }
+		git submodule update --init --recursive || { echo "⚠️ Échec de la mise à jour des sous-modules."; exit 1; }
+		return
+	fi
 
-# Mettre à jour le dépôt GitHub.
-update_repository() {
-	echo "⚙️ Mise à jour des sous-modules..."
-	git submodule update --init --recursive || { echo "⚠️ Échec de la mise à jour des sous-modules."; del_repository; exit 1; }
+	echo "⚙️ Téléchargement de l'application depuis GitHub..."
+	git clone --depth 1 --recurse-submodules https://github.com/Bing-Chill-inc/Algoforge-main.git || { echo "Échec du clonage du dépôt. Vérifiez votre connexion internet."; exit 1; }
+	mv Algoforge-main Algoforge || { echo "⚠️ Échec du renommage du dossier 'Algoforge-main' en 'Algoforge'."; exit 1; }
+	cd Algoforge || { echo "⚠️ Le dossier 'Algoforge' n'existe pas. Vérifiez le clonage du dépôt."; exit 1; }
 }
 
 # Renommer le fichier template-docker.env en .env.
 rename_env_file() {
-	if [ ! -f "template-docker.env" ]; then
-    	echo "⚠️ Le fichier 'template-docker.env' est introuvable. Assurez-vous que le dépôt a été cloné correctement."
-    	exit 1
+	if [ -f ".env" ]; then
+		echo "⚠️ Le fichier '.env' existe déjà. Voulez-vous le réinitialiser ? (o/N)"
+		read response
+		if [ "$response" = "o" ] || [ "$response" = "O" ]; then
+			rm .env || { echo "⚠️ Échec de la suppression du fichier '.env'."; exit 1; }
+		else
+			echo "⚙️ Utilisation du fichier '.env' existant..."
+			return
+		fi
 	fi
-	mv template-docker.env .env || { echo "⚠️ Échec du renommage du fichier 'template-docker.env' en '.env'."; del_repository; exit 1; }
+
+	if [ ! -f "template-docker.env" ]; then
+		echo "⚠️ Le fichier 'template-docker.env' est introuvable. Assurez-vous que le dépôt a été cloné correctement."
+		exit 1
+	fi
+	cp template-docker.env .env || { echo "⚠️ Échec de la copie du fichier 'template-docker.env'."; exit 1; }
+}
+
+# Vérification et ajustement du type de base de données.
+check_database_type() {
+    echo "⚙️ Vérification du type de base de données..."
+    db_type=$(grep -oP '(?<=^DATABASE_TYPE=).*' .env)
+    db_name=$(grep -oP '(?<=^DATABASE_NAME=).*' .env)
+    if [ "$db_type" != "postgres" ]; then
+        echo "⚠️ Le type de base de données est incorrect. Ajustement à 'postgres'."
+        sed -i 's/^DATABASE_TYPE=.*/DATABASE_TYPE=postgres/' .env
+    fi
+    if [ "$db_name" != "db_algoforge" ]; then
+        echo "⚠️ Le nom de la base de données est incorrect. Ajustement à 'db_algoforge'."
+        sed -i 's/^DATABASE_NAME=.*/DATABASE_NAME=db_algoforge/' .env
+    fi
 }
 
 # Modifier le fichier .env pour ajouter les informations de connexion à la base de données.
 edit_env_file() {
+	echo "Souhaitez-vous modifier les informations de connexion à la base de données (modifier le .env) ? (o/N)"
+	read response
+	if [ "$response" != "o" ] && [ "$response" != "O" ]; then
+		return
+	fi
+
 	echo "Pour les valeurs par défaut, appuyez sur Entrée."
 
 	# Modification des ports pour éviter les conflits.
@@ -46,15 +81,15 @@ edit_env_file() {
 	read port
 
 	if [ -z "$port" ]; then
-    	port=5205
+		port=5205
 	fi
 
 	while ! echo "$port" | grep -qE '^[0-9]+$' || [ "$port" -lt 1024 ] || [ "$port" -gt 65535 ]; do
-    	echo "⚠️ Le port doit être un nombre entier entre 1024 et 65535."
-    	read port
-    	if [ -z "$port" ]; then
-        	port=5205
-    	fi
+		echo "⚠️ Le port doit être un nombre entier entre 1024 et 65535."
+		read port
+		if [ -z "$port" ]; then
+			port=5205
+		fi
 	done
 
 	sed -i "s/5205/$port/g" .env
@@ -63,15 +98,15 @@ edit_env_file() {
 	read pgadmin_port
 
 	if [ -z "$pgadmin_port" ]; then
-    	pgadmin_port=5300
+		pgadmin_port=5300
 	fi
 
 	while ! echo "$pgadmin_port" | grep -qE '^[0-9]+$' || [ "$pgadmin_port" -lt 1024 ] || [ "$pgadmin_port" -gt 65535 ] || [ "$pgadmin_port" -eq "$port" ]; do
-    	echo "⚠️ Le port doit être un nombre entier entre 1024 et 65535, et différent du port de l'application."
-    	read pgadmin_port
-    	if [ -z "$pgadmin_port" ]; then
-        	pgadmin_port=5300
-    	fi
+		echo "⚠️ Le port doit être un nombre entier entre 1024 et 65535, et différent du port de l'application."
+		read pgadmin_port
+		if [ -z "$pgadmin_port" ]; then
+			pgadmin_port=5300
+		fi
 	done
 
 	sed -i "s/5300/$pgadmin_port/g" .env
@@ -80,34 +115,26 @@ edit_env_file() {
 	echo "Souhaitez-vous modifier les informations de connexion à la base de données (modifier le .env) ? (o/N)"
 	read response
 	if [ "$response" = "o" ] || [ "$response" = "O" ]; then
-    	nano .env
+		nano .env
 	fi
 }
 
 # Lancer l'application avec docker compose.
 start_application() {
 	echo "⚙️ Démarrage de l'application avec Docker Compose..."
-	docker compose up --wait || { echo "⚠️ Échec du démarrage de l'application avec docker compose."; del_repository; exit 1; }
-}
-
-# Demander si l'utilisateur souhaite supprimer le dossier Algoforge / Algoforge-main.
-del_repository() {
-	echo "Voulez-vous supprimer le dossier 'Algoforge' ou 'Algoforge-main' ? (O/n)"
-	read del_response
-	if [ "$del_response" = "o" ] || [ "$del_response" = "O" ] || [ "$del_response" = "" ]; then
-    	[ -d "Algoforge" ] && rm -rf Algoforge
-    	[ -d "Algoforge-main" ] && rm -rf Algoforge-main
-	fi
-	exit 1
+	docker compose up --wait || { echo "⚠️ Échec du démarrage de l'application avec docker compose."; exit 1; }
 }
 
 # Exécution des fonctions.
 check_requirements
-clone_repository
-update_repository
+clone_or_update_repository
 rename_env_file
+check_database_type
 edit_env_file
 start_application
+
+# Récupération du port à partir du fichier .env.
+port=$(grep -oP '(?<=^PORT=).*' .env)
 
 echo "✔️ L'application est en train de démarrer en arrière-plan !"
 echo "Ouvrez un navigateur et entrez l'adresse: http://localhost:$port"

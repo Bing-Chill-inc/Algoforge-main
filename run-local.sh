@@ -37,8 +37,7 @@ update_repository() {
 # Renommer le fichier template-local.env en .env.
 rename_env_file() {
 	if [ -f ".env" ]; then
-		echo "⚠️ Le fichier '.env' existe déjà. Voulez-vous le réinitialiser ?."
-		echo "Voulez-vous le réinitialiser ? (o/N)"
+		echo "⚠️ Le fichier '.env' existe déjà. Voulez-vous le réinitialiser ? (o/N)."
 		read response
 		if [ "$response" = "o" ] || [ "$response" = "O" ]; then
 			rm .env || { echo "⚠️ Échec de la suppression du fichier '.env'."; del_repository; exit 1; }
@@ -52,8 +51,22 @@ rename_env_file() {
     	echo "⚠️ Le fichier 'template-local.env' est introuvable. Assurez-vous que le dépôt a été cloné correctement."
     	exit 1
 	fi
-	cp template-local.env template-local-copy.env || { echo "⚠️ Échec de la copie du fichier 'template-local.env'."; del_repository; exit 1; }
-	mv template-local-copy.env .env || { echo "⚠️ Échec du renommage du fichier 'template-local.env' en '.env'."; del_repository; exit 1; }
+	cp template-local.env .env || { echo "⚠️ Échec de la copie du fichier 'template-local.env'."; del_repository; exit 1; }
+}
+
+# Vérification et ajustement du type de base de données.
+check_database_type() {
+    echo "⚙️ Vérification du type de base de données..."
+    db_type=$(grep -oP '(?<=^DATABASE_TYPE=).*' .env)
+    db_name=$(grep -oP '(?<=^DATABASE_NAME=).*' .env)
+    if [ "$db_type" != "sqlite" ]; then
+        echo "⚠️ Le type de base de données est incorrect. Ajustement à 'sqlite'."
+        sed -i 's/^DATABASE_TYPE=.*/DATABASE_TYPE=sqlite/' .env
+    fi
+    if [ "$db_name" != "db_algoforge.sqlite" ]; then
+        echo "⚠️ Le nom de la base de données est incorrect. Ajustement à 'db_algoforge.sqlite'."
+        sed -i 's/^DATABASE_NAME=.*/DATABASE_NAME=db_algoforge.sqlite/' .env
+    fi
 }
 
 # Lancer l'application avec bun.
@@ -80,6 +93,7 @@ check_requirements
 clone_repository
 update_repository
 rename_env_file
+check_database_type
 start_application
 
 # Récupération du port à partir du fichier .env.
