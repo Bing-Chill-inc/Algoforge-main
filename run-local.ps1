@@ -3,11 +3,13 @@ function Check-Requirements {
     Write-Host "Verification des prerequis..."
     if (-not (Get-Command git -ErrorAction SilentlyContinue)) {
         Write-Host "Git n'est pas installe. Veuillez l'installer depuis https://git-scm.com/downloads."
-        exit 1
+        Read-Host -Prompt "Appuyez sur Entree pour continuer..."
+        return
     }
     if (-not (Get-Command bun -ErrorAction SilentlyContinue)) {
-        Write-Host "Bun n'est pas installe. Veuillez l'installer depuis https://bun.sh/."
-        exit 1
+        Write-Host "Bun n'est pas installe. Veuillez l'installer depuis https://bun.sh/"
+        Read-Host -Prompt "Appuyez sur Entree pour continuer..."
+        return
     }
 }
 
@@ -26,7 +28,7 @@ function Clone-Repository {
         }
         catch {
             Write-Host "Le dossier 'Algoforge' n'existe pas. Verifiez le nom du dossier."
-            exit 1
+            return
         }
         return
     }
@@ -37,7 +39,7 @@ function Clone-Repository {
     }
     catch {
         Write-Host "Echec du clonage du depot. Verifiez votre connexion internet."
-        exit 1
+        return
     }
 
     try {
@@ -46,7 +48,7 @@ function Clone-Repository {
     catch {
         Write-Host "Echec du renommage du dossier 'Algoforge-main' en 'Algoforge'."
         Del-Repository
-        exit 1
+        return
     }
 
     try {
@@ -54,7 +56,7 @@ function Clone-Repository {
     }
     catch {
         Write-Host "Le dossier 'Algoforge' n'existe pas. Verifiez le clonage du depot."
-        exit 1
+        return
     }
 }
 
@@ -67,7 +69,8 @@ function Update-Repository {
     catch {
         Write-Host "Echec de la mise a jour du depot. Verifiez votre connexion internet."
         Del-Repository
-        exit 1
+        Read-Host -Prompt "Appuyez sur Entree pour continuer..."
+        return
     }
 
     Write-Host "Mise a jour des sous-modules..."
@@ -77,7 +80,8 @@ function Update-Repository {
     catch {
         Write-Host "Echec de la mise a jour des sous-modules."
         Del-Repository
-        exit 1
+        Read-Host -Prompt "Appuyez sur Entree pour continuer..."
+        return
     }
 }
 
@@ -93,7 +97,7 @@ function Rename-EnvFile {
             catch {
                 Write-Host "Echec de la suppression du fichier '.env'."
                 Del-Repository
-                exit 1
+                return
             }
         }
         else {
@@ -104,7 +108,7 @@ function Rename-EnvFile {
 
     if (-not (Test-Path -Path "template-local.env")) {
         Write-Host "Le fichier 'template-local.env' est introuvable. Assurez-vous que le depot a ete clone correctement."
-        exit 1
+        return
     }
 
     try {
@@ -113,7 +117,7 @@ function Rename-EnvFile {
     catch {
         Write-Host "Echec de la copie du fichier 'template-local.env'."
         Del-Repository
-        exit 1
+        return
     }
 
     try {
@@ -122,8 +126,41 @@ function Rename-EnvFile {
     catch {
         Write-Host "Echec du renommage du fichier 'template-local.env' en '.env'."
         Del-Repository
-        exit 1
+        return
     }
+}
+
+# Vérification et ajustement du type de base de données.
+function Check-Database-Type {
+    Write-Host "Verification du type de base de donnees..."
+
+    # Initialiser les variables
+    $db_type = ""
+    $db_name = ""
+
+    # Lire les valeurs actuelles de DATABASE_TYPE et DATABASE_NAME
+    foreach ($line in Get-Content ".env") {
+        if ($line -match "^DATABASE_TYPE\s*=\s*(.+)$") {
+            $db_type = $matches[1].Trim('"')
+        }
+        if ($line -match "^DATABASE_NAME\s*=\s*(.+)$") {
+            $db_name = $matches[1].Trim('"')
+        }
+    }
+
+    # Vérification et correction de DATABASE_TYPE
+    if ($db_type -ne "sqlite") {
+        Write-Host "Le type de base de donnees est incorrect. Ajustement a 'sqlite'." -ForegroundColor Yellow
+        (Get-Content .env) | ForEach-Object { $_ -replace "^DATABASE_TYPE\s*=.*", 'DATABASE_TYPE = "sqlite"' } | Set-Content .env
+    }
+
+    # Vérification et correction de DATABASE_NAME
+    if ($db_name -ne "db_algoforge.sqlite") {
+        Write-Host "Le nom de la base de donnees est incorrect. Ajustement a 'db_algoforge.sqlite'." -ForegroundColor Yellow
+        (Get-Content .env) | ForEach-Object { $_ -replace "^DATABASE_NAME\s*=.*", 'DATABASE_NAME = "db_algoforge.sqlite"' } | Set-Content .env
+    }
+
+    Write-Host "Type de base de donnees et nom de la base de donnees verifiés et ajustés si necessaire." -ForegroundColor Green
 }
 
 # Lancer l'application avec bun.
@@ -134,23 +171,34 @@ function Start-Application {
     }
     catch {
         Write-Host "Le dossier 'src/back' n'existe pas. Verifiez le clonage du depot."
-        exit 1
+        Read-Host -Prompt "Appuyez sur Entree pour continuer..."
+        return
     }
 
     try {
         bun run prod
+        if ($LASTEXITCODE -ne 0) {
+            throw "Echec du demarrage de l'application. Verifiez votre installation de Bun."
+        }
     }
     catch {
         Write-Host "Echec du demarrage de l'application. Verifiez votre installation de Bun."
         Del-Repository
-        exit 1
+        return
     }
+
+    # Recuperation du port a partir du fichier .env.
+    $port = (Get-Content -Path "../../.env" | Select-String -Pattern "^PORT =").ToString().Split("=")[1].Trim()
+
+    Write-Host "L'application est en train de demarrer en arriere-plan !"
+    Write-Host "Ouvrez un navigateur et entrez l'adresse: http://localhost:$port"
+    Read-Host -Prompt "Appuyez sur Entree pour continuer..."
 }
 
 # Demander si l'utilisateur souhaite supprimer le dossier Algoforge / Algoforge-main.
 function Del-Repository {
-    $del_response = Read-Host "Voulez-vous supprimer le dossier 'Algoforge' ou 'Algoforge-main' ? (O/n)"
-    if ($del_response -eq "o" -or $del_response -eq "O" -or $del_response -eq "") {
+    $del_response = Read-Host "Voulez-vous supprimer le dossier 'Algoforge' ou 'Algoforge-main' ? (o/N)"
+    if ($del_response -eq "o" -or $del_response -eq "O") {
         $currentFolder = Split-Path -Leaf -Path (Get-Location)
         
         if ($currentFolder -eq "Algoforge") {
@@ -166,7 +214,8 @@ function Del-Repository {
             Remove-Item -Path "Algoforge-main" -Recurse -Force
         }
     }
-    exit 1
+    Read-Host -Prompt "Appuyez sur Entree pour continuer..."
+    return
 }
 
 # Execution des fonctions.
@@ -174,10 +223,5 @@ Check-Requirements
 Clone-Repository
 Update-Repository
 Rename-EnvFile
+Check-Database-Type
 Start-Application
-
-# Recuperation du port a partir du fichier .env.
-$port = (Get-Content -Path ".env" | Select-String -Pattern "^PORT =").ToString().Split("=")[1].Trim()
-
-Write-Host "L'application est en train de demarrer en arriere-plan !"
-Write-Host "Ouvrez un navigateur et entrez l'adresse: http://localhost:$port"

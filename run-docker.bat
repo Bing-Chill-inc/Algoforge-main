@@ -1,106 +1,193 @@
 @echo off
 setlocal enabledelayedexpansion
 
-:: Vérification des prérequis
+REM Verification des prerequis.
+call :check_requirements
+call :clone_repository
+call :update_repository
+call :rename_env_file
+call :check_database_type
+call :start_application
+
+goto :eof
+
+:check_requirements
 echo Verification des prerequis...
-where git >nul 2>nul
-if %errorlevel% neq 0 (
-    echo Git n'est pas installe.
-    exit /b 1
+where git >nul 2>&1 || (
+    echo Git n'est pas installe. Veuillez l'installer depuis https://git-scm.com/downloads.
+    pause
+    goto :eof
 )
-
-where docker >nul 2>nul
-if %errorlevel% neq 0 (
-    echo Docker n'est pas installe.
-    exit /b 1
+where docker >nul 2>&1 || (
+    echo Docker n'est pas installe. Veuillez l'installer depuis https://www.docker.com/products/docker-desktop.
+    pause
+    goto :eof
 )
-
-where docker-compose >nul 2>nul
-if %errorlevel% neq 0 (
-    echo Docker Compose n'est pas installe.
-    exit /b 1
+where docker-compose >nul 2>&1 || (
+    echo Docker Compose n'est pas installe. Veuillez l'installer depuis https://docs.docker.com/compose/install/.
+    pause
+    goto :eof
 )
+exit /b 0
 
-:: Clonage du dépôt
-echo Telechargement de l'application depuis GitHub...
+:clone_repository
 if exist Algoforge (
-    echo Suppression de l'ancien dossier Algoforge...
-    rmdir /s /q Algoforge
+    echo Le dossier 'Algoforge' existe deja. Passage a l'etape suivante...
+    cd Algoforge || (
+        echo Le dossier 'Algoforge' n'existe pas. Verifiez le nom du dossier.
+        pause
+        goto :eof
+    )
+    exit /b 0
 )
 
-git clone --depth 1 --recurse-submodules https://github.com/Bing-Chill-inc/Algoforge-main.git Algoforge
-if %errorlevel% neq 0 (
-    echo Echec du clonage du depot.
-    exit /b 1
+echo Telechargement de l'application depuis GitHub...
+git clone --depth 1 --recurse-submodules https://github.com/Bing-Chill-inc/Algoforge-main.git Algoforge || (
+    echo Echec du clonage du depot. Verifiez votre connexion internet.
+    pause
+    goto :eof
 )
+cd Algoforge || (
+    echo Le dossier 'Algoforge' n'existe pas. Verifiez le clonage du depot.
+    pause
+    goto :eof
+)
+exit /b 0
 
-cd Algoforge
-
-:: Mise à jour des sous-modules
+:update_repository
+echo Mise a jour du depot...
+git pull || (
+    echo Echec de la mise a jour du depot. Verifiez votre connexion internet.
+    call :del_repository
+    pause
+    goto :eof
+)
 echo Mise a jour des sous-modules...
-git submodule update --init --recursive
-if %errorlevel% neq 0 (
+git submodule update --init --recursive || (
     echo Echec de la mise a jour des sous-modules.
-    exit /b 1
+    call :del_repository
+    pause
+    goto :eof
+)
+echo Sous-modules mis a jour avec succes.
+exit /b 0
+
+:rename_env_file
+if exist ".\.env" (
+    echo Le fichier '.env' existe deja.
+    echo Voulez-vous le reinitialiser ^(o/N^)
+    set /p response=
+    if /i "!response!" == "o" (
+        del .env || (
+            echo Echec de la suppression du fichier '.env'.
+            call :del_repository
+            pause
+            goto :eof
+        )
+    ) else (
+        echo Demarrage de l'application avec le fichier '.env' existant...
+        exit /b 0
+    )
 )
 
-:: Renommage du fichier template-docker.env en .env
 if not exist template-docker.env (
-    echo Le fichier 'template-docker.env' est introuvable.
-    exit /b 1
+    echo Le fichier 'template-docker.env' est introuvable. Assurez-vous que le depot a ete clone correctement.
+    pause
+    goto :eof
 )
-copy /y template-docker.env .env
+copy template-docker.env .env || (
+    echo Echec de la copie du fichier 'template-docker.env'.
+    call :del_repository
+    pause
+    goto :eof
+)
+exit /b 0
 
-:: Configuration des ports
-:pgadmin_port
-set /p pgadmin_port="Veuillez saisir le port pour pgAdmin (par defaut 5300) : "
-if "%pgadmin_port%"=="" set pgadmin_port=5300
-for /f "delims=0123456789" %%A in ("%pgadmin_port%") do (
-    echo Le port doit etre un nombre valide.
-    goto pgadmin_port
+:check_database_type
+
+echo Verification du type de base de donnees...
+
+:: Initialiser les variables
+set "db_type="
+set "db_name="
+
+:: Lire les valeurs actuelles de DATABASE_TYPE et DATABASE_NAME
+for /f "usebackq tokens=1,* delims==" %%a in (".env") do (
+    set "var=%%a"
+    set "val=%%b"
+    
+    :: Supprimer les espaces avant/après
+    set "var=!var: =!"
+    set "val=!val: =!"
+
+    :: Vérifier si c'est DATABASE_TYPE
+    if /i "!var!"=="DATABASE_TYPE" set "db_type=!val!"
+    if /i "!var!"=="DATABASE_NAME" set "db_name=!val!"
 )
 
-if %pgadmin_port% lss 1024 if %pgadmin_port% gtr 65535 (
-    echo Le port doit etre entre 1024 et 65535.
-    goto pgadmin_port
+:: Enlever le premier et dernier caractere de db_type et db_name
+set "db_type=!db_type:~1,-1!"
+set "db_name=!db_name:~1,-1!"
+
+:: Vérification et correction de DATABASE_TYPE
+if not "!db_type!"=="postgres" (
+    echo Le type de base de donnees est incorrect. Ajustement a "postgres".
+    (echo DATABASE_TYPE = "postgres") > temp.env
+    findstr /v /r "^DATABASE_TYPE *= *" .env >> temp.env
+    move /y temp.env .env > nul
 )
 
-:app_port
-set /p port="Veuillez saisir le port pour l'application (par defaut 5205) : "
-if "%port%"=="" set port=5205
-for /f "delims=0123456789" %%A in ("%port%") do (
-    echo Le port doit etre un nombre valide.
-    goto app_port
+:: Vérification et correction de DATABASE_NAME
+if not "!db_name!"=="db_algoforge" (
+    echo Le nom de la base de donnees est incorrect. Ajustement a "db_algoforge".
+    (echo DATABASE_NAME = "db_algoforge") > temp.env
+    findstr /v /r "^DATABASE_NAME *= *" .env >> temp.env
+    move /y temp.env .env > nul
 )
 
-if %port% lss 1024 if %port% gtr 65535 if %port%==%pgadmin_port% (
-    echo Le port doit etre entre 1024 et 65535 et different de pgAdmin.
-    goto app_port
-)
+echo Type et nom de la base de donnees verifies et corriges si necessaire.
 
-:: Modification du fichier .env
-powershell -Command "(Get-Content .env) -replace 'PORT=.*', 'PORT=%port%' -replace 'PGADMIN_PORT=.*', 'PGADMIN_PORT=%pgadmin_port%' | Set-Content .env"
+exit /b 0
 
-set /p edit="Voulez-vous modifier d'autres parametres ? (o/N) : "
-if /i "%edit%"=="o" notepad .env
-
-:: Démarrage de l'application avec Docker Compose
+:start_application
 echo Demarrage de l'application avec Docker Compose...
 if not exist docker-compose.yml (
     echo Le fichier docker-compose.yml est introuvable.
-    exit /b 1
+    pause
+    goto :eof
 )
 
-docker compose up -d
-if %errorlevel% neq 0 (
+docker compose up -d || (
     echo Une erreur est survenue.
-    set /p delete="Voulez-vous supprimer Algoforge ? (O/n) : "
-    if /i "%delete%"=="o" (
-        cd ..
-        rmdir /s /q Algoforge
-    )
-    exit /b 1
+    call :del_repository
+    pause
+    goto :eof
 )
 
-echo Installation terminee avec succes !
+REM Recuperation du port a partir du fichier .env
+for /f "tokens=2 delims==" %%a in ('findstr /b "PORT = " .env') do set "port=%%a"
+set "port=!port: =!"
+
+echo L'application est en train de demarrer en arriere-plan !
+echo Ouvrez un navigateur et entrez l'adresse: http://localhost:%port%
+pause
 exit /b 0
+
+:del_repository
+echo Voulez-vous supprimer le dossier 'Algoforge' ou 'Algoforge-main' ? ^(o/N^)
+set /p del_response=
+if /i "!del_response!" == "o" goto :do_delete
+if /i "!del_response!" == "O" goto :do_delete
+exit /b 1
+
+:do_delete
+if exist Algoforge rd /s /q Algoforge
+if exist Algoforge-main rd /s /q Algoforge-main
+for %%I in (.) do if "%%~nxI" == "Algoforge" (
+    cd .. 
+    rd /s /q Algoforge
+)
+exit /b 1
+
+:eof
+pause
