@@ -3,15 +3,18 @@ function Check-Requirements {
     Write-Host "Verification des prerequis..."
     if (-not (Get-Command git -ErrorAction SilentlyContinue)) {
         Write-Host "Git n'est pas installe." -ForegroundColor Red
-        exit 1
+        Read-Host -Prompt "Appuyez sur Entree pour continuer..."
+        return
     }
     if (-not (Get-Command docker -ErrorAction SilentlyContinue)) {
         Write-Host "Docker n'est pas installe." -ForegroundColor Red
-        exit 1
+        Read-Host -Prompt "Appuyez sur Entree pour continuer..."
+        return
     }
     if (-not (Get-Command docker-compose -ErrorAction SilentlyContinue)) {
         Write-Host "Docker Compose n'est pas installe." -ForegroundColor Red
-        exit 1
+        Read-Host -Prompt "Appuyez sur Entree pour continuer..."
+        return
     }
 }
 
@@ -22,12 +25,14 @@ function Clone-Or-Update-Repository {
         git pull
         if ($LASTEXITCODE -ne 0) {
             Write-Host "Echec de la mise a jour du depot." -ForegroundColor Red
-            exit 1
+            Read-Host -Prompt "Appuyez sur Entree pour continuer..."
+            return
         }
         git submodule update --init --recursive
         if ($LASTEXITCODE -ne 0) {
             Write-Host "Echec de la mise a jour des sous-modules." -ForegroundColor Red
-            exit 1
+            Read-Host -Prompt "Appuyez sur Entree pour continuer..."
+            return
         }
         return
     }
@@ -38,12 +43,14 @@ function Clone-Or-Update-Repository {
         git pull
         if ($LASTEXITCODE -ne 0) {
             Write-Host "Echec de la mise a jour du depot." -ForegroundColor Red
-            exit 1
+            Read-Host -Prompt "Appuyez sur Entree pour continuer..."
+            return
         }
         git submodule update --init --recursive
         if ($LASTEXITCODE -ne 0) {
             Write-Host "Echec de la mise a jour des sous-modules." -ForegroundColor Red
-            exit 1
+            Read-Host -Prompt "Appuyez sur Entree pour continuer..."
+            return
         }
         return
     }
@@ -52,7 +59,8 @@ function Clone-Or-Update-Repository {
     git clone --depth 1 --recurse-submodules https://github.com/Bing-Chill-inc/Algoforge-main.git Algoforge
     if ($LASTEXITCODE -ne 0) {
         Write-Host "Echec du clonage du depot." -ForegroundColor Red
-        exit 1
+        Read-Host -Prompt "Appuyez sur Entree pour continuer..."
+        return
     }
     Set-Location -Path "Algoforge"
 }
@@ -65,7 +73,8 @@ function Rename-Env-File {
             Remove-Item -Path ".env"
             if ($LASTEXITCODE -ne 0) {
                 Write-Host "Echec de la suppression du fichier '.env'." -ForegroundColor Red
-                exit 1
+                Read-Host -Prompt "Appuyez sur Entree pour continuer..."
+                return
             }
         } else {
             Write-Host "Utilisation du fichier '.env' existant..."
@@ -75,28 +84,48 @@ function Rename-Env-File {
 
     if (-not (Test-Path "template-docker.env")) {
         Write-Host "Le fichier 'template-docker.env' est introuvable." -ForegroundColor Red
-        exit 1
+        Read-Host -Prompt "Appuyez sur Entree pour continuer..."
+        return
     }
     Copy-Item -Path "template-docker.env" -Destination ".env"
     if ($LASTEXITCODE -ne 0) {
         Write-Host "Echec de la copie du fichier 'template-docker.env'." -ForegroundColor Red
-        exit 1
+        Read-Host -Prompt "Appuyez sur Entree pour continuer..."
+        return
     }
 }
 
 # Vérification et ajustement du type de base de données.
 function Check-Database-Type {
     Write-Host "Verification du type de base de donnees..."
-    $db_type = (Get-Content -Path ".env" | Select-String -Pattern "^DATABASE_TYPE=").ToString().Split("=")[1].Trim()
-    $db_name = (Get-Content -Path ".env" | Select-String -Pattern "^DATABASE_NAME=").ToString().Split("=")[1].Trim()
+
+    # Initialiser les variables
+    $db_type = ""
+    $db_name = ""
+
+    # Lire les valeurs actuelles de DATABASE_TYPE et DATABASE_NAME
+    foreach ($line in Get-Content ".env") {
+        if ($line -match "^DATABASE_TYPE\s*=\s*(.+)$") {
+            $db_type = $matches[1].Trim('"')
+        }
+        if ($line -match "^DATABASE_NAME\s*=\s*(.+)$") {
+            $db_name = $matches[1].Trim('"')
+        }
+    }
+
+    # Vérification et correction de DATABASE_TYPE
     if ($db_type -ne "postgres") {
         Write-Host "Le type de base de donnees est incorrect. Ajustement a 'postgres'." -ForegroundColor Yellow
-        (Get-Content .env) | ForEach-Object { $_ -replace "^DATABASE_TYPE=.*", "DATABASE_TYPE=postgres" } | Set-Content .env
+        (Get-Content .env) | ForEach-Object { $_ -replace "^DATABASE_TYPE\s*=.*", 'DATABASE_TYPE = "postgres"' } | Set-Content .env
     }
+
+    # Vérification et correction de DATABASE_NAME
     if ($db_name -ne "db_algoforge") {
         Write-Host "Le nom de la base de donnees est incorrect. Ajustement a 'db_algoforge'." -ForegroundColor Yellow
-        (Get-Content .env) | ForEach-Object { $_ -replace "^DATABASE_NAME=.*", "DATABASE_NAME=db_algoforge" } | Set-Content .env
+        (Get-Content .env) | ForEach-Object { $_ -replace "^DATABASE_NAME\s*=.*", 'DATABASE_NAME = "db_algoforge"' } | Set-Content .env
     }
+
+    Write-Host "Type de base de donnees et nom de la base de donnees verifiés et ajustés si necessaire." -ForegroundColor Green
 }
 
 # Modifier le fichier .env pour ajouter les informations de connexion à la base de données.
@@ -135,7 +164,8 @@ function Start-Application {
     docker compose up --wait
     if ($LASTEXITCODE -ne 0) {
         Write-Host "Echec du demarrage de l'application avec docker compose." -ForegroundColor Red
-        exit 1
+        Read-Host -Prompt "Appuyez sur Entree pour continuer..."
+        return
     }
 }
 
@@ -148,7 +178,8 @@ Edit-Env-File
 Start-Application
 
 # Récupération du port à partir du fichier .env.
-$port = (Get-Content .env | Select-String -Pattern '^PORT=').ToString().Split('=')[1].Trim()
+$port = (Get-Content .env | Select-String -Pattern '^PORT =').ToString().Split('=')[1].Trim()
 
 Write-Host "L'application est en train de demarrer en arriere-plan !"
 Write-Host "Ouvrez un navigateur et entrez l'adresse: http://localhost:$port"
+Read-Host -Prompt "Appuyez sur Entree pour continuer..."
