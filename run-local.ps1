@@ -3,12 +3,12 @@ function Check-Requirements {
     Write-Host "Verification des prerequis..."
     if (-not (Get-Command git -ErrorAction SilentlyContinue)) {
         Write-Host "Git n'est pas installe. Veuillez l'installer depuis https://git-scm.com/downloads."
-        Read-Host -Prompt "Appuyez sur Entrée pour continuer..."
+        Read-Host -Prompt "Appuyez sur Entree pour continuer..."
         return
     }
     if (-not (Get-Command bun -ErrorAction SilentlyContinue)) {
         Write-Host "Bun n'est pas installe. Veuillez l'installer depuis https://bun.sh/"
-        Read-Host -Prompt "Appuyez sur Entrée pour continuer..."
+        Read-Host -Prompt "Appuyez sur Entree pour continuer..."
         return
     }
 }
@@ -18,7 +18,6 @@ function Clone-Repository {
     $currentFolder = Split-Path -Leaf -Path (Get-Location)
     if ($currentFolder -eq "Algoforge") {
         Write-Host "Le dossier 'Algoforge' existe deja et vous etes actuellement dedans. Passage a l'etape suivante..."
-        Read-Host -Prompt "Appuyez sur Entrée pour continuer..."
         return
     }
 
@@ -29,10 +28,8 @@ function Clone-Repository {
         }
         catch {
             Write-Host "Le dossier 'Algoforge' n'existe pas. Verifiez le nom du dossier."
-            Read-Host -Prompt "Appuyez sur Entrée pour continuer..."
             return
         }
-        Read-Host -Prompt "Appuyez sur Entrée pour continuer..."
         return
     }
 
@@ -42,7 +39,6 @@ function Clone-Repository {
     }
     catch {
         Write-Host "Echec du clonage du depot. Verifiez votre connexion internet."
-        Read-Host -Prompt "Appuyez sur Entrée pour continuer..."
         return
     }
 
@@ -52,7 +48,6 @@ function Clone-Repository {
     catch {
         Write-Host "Echec du renommage du dossier 'Algoforge-main' en 'Algoforge'."
         Del-Repository
-        Read-Host -Prompt "Appuyez sur Entrée pour continuer..."
         return
     }
 
@@ -61,7 +56,6 @@ function Clone-Repository {
     }
     catch {
         Write-Host "Le dossier 'Algoforge' n'existe pas. Verifiez le clonage du depot."
-        Read-Host -Prompt "Appuyez sur Entrée pour continuer..."
         return
     }
 }
@@ -75,7 +69,7 @@ function Update-Repository {
     catch {
         Write-Host "Echec de la mise a jour du depot. Verifiez votre connexion internet."
         Del-Repository
-        Read-Host -Prompt "Appuyez sur Entrée pour continuer..."
+        Read-Host -Prompt "Appuyez sur Entree pour continuer..."
         return
     }
 
@@ -86,7 +80,7 @@ function Update-Repository {
     catch {
         Write-Host "Echec de la mise a jour des sous-modules."
         Del-Repository
-        Read-Host -Prompt "Appuyez sur Entrée pour continuer..."
+        Read-Host -Prompt "Appuyez sur Entree pour continuer..."
         return
     }
 }
@@ -103,20 +97,17 @@ function Rename-EnvFile {
             catch {
                 Write-Host "Echec de la suppression du fichier '.env'."
                 Del-Repository
-                Read-Host -Prompt "Appuyez sur Entrée pour continuer..."
                 return
             }
         }
         else {
             Write-Host "Demarrage de l'application avec le fichier '.env' existant..."
-            Read-Host -Prompt "Appuyez sur Entrée pour continuer..."
             return
         }
     }
 
     if (-not (Test-Path -Path "template-local.env")) {
         Write-Host "Le fichier 'template-local.env' est introuvable. Assurez-vous que le depot a ete clone correctement."
-        Read-Host -Prompt "Appuyez sur Entrée pour continuer..."
         return
     }
 
@@ -126,7 +117,6 @@ function Rename-EnvFile {
     catch {
         Write-Host "Echec de la copie du fichier 'template-local.env'."
         Del-Repository
-        Read-Host -Prompt "Appuyez sur Entrée pour continuer..."
         return
     }
 
@@ -136,7 +126,6 @@ function Rename-EnvFile {
     catch {
         Write-Host "Echec du renommage du fichier 'template-local.env' en '.env'."
         Del-Repository
-        Read-Host -Prompt "Appuyez sur Entrée pour continuer..."
         return
     }
 }
@@ -182,19 +171,28 @@ function Start-Application {
     }
     catch {
         Write-Host "Le dossier 'src/back' n'existe pas. Verifiez le clonage du depot."
-        Read-Host -Prompt "Appuyez sur Entrée pour continuer..."
+        Read-Host -Prompt "Appuyez sur Entree pour continuer..."
         return
     }
 
     try {
         bun run prod
+        if ($LASTEXITCODE -ne 0) {
+            throw "Echec du demarrage de l'application. Verifiez votre installation de Bun."
+        }
     }
     catch {
         Write-Host "Echec du demarrage de l'application. Verifiez votre installation de Bun."
         Del-Repository
-        Read-Host -Prompt "Appuyez sur Entrée pour continuer..."
         return
     }
+
+    # Recuperation du port a partir du fichier .env.
+    $port = (Get-Content -Path "../../.env" | Select-String -Pattern "^PORT =").ToString().Split("=")[1].Trim()
+
+    Write-Host "L'application est en train de demarrer en arriere-plan !"
+    Write-Host "Ouvrez un navigateur et entrez l'adresse: http://localhost:$port"
+    Read-Host -Prompt "Appuyez sur Entree pour continuer..."
 }
 
 # Demander si l'utilisateur souhaite supprimer le dossier Algoforge / Algoforge-main.
@@ -216,7 +214,7 @@ function Del-Repository {
             Remove-Item -Path "Algoforge-main" -Recurse -Force
         }
     }
-    Read-Host -Prompt "Appuyez sur Entrée pour continuer..."
+    Read-Host -Prompt "Appuyez sur Entree pour continuer..."
     return
 }
 
@@ -227,10 +225,3 @@ Update-Repository
 Rename-EnvFile
 Check-Database-Type
 Start-Application
-
-# Recuperation du port a partir du fichier .env.
-$port = (Get-Content -Path ".env" | Select-String -Pattern "^PORT =").ToString().Split("=")[1].Trim()
-
-Write-Host "L'application est en train de demarrer en arriere-plan !"
-Write-Host "Ouvrez un navigateur et entrez l'adresse: http://localhost:$port"
-Read-Host -Prompt "Appuyez sur Entrée pour continuer..."

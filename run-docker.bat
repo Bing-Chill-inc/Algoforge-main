@@ -145,7 +145,7 @@ if not "!db_name!"=="db_algoforge" (
     move /y temp.env .env > nul
 )
 
-echo Type et nom de la base de donnees verifiés et corrigés si necessaire.
+echo Type et nom de la base de donnees verifies et corriges si necessaire.
 
 exit /b 0
 
@@ -165,7 +165,8 @@ docker compose up -d || (
 )
 
 REM Recuperation du port a partir du fichier .env
-for /f "tokens=2 delims==" %%a in ('findstr /b "PORT =" .env') do set "port=%%a"
+for /f "tokens=2 delims==" %%a in ('findstr /b "PORT = " .env') do set "port=%%a"
+set "port=!port: =!"
 
 echo L'application est en train de demarrer en arriere-plan !
 echo Ouvrez un navigateur et entrez l'adresse: http://localhost:%port%

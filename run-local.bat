@@ -176,6 +176,7 @@ bun run prod || (
 
 REM Recuperation du port a partir du fichier .env
 for /f "tokens=3 delims== " %%a in ('findstr /b "PORT =" ..\.\.env') do set "port=%%a"
+set "port=!port: =!"
 
 echo L'application est en train de demarrer en arriere-plan !
 echo Ouvrez un navigateur et entrez l'adresse: http://localhost:!port!
