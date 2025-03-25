@@ -31,7 +31,8 @@ app.get(iconHandler.route, iconHandler.callback);
 
 // Préparation du bundle de l'éditeur - SmeltJS.
 const SmeltJS = async () => {
-	console.log(await $`bun i`.cwd(`../front-editeur`).text());
+
+	Logger.debug(await $`bun i`.cwd(`../front-editeur`).text(), "smeltjs: install");
 
 	// Si le contenu du dossier ../front-editeur change, il faut relancer la commande.
 
@@ -39,11 +40,11 @@ const SmeltJS = async () => {
 		path.join(__dirname, "/../front-editeur/src"),
 		{ recursive: true },
 		async () => {
-			console.log(await $`bun SmeltJS.ts`.cwd(`../front-editeur`).text());
+			Logger.debug(await $`bun SmeltJS.ts`.cwd(`../front-editeur`).text(), "smeltjs: build");
 		},
 	);
 
-	console.log(await $`bun SmeltJS.ts`.cwd(`../front-editeur`).text());
+	Logger.debug(await $`bun SmeltJS.ts`.cwd(`../front-editeur`).text(), "smeltjs: build");
 };
 
 app.use("/edit", express.static(path.join(__dirname, "/../front-editeur/out")));

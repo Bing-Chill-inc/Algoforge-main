@@ -18,7 +18,8 @@
     - [Installation UNIX](#installation-unix)
   - [Version standalone](#version-standalone)
     - [Programmes requis](#programmes-requis-1)
-    - [Installation automatique (UNIX)](#installation-automatique-unix)
+    - [Installation automatique Windows](#installation-automatique-windows)
+    - [Installation automatique UNIX](#installation-automatique-unix)
     - [Installation manuelle (Windows/UNIX)](#installation-manuelle-windowsunix)
   - [Version de bureau](#version-de-bureau)
 - [Identité collaborateurs](#identité-collaborateurs)
@@ -93,7 +94,7 @@ La version docker de l'application comprend par défaut une base de données Pos
 - Sans Powershell: `run-docker.bat`
 - Avec Powershell: `run-docker.ps1`
 
-1. Exécuter le programme depuis une invite de commande ou en double-cliquant dessus.
+2. Exécuter le programme depuis une invite de commande ou en double-cliquant dessus.
 
 #### Installation UNIX
 
@@ -112,7 +113,16 @@ La version docker de l'application comprend par défaut une base de données Pos
 - Installer [git](https://git-scm.com/downloads).
 - Installer [Bun](https://bun.sh), testé avec la version 1.2.5.
 
-#### Installation automatique (UNIX)
+#### Installation automatique Windows
+
+1. Télécharger l'installateur de l'application. Nous vous proposons 2 méthodes pour cela:
+
+- Sans Powershell: `run-local.bat`
+- Avec Powershell: `run-local.ps1`
+
+2. Exécuter le programme depuis une invite de commande ou en double-cliquant dessus.
+
+#### Installation automatique UNIX
 
 1. Télécharger l'installateur de l'application : `run-local.sh`
 2. Exécuter le programme depuis une invite de commande:
