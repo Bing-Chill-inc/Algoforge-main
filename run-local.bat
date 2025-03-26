@@ -133,7 +133,7 @@ for /f "usebackq tokens=1,* delims==" %%a in (".env") do (
     set "var=!var: =!"
     set "val=!val: =!"
 
-    :: Vérifier si c'est DATABASE_TYPE
+    :: Verifier si c'est DATABASE_TYPE
     if /i "!var!"=="DATABASE_TYPE" set "db_type=!val!"
     if /i "!var!"=="DATABASE_NAME" set "db_name=!val!"
 )
@@ -142,7 +142,7 @@ for /f "usebackq tokens=1,* delims==" %%a in (".env") do (
 set "db_type=!db_type:~1,-1!"
 set "db_name=!db_name:~1,-1!"
 
-:: Vérification et correction de DATABASE_TYPE
+:: Verification et correction de DATABASE_TYPE
 if not "!db_type!"=="sqlite" (
     echo Le type de base de donnees est incorrect. Ajustement a "sqlite".
     (echo DATABASE_TYPE = "sqlite") > temp.env
@@ -150,7 +150,7 @@ if not "!db_type!"=="sqlite" (
     move /y temp.env .env > nul
 )
 
-:: Vérification et correction de DATABASE_NAME
+:: Verification et correction de DATABASE_NAME
 if not "!db_name!"=="db_algoforge.sqlite" (
     echo Le nom de la base de donnees est incorrect. Ajustement a "db_algoforge.sqlite".
     (echo DATABASE_NAME = "db_algoforge.sqlite") > temp.env

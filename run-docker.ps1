@@ -1,4 +1,4 @@
-# Vérification des prérequis.
+# Verification des prerequis.
 function Check-Requirements {
     Write-Host "Verification des prerequis..."
     if (-not (Get-Command git -ErrorAction SilentlyContinue)) {
@@ -18,7 +18,7 @@ function Check-Requirements {
     }
 }
 
-# Cloner ou mettre à jour le dépôt GitHub.
+# Cloner ou mettre a jour le depôt GitHub.
 function Clone-Or-Update-Repository {
     if ((Get-Location).Path -match "Algoforge$") {
         Write-Host "Le dossier 'Algoforge' existe deja et vous etes actuellement dedans. Mise a jour du depot..."
@@ -95,7 +95,7 @@ function Rename-Env-File {
     }
 }
 
-# Vérification et ajustement du type de base de données.
+# Verification et ajustement du type de base de donnees.
 function Check-Database-Type {
     Write-Host "Verification du type de base de donnees..."
 
@@ -113,22 +113,22 @@ function Check-Database-Type {
         }
     }
 
-    # Vérification et correction de DATABASE_TYPE
+    # Verification et correction de DATABASE_TYPE
     if ($db_type -ne "postgres") {
         Write-Host "Le type de base de donnees est incorrect. Ajustement a 'postgres'." -ForegroundColor Yellow
         (Get-Content .env) | ForEach-Object { $_ -replace "^DATABASE_TYPE\s*=.*", 'DATABASE_TYPE = "postgres"' } | Set-Content .env
     }
 
-    # Vérification et correction de DATABASE_NAME
+    # Verification et correction de DATABASE_NAME
     if ($db_name -ne "db_algoforge") {
         Write-Host "Le nom de la base de donnees est incorrect. Ajustement a 'db_algoforge'." -ForegroundColor Yellow
         (Get-Content .env) | ForEach-Object { $_ -replace "^DATABASE_NAME\s*=.*", 'DATABASE_NAME = "db_algoforge"' } | Set-Content .env
     }
 
-    Write-Host "Type de base de donnees et nom de la base de donnees verifiés et ajustés si necessaire." -ForegroundColor Green
+    Write-Host "Type de base de donnees et nom de la base de donnees verifies et ajustes si necessaire." -ForegroundColor Green
 }
 
-# Modifier le fichier .env pour ajouter les informations de connexion à la base de données.
+# Modifier le fichier .env pour ajouter les informations de connexion a la base de donnees.
 function Edit-Env-File {
     $response = Read-Host "Souhaitez-vous modifier les informations de connexion a la base de donnees (modifier le .env) ? (o/N)"
     if ($response -ne "o" -and $response -ne "O") {
@@ -137,7 +137,7 @@ function Edit-Env-File {
 
     Write-Host "Pour les valeurs par defaut, appuyez sur Entree."
 
-    # Modification des ports pour éviter les conflits.
+    # Modification des ports pour eviter les conflits.
     do {
         $port = Read-Host "Veuillez saisir le port que vous souhaitez utiliser pour l'application (par defaut 5205)"
         if ([string]::IsNullOrWhiteSpace($port)) { $port = 5205 }
@@ -158,7 +158,7 @@ function Edit-Env-File {
     }
 }
 
-# Démarrer l'application avec docker compose.
+# Demarrer l'application avec docker compose.
 function Start-Application {
     Write-Host "Demarrage de l'application avec Docker Compose..."
     docker compose up --wait
@@ -169,7 +169,7 @@ function Start-Application {
     }
 }
 
-# Exécution des fonctions.
+# Execution des fonctions.
 Check-Requirements
 Clone-Or-Update-Repository
 Rename-Env-File
@@ -177,7 +177,7 @@ Check-Database-Type
 Edit-Env-File
 Start-Application
 
-# Récupération du port à partir du fichier .env.
+# Recuperation du port a partir du fichier .env.
 $port = (Get-Content .env | Select-String -Pattern '^PORT =').ToString().Split('=')[1].Trim()
 
 Write-Host "L'application est en train de demarrer en arriere-plan !"

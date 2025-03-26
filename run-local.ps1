@@ -130,7 +130,7 @@ function Rename-EnvFile {
     }
 }
 
-# Vérification et ajustement du type de base de données.
+# Verification et ajustement du type de base de donnees.
 function Check-Database-Type {
     Write-Host "Verification du type de base de donnees..."
 
@@ -148,19 +148,19 @@ function Check-Database-Type {
         }
     }
 
-    # Vérification et correction de DATABASE_TYPE
+    # Verification et correction de DATABASE_TYPE
     if ($db_type -ne "sqlite") {
         Write-Host "Le type de base de donnees est incorrect. Ajustement a 'sqlite'." -ForegroundColor Yellow
         (Get-Content .env) | ForEach-Object { $_ -replace "^DATABASE_TYPE\s*=.*", 'DATABASE_TYPE = "sqlite"' } | Set-Content .env
     }
 
-    # Vérification et correction de DATABASE_NAME
+    # Verification et correction de DATABASE_NAME
     if ($db_name -ne "db_algoforge.sqlite") {
         Write-Host "Le nom de la base de donnees est incorrect. Ajustement a 'db_algoforge.sqlite'." -ForegroundColor Yellow
         (Get-Content .env) | ForEach-Object { $_ -replace "^DATABASE_NAME\s*=.*", 'DATABASE_NAME = "db_algoforge.sqlite"' } | Set-Content .env
     }
 
-    Write-Host "Type de base de donnees et nom de la base de donnees verifiés et ajustés si necessaire." -ForegroundColor Green
+    Write-Host "Type de base de donnees et nom de la base de donnees verifies et ajustes si necessaire." -ForegroundColor Green
 }
 
 # Lancer l'application avec bun.
