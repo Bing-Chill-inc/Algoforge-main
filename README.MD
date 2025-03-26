@@ -2,9 +2,9 @@
     <img src="logo.png" style="width:128px" alt="Le logo d'AlgoForge"/>
     </br>
     </br>
-    <a href="https://bing-chill-inc.github.io/wikiforge/">Wiki</a>
+    <a href="https://bing-chill-inc.github.io/wikiforge/" target="_parent">Wiki</a>
     -
-    <a href="https://bing-chill-inc.github.io/wikiforge/docs/tutorial/self-host/install/">Doc d'installation</a>
+    <a href="https://bing-chill-inc.github.io/wikiforge/docs/tutorial/self-host/install/" target="_parent">Doc d'installation</a>
     <h1>AlgoForge</h1>
 </div>
 
