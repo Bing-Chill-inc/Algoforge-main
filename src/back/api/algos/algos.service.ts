@@ -9,7 +9,7 @@ import { Algorithme } from "../../db/schemas/Algorithme.schema";
 import { AppDataSource } from "../../db/data-source";
 import { PermAlgorithme } from "../../db/schemas/PermAlgorithme.schema";
 import { Droits } from "../../types/droits.enum";
-import { AlgoCreateDTO, AlgoUpdateDTO } from "./algos.dto";
+import { AlgoCreateDTO, AlgoSelectDTO, AlgoUpdateDTO } from "./algos.dto";
 import { AlgoValidator } from "../../utils/algoValidator";
 import {
 	BadRequestRes,
@@ -26,6 +26,8 @@ import {
 	rightsOfUserOnDir,
 } from "../../utils/queries";
 import { Responses } from "../../constants/responses.const";
+import { SortAlgos } from "../../types/sortAlgos.enum";
+import { FindOperator, IsNull, Not } from "typeorm";
 
 /**
  * Service pour les algorithmes.
@@ -47,24 +49,45 @@ export class AlgosService {
 
 	/**
 	 * Récupère les permissions des algorithmes que l'utilisateur a le droit de voir (propriétaire, écriture+lecture, lecture seule).
-	 * @param id Id de l'utilisateur.
-	 * @param requestedUserId Id de l'utilisateur qui demande les algorithmes.
-	 * @param dirId Id du dossier.
+	 * @param data Données de la recherche.
 	 * @returns Les algorithmes de l'utilisateur.
 	 */
 	// NOTE: dirId est de quel type lors de l'appel de la fonction ? (number ou null)
-	async getAlgosPermsOfUser(
-		id: number,
-		requestedUserId: number,
-		dirId: number,
-	) {
+	async getAlgosPermsOfUser(data: AlgoSelectDTO) {
 		const permAlgoRepository =
 			AppDataSource.manager.getRepository(PermAlgorithme);
 
-		// Récupération des algorithmes de l'utilisateur.
-		if (dirId) {
+		// Préparation du triage des algorithmes.
+		let sorts: any;
+		switch (data.sorted) {
+			default:
+			case SortAlgos.ByName:
+				sorts = { nom: "ASC" };
+				break;
+
+			case SortAlgos.ByCreationDate:
+				sorts = { dateCreation: "ASC" };
+				break;
+
+			case SortAlgos.ByModificationDate:
+				sorts = { dateModification: "ASC" };
+				break;
+		}
+		// Préparation du filtrage des algorithmes supprimés.
+		let deleted: FindOperator<any>;
+		if (!data.deleted) {
+			deleted = IsNull();
+		} else {
+			deleted = Not(IsNull());
+		}
+
+		// Récupération des algorithmes de l'utilisateur dans le dossier.
+		if (data.dirId) {
 			// Vérification des droits de l'utilisateur sur le dossier.
-			const rights = await rightsOfUserOnDir(requestedUserId, dirId);
+			const rights = await rightsOfUserOnDir(
+				data.requestedUserId,
+				data.dirId,
+			);
 			if (!rights) {
 				return new ForbiddenRes(Responses.General.Forbidden);
 			}
@@ -73,12 +96,16 @@ export class AlgosService {
 			const algos = await permAlgoRepository.find({
 				relations: { algorithme: true },
 				where: {
-					idUtilisateur: id,
+					idUtilisateur: data.userId,
 					algorithme: {
 						dossier: {
-							id: dirId,
+							id: data.dirId,
 						},
+						dateSuppression: deleted,
 					},
+				},
+				order: {
+					algorithme: sorts,
 				},
 			});
 
@@ -86,12 +113,20 @@ export class AlgosService {
 				return new NotFoundRes(Responses.Algo.By_User.Not_found);
 			}
 			return new OkRes(Responses.Algo.By_User.Found, algos);
-		} else {
+		}
+		// Récupération des algorithmes de l'utilisateur sans dossier.
+		else {
 			const algos = await permAlgoRepository.find({
 				relations: { algorithme: true },
 				where: {
-					idUtilisateur: id,
-					algorithme: { dossier: null },
+					idUtilisateur: data.userId,
+					algorithme: {
+						dossier: null,
+						dateSuppression: deleted,
+					},
+				},
+				order: {
+					algorithme: sorts,
 				},
 			});
 
@@ -102,7 +137,7 @@ export class AlgosService {
 			// Vérifier que l'utilisateur a le droit de voir ces algorithmes.
 			for (const [index, algo] of algos.entries()) {
 				const rights = await rightsOfUserOnAlgo(
-					requestedUserId,
+					data.requestedUserId,
 					algo.idAlgorithme,
 				);
 				if (!rights) {
@@ -268,30 +303,38 @@ export class AlgosService {
 
 		// Vérification des droits de l'utilisateur.
 		const rights = await rightsOfUserOnAlgo(requestedUserId, id);
-		if (!rights) return new ForbiddenRes(Responses.General.Forbidden);
+		if (!rights || rights !== Droits.Owner)
+			return new ForbiddenRes(Responses.General.Forbidden);
 
-		// Suppression de l'algorithme.
-		try {
-			// Suppression des permissions de l'algorithme.
-			for (const perm of algo.permAlgorithmes) {
-				await AppDataSource.manager
-					.getRepository(PermAlgorithme)
-					.delete(perm);
+		if (!algo.dateSuppression) {
+			// Marquer l'algorithme comme supprimé.
+			algo.dateSuppression = new Date().getTime();
+			await algoRepository.save(algo);
+			return new OkRes(Responses.Algo.Success.Trash);
+		} else {
+			// Suppression de l'algorithme.
+			try {
+				// Suppression des permissions de l'algorithme.
+				for (const perm of algo.permAlgorithmes) {
+					await AppDataSource.manager
+						.getRepository(PermAlgorithme)
+						.delete(perm);
+				}
+				delete algo.permAlgorithmes;
+				// Suppression de l'algorithme en base de données.
+				const deletedAlgo = await algoRepository.delete(algo.id);
+
+				// Suppression de l'algorithme du système de fichiers.
+				const result = this.deleteAlgoFromDisk(id);
+				if (!result) return new NotFoundRes(Responses.Algo.Not_found);
+				return new OkRes(Responses.Algo.Success.Deleted, deletedAlgo);
+			} catch (error) {
+				if (error instanceof Error)
+					Logger.error(error.stack, "AlgosService: deleteAlgo");
+				return new InternalServerErrorRes(
+					Responses.Algo.Errors.While_deleting_algo,
+				);
 			}
-			delete algo.permAlgorithmes;
-			// Suppression de l'algorithme en base de données.
-			const deletedAlgo = await algoRepository.delete(algo.id);
-
-			// Suppression de l'algorithme du système de fichiers.
-			const result = this.deleteAlgoFromDisk(id);
-			if (!result) return new NotFoundRes(Responses.Algo.Not_found);
-			return new OkRes(Responses.Algo.Success.Deleted, deletedAlgo);
-		} catch (error) {
-			if (error instanceof Error)
-				Logger.error(error.stack, "AlgosService: deleteAlgo");
-			return new InternalServerErrorRes(
-				Responses.Algo.Errors.While_deleting_algo,
-			);
 		}
 	}
 

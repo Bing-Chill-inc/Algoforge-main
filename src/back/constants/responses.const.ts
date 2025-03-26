@@ -61,12 +61,12 @@ export const Responses = {
 			Created: "Algorithme créé.",
 			Updated: "Algorithme mis à jour.",
 			Deleted: "Algorithme supprimé.",
+			Trash: "Algorithme déplacé dans la corbeille.",
 			Found: "Algorithme trouvé.",
 		},
 	},
 	Dir: {
-		Forbidden_create:
-			"Vous n'avez pas les droits pour créer ce dossier.",
+		Forbidden_create: "Vous n'avez pas les droits pour créer ce dossier.",
 		Forbidden_update:
 			"Vous n'avez pas les droits pour modifier ce dossier.",
 		Not_found: "Dossier non trouvé.",

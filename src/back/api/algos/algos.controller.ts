@@ -2,7 +2,7 @@ import { Router, Request, Response } from "express";
 import expressAsyncHandler from "express-async-handler";
 import { AlgosService } from "./algos.service";
 import { Logger } from "../../utils/logger";
-import { AlgoCreateDTO, AlgoUpdateDTO } from "./algos.dto";
+import { AlgoCreateDTO, AlgoSelectDTO, AlgoUpdateDTO } from "./algos.dto";
 import {
 	BadRequestRes,
 	CreatedRes,
@@ -62,10 +62,13 @@ export class AlgosController {
 	}
 
 	/**
-	 * GET /byUserId/:id ?dirId=:dirId
+	 * GET /byUserId/:id ?deleted=:deleted ?sorted=:sorted
+	 * NOTE: ?dirId=:dirId est temporairement désactivé.
 	 * Récupérer les algorithmes d'un utlisateur.
 	 * @param req.params.id Id de l'utilisateur.
-	 * @param req.params.dirId Id du dossier dans lequel on recherche les algorithmes.
+	 * @param req.query.deleted Booléen pour savoir si on veut récupérer les algorithmes supprimés ou non.
+	 * @param req.query.sorted String correspondant à un type de tri des algorithmes. Voir l'énum {@link SortAlgos}
+	 * NOTE: @param req.params.dirId Id du dossier dans lequel on recherche les algorithmes.
 	 * @remarks
 	 * Besoin d'être connecté, voir: {@link UsersService.verify}
 	 * Si algorithmes trouvés, voir la structure suivante: {@link PermAlgorithme}
@@ -77,8 +80,11 @@ export class AlgosController {
 	 */
 	private async getAlgosPermsOfUser(req: Request, res: Response) {
 		let { id } = req.params;
-		const { dirId } = req.query as { dirId: string };
 		const user = res.locals.user as Utilisateur;
+		const { deleted, sorted } = req.query;
+		// FIXME: Les dossiers sont temporairement désactivé.
+		// const { dirId } = req.query as { dirId: string };
+		const dirId = null;
 
 		// Si dirId est null, on se situe à la racine, sinon on se situe dans un dossier, on récupère l'owner du dossier
 		if (dirId) {
@@ -92,11 +98,14 @@ export class AlgosController {
 			id = String(owner.id);
 		}
 
+		const selectData = new AlgoSelectDTO();
+		selectData.requestedUserId = user.id;
+		selectData.userId = +id;
+		selectData.deleted = deleted === "true" ? true : false;
+		selectData.sorted = sorted ? String(sorted) : "nom";
 		// Récupération des permissions des algorithmes de l'utilisateur dans le dossier
 		const algosPermsResponse = await this.algosService.getAlgosPermsOfUser(
-			+id,
-			user.id,
-			+dirId,
+			selectData,
 		);
 
 		return res.status(algosPermsResponse.statut).json(algosPermsResponse);

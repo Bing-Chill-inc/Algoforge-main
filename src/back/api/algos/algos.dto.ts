@@ -1,5 +1,6 @@
 import {
 	IsArray,
+	IsBoolean,
 	IsDate,
 	IsJSON,
 	IsNumber,
@@ -9,6 +10,7 @@ import {
 	MinLength,
 } from "class-validator";
 import { PermAlgorithme } from "../../db/schemas/PermAlgorithme.schema";
+import { SortAlgos } from "../../types/sortAlgos.enum";
 
 /**
  * Classe de validation pour la création d'un algorithme.
@@ -133,4 +135,50 @@ export class AlgoUpdateDTO {
 	 */
 	@IsJSON()
 	sourceCode: string;
+}
+
+export class AlgoSelectDTO {
+	/**
+	 * Identifiant de l'utilisateur ayant demandé la création de l'algorithme.
+	 * Il est utilisé pour vérifier les droits de l'utilisateur, et indiqué automatiquement.
+	 * @example 1
+	 * @type {number}
+	 */
+	@IsNumber()
+	requestedUserId: number;
+
+	/**
+	 * Identifiant de l'utilisateur propriétaire des algorithmes.
+	 * @example 1
+	 * @type {number}
+	 */
+	@IsNumber()
+	userId: number;
+
+	/**
+	 * Identifiant du dossier dans lequel on recherche les algorithmes.
+	 * @example 1
+	 * @type {number}
+	 */
+	@IsNumber()
+	@IsOptional()
+	dirId?: number;
+
+	/**
+	 * Indique si on veut récupérer les algorithmes supprimés ou non.
+	 * @default false
+	 * @type {boolean}
+	 */
+	@IsOptional()
+	@IsBoolean()
+	deleted: boolean = false;
+
+	/**
+	 * Indique si on veut trier les algorithmes ou non.
+	 * @default SortAlgos.ByName
+	 * @type {string}
+	 */
+	@IsOptional()
+	@IsString()
+	sorted: string = SortAlgos.ByName;
 }

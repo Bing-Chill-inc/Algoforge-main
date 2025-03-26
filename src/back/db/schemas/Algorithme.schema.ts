@@ -56,6 +56,15 @@ export class Algorithme {
 	dateModification: number;
 
 	/**
+	 * Date de suppression de l'algorithme. Si null, l'algorithme n'est pas supprimé.
+	 * Date sous forme de timestamp en raison de la diversité des SGBD.
+	 * @public
+	 * @type {number}
+	 */
+	@Column({ type: "bigint", name: "datesuppression", nullable: true })
+	dateSuppression: number;
+
+	/**
 	 * Dossier dans lequel se trouve l'algorithme.
 	 * Si null, l'algorithme est à la racine.
 	 * @public

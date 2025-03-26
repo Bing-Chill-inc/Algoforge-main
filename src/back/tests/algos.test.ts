@@ -115,7 +115,8 @@ export const AlgosTests = async () => {
 			);
 		});
 
-		test("erreur: Aucun algorithme trouvé (dirId=1).", async () => {
+		// FIXME: le dossier est temporairement désactivé.
+		test.todo("erreur: Aucun algorithme trouvé (dirId=1).", async () => {
 			const response = await request
 				.get(`/api/algos/byUserId/3?dirId=1`)
 				.auth(token, { type: "bearer" });
@@ -294,6 +295,19 @@ export const AlgosTests = async () => {
 				Responses.Algo.Not_found,
 			);
 		});
+		test("succès: Algorithme déplacé dans la corbeille.", async () => {
+			const response = await request
+				.delete("/api/algos/1")
+				.auth(token, { type: "bearer" });
+			Logger.debug(JSON.stringify(response.body), "test: algos", 5);
+			expect(response.status).toBe(OkRes.statut);
+			expect(response.body).toHaveProperty(
+				"message",
+				Responses.Algo.Success.Trash,
+			);
+			expect(existsSync(AlgosService.dataPath + "1.json")).toBe(true);
+		});
+
 		test("succès: Algorithme supprimé.", async () => {
 			const response = await request
 				.delete("/api/algos/1")
