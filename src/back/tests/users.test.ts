@@ -22,6 +22,7 @@ import {
 } from "../api/users/users.dto";
 import { createMailToken } from "../utils/mailConfirmToken";
 import { mocked } from "../mail/transporter";
+import { Theme } from "../types/theme.enum";
 
 const utilisateursRepository = AppDataSource.getRepository(Utilisateur);
 
@@ -333,8 +334,8 @@ export const UsersTests = async () => {
 			exampleToken = await login(UserSet.example);
 
 			const payload = new UserUpdateDTO();
-			payload.pseudo = "Nouveau pseudo !";
 			payload.currentPassword = "wrong";
+			payload.newPassword = "nouveauMdp";
 
 			const response = await request
 				.put(`/api/users/${UserSet.example.id}`)
@@ -348,12 +349,11 @@ export const UsersTests = async () => {
 			);
 		});
 
-		test("ID: 102 -> erreur: Url de la photo de profil invalide.", async () => {
+		test("ID: 101 -> erreur: Url de la photo de profil invalide.", async () => {
 			exampleToken = await login(UserSet.unitTestUser2);
 
 			const payload = new UserUpdateDTO();
 			payload.urlPfp = "wrong";
-			payload.currentPassword = UserSet.unitTestUser2.password;
 
 			const response = await request
 				.put(`/api/users/${UserSet.unitTestUser2.id}`)
@@ -364,12 +364,11 @@ export const UsersTests = async () => {
 			expect(response.body.data[0]).toHaveProperty("property", "urlPfp");
 		});
 
-		test("ID: 102 -> erreur: Url de la photo de profil n'est pas une image.", async () => {
+		test("ID: 101 -> erreur: Url de la photo de profil n'est pas une image.", async () => {
 			exampleToken = await login(UserSet.unitTestUser2);
 
 			const payload = new UserUpdateDTO();
 			payload.urlPfp = "https://google.com";
-			payload.currentPassword = UserSet.unitTestUser2.password;
 
 			const response = await request
 				.put(`/api/users/${UserSet.unitTestUser2.id}`)
@@ -383,15 +382,46 @@ export const UsersTests = async () => {
 			);
 		});
 
-		test("ID: 102 -> Url de la photo de profil modifié.", async () => {
-			exampleToken = await login(UserSet.unitTestUser2);
+		test("ID: 101 -> Url de la photo de profil modifié.", async () => {
+			exampleToken = await login(UserSet.unitTestUser1);
 
 			const payload = new UserUpdateDTO();
-			payload.urlPfp = UserSet.unitTestUser2.urlPfp;
-			payload.currentPassword = UserSet.unitTestUser2.password;
+			payload.urlPfp = UserSet.unitTestUser1.urlPfp;
 
 			const response = await request
-				.put(`/api/users/${UserSet.unitTestUser2.id}`)
+				.put(`/api/users/${UserSet.unitTestUser1.id}`)
+				.auth(exampleToken, { type: "bearer" })
+				.send(payload);
+			Logger.debug(JSON.stringify(response.body), "test: users", 5);
+			expect(response.status).toBe(OkRes.statut);
+		});
+
+		test("ID: 101 -> erreur: Thème incorrect.", async () => {
+			exampleToken = await login(UserSet.unitTestUser1);
+
+			const payload = new UserUpdateDTO();
+			payload.theme = 34;
+
+			const response = await request
+				.put(`/api/users/${UserSet.unitTestUser1.id}`)
+				.auth(exampleToken, { type: "bearer" })
+				.send(payload);
+			Logger.debug(JSON.stringify(response.body), "test: users", 5);
+			expect(response.status).toBe(BadRequestRes.statut);
+			expect(response.body).toHaveProperty(
+				"message",
+				Responses.User.Invalid_theme,
+			);
+		});
+
+		test("ID: 101 -> succès: Thème modifié.", async () => {
+			exampleToken = await login(UserSet.unitTestUser1);
+
+			const payload = new UserUpdateDTO();
+			payload.theme = Theme.FlashBang;
+
+			const response = await request
+				.put(`/api/users/${UserSet.unitTestUser1.id}`)
 				.auth(exampleToken, { type: "bearer" })
 				.send(payload);
 			Logger.debug(JSON.stringify(response.body), "test: users", 5);

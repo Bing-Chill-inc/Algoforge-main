@@ -28,6 +28,7 @@ import { MailService } from "../../mail/mail.service";
 import { Responses } from "../../constants/responses.const";
 import { hashString } from "../../utils/hash";
 import { fetch } from "bun";
+import { Theme } from "../../types/theme.enum";
 
 /**
  * Service pour les utilisateurs.
@@ -312,10 +313,10 @@ export class UsersService {
 		}
 
 		// Vérification de la présence des données
-		if (!data.currentPassword) {
-			return new BadRequestRes(Responses.General.Missing_data);
-		}
-		if (!data.pseudo && !data.urlPfp && !data.newPassword) {
+		// if (!data.currentPassword) {
+		// 	return new BadRequestRes(Responses.General.Missing_data);
+		// }
+		if (!data.pseudo && !data.urlPfp && !data.newPassword && !data.theme) {
 			return new BadRequestRes(Responses.General.Missing_data);
 		}
 
@@ -334,16 +335,25 @@ export class UsersService {
 
 		if (!user) {
 			return new NotFoundRes(Responses.User.Not_found);
-		} else if (!bcrypt.compareSync(data.currentPassword, user.mdpHash)) {
-			return new UnauthorizedRes(Responses.User.Invalid_password);
 		}
 
-		// Mise à jour de l'utilisateur
+		// Mise à jour de l'utilisateur (mot de passe nécessaire)
+		if (data.newPassword) {
+			if (!bcrypt.compareSync(data.currentPassword, user.mdpHash)) {
+				return new UnauthorizedRes(Responses.User.Invalid_password);
+			}
+			user.mdpHash = hashString(data.newPassword);
+		}
+
+		// Mise à jour de l'utilisateur (mot de passe non nécessaire)
 		if (data.pseudo) {
 			user.pseudo = data.pseudo;
 		}
-		if (data.newPassword) {
-			user.mdpHash = hashString(data.newPassword);
+		if (data.theme) {
+			if (!Object.values(Theme).includes(data.theme)) {
+				return new BadRequestRes(Responses.User.Invalid_theme);
+			}
+			user.theme = data.theme;
 		}
 		if (data.urlPfp) {
 			const requestUrl = await fetch(data.urlPfp);

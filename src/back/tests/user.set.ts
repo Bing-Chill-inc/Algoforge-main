@@ -12,13 +12,13 @@ export const UserSet = {
 		email: "unittestuser1@algoforge.fr",
 		password: "unittest1",
 		pseudo: "UnitTestUser1",
+		urlPfp: "https://avatars.githubusercontent.com/u/46644925?v=4",
 	},
 	unitTestUser2: {
 		id: 102,
 		email: "unittestuser2@algoforge.fr",
 		password: "unittest2",
 		pseudo: "UnitTestUser2",
-		urlPfp: "https://avatars.githubusercontent.com/u/46644925?v=4",
 	},
 	unitTestAlgo1: {
 		id: 110,

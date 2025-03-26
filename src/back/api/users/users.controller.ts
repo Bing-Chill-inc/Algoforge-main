@@ -78,8 +78,6 @@ export class UsersController {
 			authMiddleware,
 			expressAsyncHandler(this.deleteUser.bind(this)),
 		);
-
-		
 	}
 
 	/**
@@ -255,13 +253,15 @@ export class UsersController {
 		const id = +req.params.id;
 
 		// Récupération des données de la requête
-		const { pseudo, currentPassword, newPassword, urlPfp } = req.body;
+		const { pseudo, currentPassword, newPassword, urlPfp, theme } =
+			req.body;
 
 		const data = new UserUpdateDTO();
 		data.pseudo = pseudo;
 		data.currentPassword = currentPassword;
 		data.newPassword = newPassword;
 		data.urlPfp = urlPfp;
+		data.theme = theme;
 		data.requestedUserId = (res.locals.user as Utilisateur).id;
 
 		const reponse = await this.usersService.updateUser(id, data);
