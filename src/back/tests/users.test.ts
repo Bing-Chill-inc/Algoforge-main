@@ -335,7 +335,7 @@ export const UsersTests = async () => {
 
 			const payload = new UserUpdateDTO();
 			payload.currentPassword = "wrong";
-			payload.newPassword = "nouveauMdp";
+			payload.newPassword = UserSet.example.newPassword;
 
 			const response = await request
 				.put(`/api/users/${UserSet.example.id}`)
