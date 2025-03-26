@@ -16,6 +16,7 @@
 - [Utilisation / Installation](#utilisation--installation)
   - [Version en ligne](#version-en-ligne)
   - [Autres versions](#autres-versions)
+- [Comment contribuer au projet ?](#comment-contribuer-au-projet-)
 - [Identité collaborateurs](#identité-collaborateurs)
 
 ## Pitch
@@ -70,6 +71,46 @@ Pour utiliser AlgoForge en ligne, vous pouvez vous rendre sur ce lien : [https:/
 ### Autres versions
 
 Pour utiliser les autres versions d'Algoforge disponibles (application de bureau, ou hébergée en local), veuillez consulter la [documentation](https://bing-chill-inc.github.io/wikiforge/docs/tutorial/self-host/install/).
+
+## Comment contribuer au projet ?
+
+Vous avez une idée d'amélioration à mettre en place et/ou voulez contribuer à ce projet ?
+Voici comment procéder :
+
+1. **Forkez** le projet en cliquant sur le bouton **Fork** sur GitHub.
+2. **Clonez** votre fork en local :
+
+   ```sh
+   git clone --recurse-submodules https://github.com/Bing-Chill-inc/Algoforge-main.git
+   cd Algoforge-main
+   ```
+
+3. **Créez une nouvelle branche** pour vos modifications :
+
+   ```sh
+   git checkout -b feat/ma-nouvelle-fonctionnalite
+   ```
+
+4. **Apportez vos modifications**, puis enregistrez-les :
+
+   ```sh
+   git add .
+   git commit -m "Ajout d'une nouvelle fonctionnalité"
+   ```
+
+5. **Poussez vos modifications** sur votre fork :
+
+   ```sh
+   git push origin ma-nouvelle-fonctionnalite
+   ```
+
+6. **Créez une Pull Request** depuis votre dépôt forké sur GitHub.
+7. **Attendez la revue** et apportez des corrections si nécessaire.
+
+> [!IMPORTANT]
+> Si vous ne savez pas comment installer l'application en local, référez vous à la [documentation](https://bing-chill-inc.github.io/wikiforge/docs/tutorial/self-host/install/).
+
+Merci d'avance ! 💜
 
 ## Identité collaborateurs
 
