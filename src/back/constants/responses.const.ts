@@ -64,6 +64,28 @@ export const Responses = {
 			Found: "Algorithme trouvé.",
 		},
 	},
+	Dir: {
+		Forbidden_create:
+			"Vous n'avez pas les droits pour créer ce dossier.",
+		Forbidden_update:
+			"Vous n'avez pas les droits pour modifier ce dossier.",
+		Not_found: "Dossier non trouvé.",
+		Parent_Not_found: "Dossier parent non trouvé.",
+		Invalid: "Dossier invalide.",
+		By_User: {
+			Not_found: "Aucun dossier trouvé.",
+			Found: "Dossiers trouvés.",
+		},
+		Errors: {
+			While_deleting_dir: "Erreur lors de la suppression du dossier.",
+		},
+		Success: {
+			Created: "Dossier créé.",
+			Updated: "Dossier mis à jour.",
+			Deleted: "Dossier supprimé.",
+			Found: "Dossier trouvé.",
+		},
+	},
 	General: {
 		Invalid_data: "Données invalides.",
 		Missing_data: "Il manque des données.",

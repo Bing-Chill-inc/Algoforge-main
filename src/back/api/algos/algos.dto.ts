@@ -16,7 +16,6 @@ import { PermAlgorithme } from "../../db/schemas/PermAlgorithme.schema";
  * @category Algorithmes
  */
 export class AlgoCreateDTO {
-
 	/**
 	 * Identifiant de l'algorithme.
 	 * Il est généré automatiquement par la base de données.
@@ -74,7 +73,6 @@ export class AlgoCreateDTO {
 	@IsNumber()
 	requestedUserId: number;
 
-
 	/**
 	 * L'algorithme en lui-même.
 	 * @type {Object}
@@ -124,6 +122,10 @@ export class AlgoUpdateDTO {
 	@IsArray()
 	@IsOptional()
 	permsAlgorithme?: PermAlgorithme[];
+
+	@IsNumber()
+	@IsOptional()
+	dossierId?: number;
 
 	/**
 	 * L'algorithme mise à jour.
