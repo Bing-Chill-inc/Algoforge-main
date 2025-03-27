@@ -123,6 +123,7 @@ export class AlgosController {
 	 * {status: 404, message: "Algorithme non trouvé" }
 	 * {status: 200, message: "Algorithme trouvé", data: new Algo() }
 	 */
+	// TODO: Bloquer la récupération de l'algo s'il est supprimé (= dans la corbeille).
 	private async getAlgo(req: Request, res: Response) {
 		// Récupération des données de la requête
 		const { id } = req.params;

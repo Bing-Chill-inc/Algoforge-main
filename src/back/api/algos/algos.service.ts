@@ -239,8 +239,8 @@ export class AlgosService {
 		// Vérification des droits de l'utilisateur.
 		const ownerAlgo = await getOwnerOfAlgo(algoToUpdate.id);
 		if (!ownerAlgo) return null;
-		const rights = await rightsOfUserOnAlgo(algo.id, algo.requestedUserId);
-		if (!rights || rights === Droits.ReadWrite || rights === Droits.Owner)
+		const rights = await rightsOfUserOnAlgo(algo.requestedUserId, algo.id);
+		if (!rights || (rights !== Droits.ReadWrite && rights !== Droits.Owner))
 			return new ForbiddenRes(Responses.General.Forbidden);
 
 		const ownerPerm = new PermAlgorithme();
