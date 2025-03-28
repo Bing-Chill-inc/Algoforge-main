@@ -6,6 +6,7 @@ export const Responses = {
 		Not_verified: "Utilisateur non vérifié.",
 		Invalid_password: "Mot de passe incorrect.",
 		Invalid_profile_url: "URL de photo de profil invalide.",
+		Invalid_theme: "Theme invalide.",
 		Not_found: "Utilisateur introuvable.",
 		Errors: {
 			While_creating_user: "Erreur lors de la création de l'utilisateur.",
@@ -18,6 +19,7 @@ export const Responses = {
 			Deleted: "Utilisateur supprimé.",
 			Confirmed: "Inscription confirmée.",
 			Found: "Utilisateur trouvé.",
+			Quota: "Quota de l'utilisateur trouvé.",
 		},
 	},
 	Token: {
@@ -59,7 +61,29 @@ export const Responses = {
 			Created: "Algorithme créé.",
 			Updated: "Algorithme mis à jour.",
 			Deleted: "Algorithme supprimé.",
+			Trash: "Algorithme déplacé dans la corbeille.",
 			Found: "Algorithme trouvé.",
+		},
+	},
+	Dir: {
+		Forbidden_create: "Vous n'avez pas les droits pour créer ce dossier.",
+		Forbidden_update:
+			"Vous n'avez pas les droits pour modifier ce dossier.",
+		Not_found: "Dossier non trouvé.",
+		Parent_Not_found: "Dossier parent non trouvé.",
+		Invalid: "Dossier invalide.",
+		By_User: {
+			Not_found: "Aucun dossier trouvé.",
+			Found: "Dossiers trouvés.",
+		},
+		Errors: {
+			While_deleting_dir: "Erreur lors de la suppression du dossier.",
+		},
+		Success: {
+			Created: "Dossier créé.",
+			Updated: "Dossier mis à jour.",
+			Deleted: "Dossier supprimé.",
+			Found: "Dossier trouvé.",
 		},
 	},
 	General: {

@@ -2,7 +2,7 @@ import { Router, Request, Response } from "express";
 import expressAsyncHandler from "express-async-handler";
 import { AlgosService } from "./algos.service";
 import { Logger } from "../../utils/logger";
-import { AlgoCreateDTO, AlgoUpdateDTO } from "./algos.dto";
+import { AlgoCreateDTO, AlgoSelectDTO, AlgoUpdateDTO } from "./algos.dto";
 import {
 	BadRequestRes,
 	CreatedRes,
@@ -11,6 +11,7 @@ import {
 	Res,
 } from "../../types/response.entity";
 import { Utilisateur } from "../../db/schemas/Utilisateur.schema";
+import { getOwnerOfDir } from "../../utils/queries";
 import { authMiddleware } from "../../middlewares/auth.middleware";
 import { Responses } from "../../constants/responses.const";
 
@@ -28,12 +29,12 @@ import { Responses } from "../../constants/responses.const";
  */
 export class AlgosController {
 	public router: Router;
-	private usersService: AlgosService;
+	private algosService: AlgosService;
 
 	constructor() {
 		Logger.debug("Initializing...", "AlgosController");
 		this.router = Router();
-		this.usersService = new AlgosService();
+		this.algosService = new AlgosService();
 		this.init();
 		Logger.debug("Done !", "AlgosController");
 	}
@@ -44,7 +45,7 @@ export class AlgosController {
 
 		this.router.get(
 			"/byUserId/:id",
-			expressAsyncHandler(this.getAlgosOfUser.bind(this)),
+			expressAsyncHandler(this.getAlgosPermsOfUser.bind(this)),
 		);
 		this.router.get("/:id", expressAsyncHandler(this.getAlgo.bind(this)));
 
@@ -60,31 +61,75 @@ export class AlgosController {
 		);
 	}
 
-	// GET /byUserId/:id
-	private async getAlgosOfUser(req: Request, res: Response) {
-		// Récupération des données de la requête
-		const { id } = req.params;
+	/**
+	 * GET /byUserId/:id ?deleted=:deleted ?sorted=:sorted
+	 * NOTE: ?dirId=:dirId est temporairement désactivé.
+	 * Récupérer les algorithmes d'un utlisateur.
+	 * @param req.params.id Id de l'utilisateur.
+	 * @param req.query.deleted Booléen pour savoir si on veut récupérer les algorithmes supprimés ou non.
+	 * @param req.query.sorted String correspondant à un type de tri des algorithmes. Voir l'énum {@link SortAlgos}
+	 * NOTE: @param req.params.dirId Id du dossier dans lequel on recherche les algorithmes.
+	 * @remarks
+	 * Besoin d'être connecté, voir: {@link UsersService.verify}
+	 * Si algorithmes trouvés, voir la structure suivante: {@link PermAlgorithme}
+	 * @example
+	 * // Retours possibles :
+	 * {status: 404, message: "Dossier non trouvé" }
+	 * {status: 404, message: "Aucun algorithme trouvé" }
+	 * {status: 200, message: "Algorithmes trouvés", data: [new PermAlgorithme()] }
+	 */
+	private async getAlgosPermsOfUser(req: Request, res: Response) {
+		let { id } = req.params;
+		const user = res.locals.user as Utilisateur;
+		const { deleted, sorted } = req.query;
+		// FIXME: Les dossiers sont temporairement désactivé.
+		// const { dirId } = req.query as { dirId: string };
+		const dirId = null;
 
-		const algos = await this.usersService.getAlgosOfUser(+id);
-
-		if (!algos || algos.length === 0) {
-			return res
-				.status(NotFoundRes.statut)
-				.json(new NotFoundRes(Responses.Algo.By_User.Not_found));
+		// Si dirId est null, on se situe à la racine, sinon on se situe dans un dossier, on récupère l'owner du dossier
+		if (dirId) {
+			// Récupérer l'owner du dossier
+			const owner = await getOwnerOfDir(+dirId);
+			if (!owner) {
+				return res
+					.status(NotFoundRes.statut)
+					.json(new NotFoundRes(Responses.Dir.Not_found));
+			}
+			id = String(owner.id);
 		}
 
-		return res
-			.status(OkRes.statut)
-			.json(new OkRes(Responses.Algo.By_User.Found, algos));
+		const selectData = new AlgoSelectDTO();
+		selectData.requestedUserId = user.id;
+		selectData.userId = +id;
+		selectData.deleted = deleted === "true" ? true : false;
+		selectData.sorted = sorted ? String(sorted) : "nom";
+		// Récupération des permissions des algorithmes de l'utilisateur dans le dossier
+		const algosPermsResponse = await this.algosService.getAlgosPermsOfUser(
+			selectData,
+		);
+
+		return res.status(algosPermsResponse.statut).json(algosPermsResponse);
 	}
 
-	// GET /:id
+	/**
+	 * GET /:id
+	 * Récupérer un algorithme.
+	 * @param req.params.id Id de l'algorithme
+	 * @remarks
+	 * Besoin d'être connecté, voir: {@link UsersService.verify}
+	 * Pour accéder au code source de l'algorithme, lire la propriété sourceCode.
+	 * @example
+	 * // Retours possibles :
+	 * {status: 404, message: "Algorithme non trouvé" }
+	 * {status: 200, message: "Algorithme trouvé", data: new Algo() }
+	 */
+	// TODO: Bloquer la récupération de l'algo s'il est supprimé (= dans la corbeille).
 	private async getAlgo(req: Request, res: Response) {
 		// Récupération des données de la requête
 		const { id } = req.params;
 		const user = res.locals.user as Utilisateur;
 
-		const algo = await this.usersService.getAlgo(+id, user.id);
+		const algo = await this.algosService.getAlgo(+id, user.id);
 
 		if (!algo) {
 			return res
@@ -97,7 +142,19 @@ export class AlgosController {
 			.json(new OkRes(Responses.Algo.Success.Found, algo));
 	}
 
-	// POST /
+	/**
+	 * POST /
+	 * Créer un algorithme.
+	 * @param req.body {@link AlgoCreateDTO}
+	 * @remarks
+	 * Besoin d'être connecté, voir: {@link UsersService.verify}
+	 * @example
+	 * // Retours possibles :
+	 * {status: 400, message: "Données manquantes" }
+	 * {status: 400, message: "Algorithme invalide" }
+	 * {status: 403, message: "Vous n'avez pas les droits pour créer cet algorithme" }
+	 * {status: 201, message: "Algorithme créé", data: new Algo() }
+	 */
 	private async createAlgo(req: Request, res: Response) {
 		// Récupération des données de la requête
 		const { ownerId, nom, sourceCode } = req.body;
@@ -113,7 +170,7 @@ export class AlgosController {
 		data.sourceCode = sourceCode;
 		data.requestedUserId = (res.locals.user as Utilisateur).id;
 
-		const result = await this.usersService.createAlgo(data);
+		const result = await this.algosService.createAlgo(data);
 		if (result instanceof Res) {
 			return res.status(result.statut).json(result);
 		}
@@ -123,7 +180,21 @@ export class AlgosController {
 			.json(new CreatedRes(Responses.Algo.Success.Created, result));
 	}
 
-	// PUT /:id
+	/**
+	 * PUT /:id
+	 * Mettre à jour un algorithme.
+	 * @param req.params.id Id de l'algorithme
+	 * @param req.body {@link AlgoUpdateDTO}
+	 * @remarks
+	 * Besoin d'être connecté, voir: {@link UsersService.verify}
+	 * @example
+	 * // Retours possibles :
+	 * {status: 400, message: "Données manquantes" }
+	 * {status: 404, message: "Algorithme non trouvé" }
+	 * {status: 400, message: "Algorithme invalide" }
+	 * {status: 403, message: "Vous n'avez pas les droits pour modifier cet algorithme" }
+	 * {status: 200, message: "Algorithme mis à jour", data: new Algo() }
+	 */
 	private async updateAlgo(req: Request, res: Response) {
 		// Récupération des données de la requête
 		const { id } = req.params;
@@ -142,8 +213,11 @@ export class AlgosController {
 		if (Array.isArray(permsAlgorithme) && permsAlgorithme?.length > 0) {
 			data.permsAlgorithme = permsAlgorithme;
 		}
+		if (req.body.dossierId) {
+			data.dossierId = req.body.dossierId;
+		}
 
-		const updatedAlgo = await this.usersService.updateAlgo(data);
+		const updatedAlgo = await this.algosService.updateAlgo(data);
 
 		if (!updatedAlgo) {
 			return res
@@ -151,17 +225,33 @@ export class AlgosController {
 				.json(new NotFoundRes(Responses.Algo.Not_found));
 		}
 
+		if (updatedAlgo instanceof Res) {
+			return res.status(updatedAlgo.statut).json(updatedAlgo);
+		}
+
 		return res
 			.status(OkRes.statut)
 			.json(new OkRes(Responses.Algo.Success.Updated, updatedAlgo));
 	}
 
-	// DELETE /:id
+	/**
+	 * DELETE /:id
+	 * Supprimer un algorithme.
+	 * @param req.params.id Id de l'algorithme
+	 * @remarks
+	 * Besoin d'être connecté, voir: {@link UsersService.verify}
+	 * @example
+	 * // Retours possibles :
+	 * {status: 404, message: "Algorithme non trouvé" }
+	 * {status: 403, message: "Permission refusée" }
+	 * {status: 500, message: "Erreur lors de la suppression de l'algorithme" }
+	 * {status: 200, message: "Algorithme supprimé" }
+	 */
 	private async deleteAlgo(req: Request, res: Response) {
 		// Récupération des données de la requête
 		const { id } = req.params;
 
-		const result = await this.usersService.deleteAlgo(
+		const result = await this.algosService.deleteAlgo(
 			+id,
 			res.locals.user.id,
 		);

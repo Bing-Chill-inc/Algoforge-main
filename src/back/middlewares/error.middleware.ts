@@ -7,8 +7,9 @@ import { Logger } from "../utils/logger";
  * @category Middlewares
  */
 export const errorMiddleware = async (error, req, res, next) => {
-	const errorMessage: string =
-		process.env.BUILD === "dev" ? error.stack : error.message;
+	const errorMessage: string = ["dev", "test"].includes(process.env.BUILD)
+		? error.stack
+		: error.message;
 
 	Logger.error(
 		`Une erreur est survenue lors du traitement de la requête: \n${errorMessage}`,

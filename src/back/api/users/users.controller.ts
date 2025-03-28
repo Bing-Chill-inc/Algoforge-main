@@ -7,6 +7,7 @@ import { AuthService } from "../auth/auth.service";
 import { Utilisateur } from "../../db/schemas/Utilisateur.schema";
 import { authMiddleware } from "../../middlewares/auth.middleware";
 import { Responses } from "../../constants/responses.const";
+import { customLimitMiddleware } from "../../middlewares/ratelimit.middleware";
 
 /**
  * Contrôleur pour les utilisateurs.
@@ -40,6 +41,7 @@ export class UsersController {
 	private init() {
 		this.router.post(
 			"/register",
+			customLimitMiddleware(300, 10),
 			expressAsyncHandler(this.register.bind(this)),
 		);
 		this.router.get(
@@ -51,6 +53,12 @@ export class UsersController {
 		this.router.post(
 			"/recover",
 			expressAsyncHandler(this.recover.bind(this)),
+		);
+
+		this.router.get(
+			"/quota",
+			authMiddleware,
+			expressAsyncHandler(this.getQuota.bind(this)),
 		);
 
 		this.router.get(
@@ -245,13 +253,15 @@ export class UsersController {
 		const id = +req.params.id;
 
 		// Récupération des données de la requête
-		const { pseudo, currentPassword, newPassword, urlPfp } = req.body;
+		const { pseudo, currentPassword, newPassword, urlPfp, theme } =
+			req.body;
 
 		const data = new UserUpdateDTO();
 		data.pseudo = pseudo;
 		data.currentPassword = currentPassword;
 		data.newPassword = newPassword;
 		data.urlPfp = urlPfp;
+		data.theme = theme;
 		data.requestedUserId = (res.locals.user as Utilisateur).id;
 
 		const reponse = await this.usersService.updateUser(id, data);
@@ -280,6 +290,24 @@ export class UsersController {
 
 		// S'il a les droits, on supprime l'utilisateur
 		const reponse = await this.usersService.deleteUser(id, requestedUserId);
+
+		return res
+			.status(reponse.statut)
+			.json({ message: reponse.message, data: reponse.data });
+	}
+
+	/**
+	 * GET /quota
+	 * Récupérer le quota de l'utilisateur.
+	 * @remarks
+	 * Besoin d'être connecté, voir: {@link UsersService.verify}
+	 * @example
+	 * // Retours possibles :
+	 * {status: 200, message: "Quota récupéré", data: {used: number, total: number} }
+	 */
+	private async getQuota(req: Request, res: Response) {
+		const userId = (res.locals.user as Utilisateur).id;
+		const reponse = await this.usersService.getQuota(userId);
 
 		return res
 			.status(reponse.statut)

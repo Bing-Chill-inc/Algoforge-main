@@ -31,20 +31,27 @@ app.get(iconHandler.route, iconHandler.callback);
 
 // Préparation du bundle de l'éditeur - SmeltJS.
 const SmeltJS = async () => {
-
-	Logger.debug(await $`bun i`.cwd(`../front-editeur`).text(), "smeltjs: install");
+	Logger.debug(
+		await $`bun i`.cwd(`../front-editeur`).text(),
+		"smeltjs: install",
+	);
 
 	// Si le contenu du dossier ../front-editeur change, il faut relancer la commande.
-
 	watch(
 		path.join(__dirname, "/../front-editeur/src"),
 		{ recursive: true },
 		async () => {
-			Logger.debug(await $`bun SmeltJS.ts`.cwd(`../front-editeur`).text(), "smeltjs: build");
+			Logger.debug(
+				await $`bun SmeltJS.ts`.cwd(`../front-editeur`).text(),
+				"smeltjs: build",
+			);
 		},
 	);
 
-	Logger.debug(await $`bun SmeltJS.ts`.cwd(`../front-editeur`).text(), "smeltjs: build");
+	Logger.debug(
+		await $`bun SmeltJS.ts`.cwd(`../front-editeur`).text(),
+		"smeltjs: build",
+	);
 };
 
 app.use("/edit", express.static(path.join(__dirname, "/../front-editeur/out")));
@@ -131,7 +138,7 @@ const dbConnexion = new Promise((resolve, reject) => {
 });
 // Init mail connection
 const mailConnexion = new Promise((resolve, reject) => {
-	if (process.env.MAIL_ENABLED !== "true") {
+	if (!MailService.shouldBeActive()) {
 		Logger.warn(
 			"Mail service is not active. No mail will be sent.",
 			"mail: service",
@@ -176,6 +183,7 @@ const mailConnexion = new Promise((resolve, reject) => {
 // Starting application
 import { AlgosController } from "./api/algos/algos.controller";
 import { UsersController } from "./api/users/users.controller";
+import { MailService } from "./mail/mail.service";
 Promise.all([dbConnexion, mailConnexion, SmeltJS()])
 	.then(async () => {
 		// Handling API logs.
@@ -187,7 +195,8 @@ Promise.all([dbConnexion, mailConnexion, SmeltJS()])
 		// Handling errors
 		app.use(errorMiddleware);
 
-		app.listen(port, () => {
+		// Start server
+		app.listen(port, async () => {
 			Logger.log(`Server is running on http://localhost:${port}`, "main");
 
 			// On indique que l'application est initialisée.

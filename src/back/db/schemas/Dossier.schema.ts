@@ -34,7 +34,7 @@ export class Dossier {
 	 */
 	@Column({ type: "varchar", length: 255, default: "Nouveau dossier" })
 	nom: string;
-	
+
 	/**
 	 * ID du dossier parent
 	 * Si null, le dossier est à la racine.
@@ -51,7 +51,7 @@ export class Dossier {
 	 * @type {Dossier}
 	 */
 	@OneToOne(() => Dossier, (dossier) => dossier.id)
-	dossier: Dossier;
+	parent: Dossier;
 
 	/**
 	 * Date de création du dossier.

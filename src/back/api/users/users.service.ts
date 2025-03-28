@@ -28,6 +28,7 @@ import { MailService } from "../../mail/mail.service";
 import { Responses } from "../../constants/responses.const";
 import { hashString } from "../../utils/hash";
 import { fetch } from "bun";
+import { Theme } from "../../types/theme.enum";
 
 /**
  * Service pour les utilisateurs.
@@ -112,25 +113,27 @@ export class UsersService {
 		}
 
 		// Envoi du mail de confirmation
-		Logger.debug(
-			`Mail de confirmation (token): ${mailToken}`,
-			"UsersService",
-			2,
-		);
-		try {
-			await this.mailService.sendConfirmationMail(
-				savedUser.adresseMail,
-				savedUser,
-				mailToken,
+		if (this.mailService.active) {
+			Logger.debug(
+				`Mail de confirmation (token): ${mailToken}`,
+				"UsersService",
+				2,
 			);
-		} catch (err) {
-			// Suppression de l'utilisateur en cas d'erreur
-			await this.utilisateursRepository.delete(savedUser.id);
+			try {
+				await this.mailService.sendConfirmationMail(
+					savedUser.adresseMail,
+					savedUser,
+					mailToken,
+				);
+			} catch (err) {
+				// Suppression de l'utilisateur en cas d'erreur
+				await this.utilisateursRepository.delete(savedUser.id);
 
-			return new Res(
-				500,
-				"Erreur lors de l'envoi du mail de confirmation",
-			);
+				return new Res(
+					500,
+					"Erreur lors de l'envoi du mail de confirmation",
+				);
+			}
 		}
 
 		// Suppression du hash du mot de passe
@@ -219,7 +222,7 @@ export class UsersService {
 			return new UnauthorizedRes(Responses.User.Invalid_password);
 		}
 		// Vérification de l'utilisateur
-		if (this.mailService.active && !user.isVerified) {
+		if (this.mailService.active && user.isVerified === false) {
 			return new UnauthorizedRes(Responses.User.Not_verified);
 		}
 
@@ -310,10 +313,10 @@ export class UsersService {
 		}
 
 		// Vérification de la présence des données
-		if (!data.currentPassword) {
-			return new BadRequestRes(Responses.General.Missing_data);
-		}
-		if (!data.pseudo && !data.urlPfp && !data.newPassword) {
+		// if (!data.currentPassword) {
+		// 	return new BadRequestRes(Responses.General.Missing_data);
+		// }
+		if (!data.pseudo && !data.urlPfp && !data.newPassword && !data.theme) {
 			return new BadRequestRes(Responses.General.Missing_data);
 		}
 
@@ -332,16 +335,25 @@ export class UsersService {
 
 		if (!user) {
 			return new NotFoundRes(Responses.User.Not_found);
-		} else if (!bcrypt.compareSync(data.currentPassword, user.mdpHash)) {
-			return new UnauthorizedRes(Responses.User.Invalid_password);
 		}
 
-		// Mise à jour de l'utilisateur
+		// Mise à jour de l'utilisateur (mot de passe nécessaire)
+		if (data.newPassword) {
+			if (!bcrypt.compareSync(data.currentPassword, user.mdpHash)) {
+				return new UnauthorizedRes(Responses.User.Invalid_password);
+			}
+			user.mdpHash = hashString(data.newPassword);
+		}
+
+		// Mise à jour de l'utilisateur (mot de passe non nécessaire)
 		if (data.pseudo) {
 			user.pseudo = data.pseudo;
 		}
-		if (data.newPassword) {
-			user.mdpHash = hashString(data.newPassword);
+		if (data.theme) {
+			if (!Object.values(Theme).includes(data.theme)) {
+				return new BadRequestRes(Responses.User.Invalid_theme);
+			}
+			user.theme = data.theme;
 		}
 		if (data.urlPfp) {
 			const requestUrl = await fetch(data.urlPfp);
@@ -482,5 +494,19 @@ export class UsersService {
 		user.mdpHash = undefined;
 
 		return new OkRes(Responses.User.Success.Found, user);
+	}
+
+	async getQuota(id: number) {
+		// Récupération du nombre d'algorithmes de l'utilisateur.
+		const nbrAlgos = await this.permsAlgorithmesRepository.count({
+			where: { idUtilisateur: id },
+		});
+		// Définition de la limite d'algorithmes.
+		const max = Number(process.env.QUOTA_ALGO) || 500;
+
+		return new OkRes(Responses.User.Success.Quota, {
+			used: nbrAlgos,
+			max,
+		});
 	}
 }
