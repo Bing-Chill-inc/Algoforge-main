@@ -1,0 +1,25 @@
+name: Run unit tests
+
+on:
+    push:
+        branches:
+            - main
+
+jobs:
+    tests:
+        runs-on: ubuntu-latest
+        steps:
+            - name: Checkout repository
+              uses: actions/checkout@v4
+              with:
+                  submodules: true # Initialize and update submodules
+
+            - uses: oven-sh/setup-bun@v1
+              with:
+                  bun-version: latest
+
+            - name: Install dependencies
+              run: cd src/back && bun install
+
+            - name: Run tests
+              run: cd src/back && bun test --env-file=../../template-test.env ./tests/setup.test.ts

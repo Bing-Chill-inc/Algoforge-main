@@ -2,6 +2,9 @@
     <img src="logo.png" style="width:128px" alt="Le logo d'AlgoForge"/>
     </br>
     </br>
+    <a href="https://bing-chill-inc.github.io/wikiforge/" target="_blank">Wiki</a>
+    -
+    <a href="https://bing-chill-inc.github.io/wikiforge/docs/tutorial/self-host/install/" target="_blank">Doc d'installation</a>
     <h1>AlgoForge</h1>
 </div>
 
@@ -12,17 +15,9 @@
 - [Fonctionnalités de l'application](#fonctionnalités-de-lapplication)
 - [Utilisation / Installation](#utilisation--installation)
   - [Version en ligne](#version-en-ligne)
-  - [Version docker](#version-docker)
-    - [Programmes requis](#programmes-requis)
-    - [Installation Windows](#installation-windows)
-    - [Installation UNIX](#installation-unix)
-  - [Version standalone](#version-standalone)
-    - [Programmes requis](#programmes-requis-1)
-    - [Installation automatique (UNIX)](#installation-automatique-unix)
-    - [Installation manuelle (Windows/UNIX)](#installation-manuelle-windowsunix)
-  - [Version de bureau](#version-de-bureau)
+  - [Autres versions](#autres-versions)
+- [Comment contribuer au projet ?](#comment-contribuer-au-projet-)
 - [Identité collaborateurs](#identité-collaborateurs)
-- [Structure des dossiers](#structure-des-dossiers)
 
 ## Pitch
 
@@ -73,104 +68,49 @@ AlgoForge est utilisable de deux manières différentes: en ligne sur un navigat
 
 Pour utiliser AlgoForge en ligne, vous pouvez vous rendre sur ce lien : [https://algoforge.fr/](https://algoforge.fr/)
 
-### Version docker
+### Autres versions
 
-La version docker de l'application comprend par défaut une base de données PostgreSQL ainsi que l'application PGAdmin pour la gestion de la base de données. Nous vous proposons dans cette section des installateurs automatiques pour Windows et UNIX.
+Pour utiliser les autres versions d'Algoforge disponibles (application de bureau, ou hébergée en local), veuillez consulter la [documentation](https://bing-chill-inc.github.io/wikiforge/docs/tutorial/self-host/install/).
 
-#### Programmes requis
+## Comment contribuer au projet ?
 
-- Rendre disponible 2 ports: l'un pour l'application et l'autre pour PGAdmin. (par défaut 5205 et 5300)
-- Installer [git](https://git-scm.com/downloads).
-- Installer [Docker](https://docker.com).
+Vous avez une idée d'amélioration à mettre en place et/ou voulez contribuer à ce projet ?
+Voici comment procéder :
 
-> [!CAUTION]
-> Docker doit être démarré quand vous voulez utiliser l’application.
+1. **Forkez** le projet en cliquant sur le bouton **Fork** sur GitHub.
+2. **Clonez** votre fork en local :
 
-#### Installation Windows
+   ```sh
+   git clone --recurse-submodules https://github.com/Bing-Chill-inc/Algoforge-main.git
+   cd Algoforge-main
+   ```
 
-1. Télécharger l'installateur de l'application. Nous vous proposons 2 méthodes pour cela:
+3. **Créez une nouvelle branche** pour vos modifications :
 
-- Sans Powershell: `run-docker.bat`
-- Avec Powershell: `run-docker.ps1`
+   ```sh
+   git checkout -b feat/ma-nouvelle-fonctionnalite
+   ```
 
-1. Exécuter le programme depuis une invite de commande ou en double-cliquant dessus.
+4. **Apportez vos modifications**, puis enregistrez-les :
 
-#### Installation UNIX
+   ```sh
+   git add .
+   git commit -m "Ajout d'une nouvelle fonctionnalité"
+   ```
 
-1. Télécharger l'installateur de l'application : `run-docker.sh`
-2. Exécuter le programme depuis une invite de commande:
+5. **Poussez vos modifications** sur votre fork :
 
-```bash
-./run-docker.sh
-```
+   ```sh
+   git push origin ma-nouvelle-fonctionnalite
+   ```
 
-### Version standalone
+6. **Créez une Pull Request** depuis votre dépôt forké sur GitHub.
+7. **Attendez la revue** et apportez des corrections si nécessaire.
 
-#### Programmes requis
+> [!IMPORTANT]
+> Si vous ne savez pas comment installer l'application en local, référez vous à la [documentation](https://bing-chill-inc.github.io/wikiforge/docs/tutorial/self-host/install/).
 
-- Rendre disponible 1 port pour l'application. (5205 par défaut)
-- Installer [git](https://git-scm.com/downloads).
-- Installer [Bun](https://bun.sh), testé avec la version 1.2.5.
-
-#### Installation automatique (UNIX)
-
-1. Télécharger l'installateur de l'application : `run-local.sh`
-2. Exécuter le programme depuis une invite de commande:
-
-```bash
-./run-local.sh
-```
-
-#### Installation manuelle (Windows/UNIX)
-
-1. Télécharger le programme grâce à la commande git suivante:
-
-```bash
-git clone --depth 1 --recurse-submodules https://github.com/Bing-Chill-inc/Algoforge-main.git
-```
-
-2. Se placer dans le dossier Algoforge:
-
-```bash
-cd Algoforge-main
-```
-
-3. Mettre à jour les sous-modules (nécessaire)
-
-```bash
-git submodule update --init --recursive
-```
-
-4. Renommer le fichier template-local.env en .env:
-
-```bash
-mv template-local.env .env
-```
-
-5. (optionnel) Modifier le fichier .env pour modifier les informations de connexion à la base de données.
-
-> [!CAUTION]
-> Si on veut utiliser cette version standalone en local, il faut laisser la configuration sqlite.
-
-6. Se placer dans le dossier back-end:
-
-```bash
-cd src/back
-```
-
-7. Lancer l’application avec la commande suivante:
-
-```bash
-bun run prod
-```
-
-_(Cette dernière va directement télécharger et installer les dépendances nécessaires)_
-
-L'application est en train de se démarrer en arrière plan ! Ouvrez un navigateur et entrez l'adresse: [http://localhost:5205](http://localhost:5205) (par défaut)
-
-### Version de bureau
-
-WIP
+Merci d'avance ! 💜
 
 ## Identité collaborateurs
 
@@ -183,9 +123,3 @@ WIP
 - Adrien HIRIBARREN TOUYA: [**@Alakamar**](https://github.com/Alakamar)
 - Lucas MARROT: [**@LucasMarrot**](https://github.com/LucasMarrot)
 - Romain LABORDE: [**@RomLabo**](https://github.com/RomLabo)
-
-## Structure des dossiers
-
-(Work In Progress)
-
-- Le dossier src héberge le Code de l'algorithme

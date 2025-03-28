@@ -33,28 +33,24 @@ app.get(iconHandler.route, iconHandler.callback);
 const SmeltJS = async () => {
 	Logger.debug(
 		await $`bun i`.cwd(`../front-editeur`).text(),
-		"main: SmeltJS",
-		10,
+		"smeltjs: install",
 	);
 
 	// Si le contenu du dossier ../front-editeur change, il faut relancer la commande.
-
 	watch(
 		path.join(__dirname, "/../front-editeur/src"),
 		{ recursive: true },
 		async () => {
 			Logger.debug(
 				await $`bun SmeltJS.ts`.cwd(`../front-editeur`).text(),
-				"main: SmeltJS",
-				10,
+				"smeltjs: build",
 			);
 		},
 	);
 
 	Logger.debug(
 		await $`bun SmeltJS.ts`.cwd(`../front-editeur`).text(),
-		"main: SmeltJS",
-		10,
+		"smeltjs: build",
 	);
 };
 

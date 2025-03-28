@@ -48,17 +48,18 @@
 				"extraResource": [
 					"../front-editeur/src"
 				],
-				"icon": "./icons/AlgoForge"
+				"icon": "./icons/AlgoForge",
+				"name": "AlgoForge"
 			},
 			"makers": [
 				{
 					"name": "@electron-forge/maker-squirrel",
 					"config": {
-						"name": "Algoforge",
+						"name": "AlgoForge",
 						"description": "L'application de création d'algorithmes",
 						"authors": "AlgoForge inc.",
 						"version": "1.0.0",
-						"setupExe": "AlgoforgeSetup.exe"
+						"setupExe": "AlgoForgeSetup.exe"
 					}
 				},
 				{

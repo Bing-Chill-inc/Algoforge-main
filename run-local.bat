@@ -18,19 +18,20 @@ where git >nul 2>&1 || (
     pause
     goto :eof
 )
-where docker >nul 2>&1 || (
-    echo Docker n'est pas installe. Veuillez l'installer depuis https://www.docker.com/products/docker-desktop.
-    pause
-    goto :eof
-)
-where docker-compose >nul 2>&1 || (
-    echo Docker Compose n'est pas installe. Veuillez l'installer depuis https://docs.docker.com/compose/install/.
+where bun >nul 2>&1 || (
+    echo Bun n'est pas installe. Veuillez l'installer depuis https://bun.sh/.
     pause
     goto :eof
 )
 exit /b 0
 
 :clone_repository
+for %%I in (.) do set "CURRENT_DIR=%%~nxI"
+if "%CURRENT_DIR%" == "Algoforge" (
+    echo Le dossier 'Algoforge' existe deja et vous etes actuellement dedans. Passage a l'etape suivante...
+    exit /b 0
+)
+
 if exist Algoforge (
     echo Le dossier 'Algoforge' existe deja. Passage a l'etape suivante...
     cd Algoforge || (
@@ -42,8 +43,14 @@ if exist Algoforge (
 )
 
 echo Telechargement de l'application depuis GitHub...
-git clone --depth 1 --recurse-submodules https://github.com/Bing-Chill-inc/Algoforge-main.git Algoforge || (
+git clone --depth 1 --recurse-submodules https://github.com/Bing-Chill-inc/Algoforge-main.git || (
     echo Echec du clonage du depot. Verifiez votre connexion internet.
+    pause
+    goto :eof
+)
+rename Algoforge-main Algoforge || (
+    echo Echec du renommage du dossier 'Algoforge-main' en 'Algoforge'.
+    call :del_repository
     pause
     goto :eof
 )
@@ -90,13 +97,19 @@ if exist ".\.env" (
     )
 )
 
-if not exist template-docker.env (
-    echo Le fichier 'template-docker.env' est introuvable. Assurez-vous que le depot a ete clone correctement.
+if not exist template-local.env (
+    echo Le fichier 'template-local.env' est introuvable. Assurez-vous que le depot a ete clone correctement.
     pause
     goto :eof
 )
-copy template-docker.env .env || (
-    echo Echec de la copie du fichier 'template-docker.env'.
+copy template-local.env template-local-copy.env || (
+    echo Echec de la copie du fichier 'template-local.env'.
+    call :del_repository
+    pause
+    goto :eof
+)
+rename template-local-copy.env .env || (
+    echo Echec du renommage du fichier 'template-local.env' en '.env'.
     call :del_repository
     pause
     goto :eof
@@ -130,46 +143,43 @@ set "db_type=!db_type:~1,-1!"
 set "db_name=!db_name:~1,-1!"
 
 :: Verification et correction de DATABASE_TYPE
-if not "!db_type!"=="postgres" (
-    echo Le type de base de donnees est incorrect. Ajustement a "postgres".
-    (echo DATABASE_TYPE = "postgres") > temp.env
+if not "!db_type!"=="sqlite" (
+    echo Le type de base de donnees est incorrect. Ajustement a "sqlite".
+    (echo DATABASE_TYPE = "sqlite") > temp.env
     findstr /v /r "^DATABASE_TYPE *= *" .env >> temp.env
     move /y temp.env .env > nul
 )
 
 :: Verification et correction de DATABASE_NAME
-if not "!db_name!"=="db_algoforge" (
-    echo Le nom de la base de donnees est incorrect. Ajustement a "db_algoforge".
-    (echo DATABASE_NAME = "db_algoforge") > temp.env
+if not "!db_name!"=="db_algoforge.sqlite" (
+    echo Le nom de la base de donnees est incorrect. Ajustement a "db_algoforge.sqlite".
+    (echo DATABASE_NAME = "db_algoforge.sqlite") > temp.env
     findstr /v /r "^DATABASE_NAME *= *" .env >> temp.env
     move /y temp.env .env > nul
 )
 
-echo Type et nom de la base de donnees verifies et corriges si necessaire.
-
 exit /b 0
 
 :start_application
-echo Demarrage de l'application avec Docker Compose...
-if not exist docker-compose.yml (
-    echo Le fichier docker-compose.yml est introuvable.
+echo Demarrage de l'application avec Bun...
+cd src\back || (
+    echo Le dossier 'src\back' n'existe pas. Verifiez le clonage du depot.
     pause
     goto :eof
 )
-
-docker compose up -d || (
-    echo Une erreur est survenue.
+bun run prod || (
+    echo Echec du demarrage de l'application. Verifiez votre installation de Bun.
     call :del_repository
     pause
     goto :eof
 )
 
 REM Recuperation du port a partir du fichier .env
-for /f "tokens=2 delims==" %%a in ('findstr /b "PORT = " .env') do set "port=%%a"
+for /f "tokens=3 delims== " %%a in ('findstr /b "PORT =" ..\.\.env') do set "port=%%a"
 set "port=!port: =!"
 
 echo L'application est en train de demarrer en arriere-plan !
-echo Ouvrez un navigateur et entrez l'adresse: http://localhost:%port%
+echo Ouvrez un navigateur et entrez l'adresse: http://localhost:!port!
 pause
 exit /b 0
 
@@ -184,7 +194,7 @@ exit /b 1
 if exist Algoforge rd /s /q Algoforge
 if exist Algoforge-main rd /s /q Algoforge-main
 for %%I in (.) do if "%%~nxI" == "Algoforge" (
-    cd .. 
+    cd ..
     rd /s /q Algoforge
 )
 exit /b 1
