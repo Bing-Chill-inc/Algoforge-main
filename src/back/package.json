@@ -43,7 +43,7 @@
 		"@types/supertest": "^6.0.2",
 		"tsx": "^4.19.2",
 		"typedoc": "^0.27.6",
-		"typedoc-github-theme": "^0.2.1",
+		"typedoc-github-theme": "^0.3.0",
 		"typedoc-plugin-extras": "^4.0.0",
 		"typedoc-plugin-merge-modules": "^6.1.0",
 		"typescript": "^5.6.3"
