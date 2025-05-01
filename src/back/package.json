@@ -24,27 +24,27 @@
 		"express-async-handler": "^1.2.0",
 		"express-rate-limit": "^7.5.0",
 		"handlebars": "^4.7.8",
-		"nodemailer": "^6.9.16",
+		"nodemailer": "^6.10.1",
 		"nodemailer-mock": "^2.0.8",
-		"pg": "^8.13.1",
+		"pg": "^8.15.6",
 		"reflect-metadata": "^0.2.2",
 		"sqlite3": "^5.1.7",
-		"supertest": "^7.0.0",
-		"typeorm": "^0.3.20",
-		"zod": "^3.24.1"
+		"supertest": "^7.1.0",
+		"typeorm": "^0.3.22",
+		"zod": "^3.24.3"
 	},
 	"devDependencies": {
 		"@types/bcrypt-nodejs": "^0.0.31",
-		"@types/bun": "^1.2.2",
+		"@types/bun": "^1.2.11",
 		"@types/cli-color": "^2.0.6",
 		"@types/cors": "^2.8.17",
-		"@types/express": "^5.0.0",
+		"@types/express": "^5.0.1",
 		"@types/nodemailer": "^6.4.17",
-		"@types/supertest": "^6.0.2",
-		"typedoc": "^0.27.6",
-		"typedoc-github-theme": "^0.2.1",
-		"typedoc-plugin-extras": "^3.1.0",
-		"typedoc-plugin-merge-modules": "^6.1.0",
-		"typescript": "^5.6.3"
+		"@types/supertest": "^6.0.3",
+		"typedoc": "^0.28.3",
+		"typedoc-github-theme": "^0.3.0",
+		"typedoc-plugin-extras": "^4.0.0",
+		"typedoc-plugin-merge-modules": "^7.0.0",
+		"typescript": "^5.8.3"
 	}
 }

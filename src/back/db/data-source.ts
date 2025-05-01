@@ -1,3 +1,5 @@
+import fs from "fs";
+import path from "path";
 import "reflect-metadata";
 import { DataSource } from "typeorm";
 import { Utilisateur } from "./schemas/Utilisateur.schema";
@@ -22,7 +24,9 @@ switch (process.env.DATABASE_TYPE) {
 
 	case "sqlite":
 		dataSource["type"] = process.env.DATABASE_TYPE;
-		dataSource["database"] = process.env.DATABASE_NAME;
+		dataSource["database"] = path.isAbsolute(process.env.DATABASE_NAME)
+			? process.env.DATABASE_NAME
+			: path.resolve(process.cwd(), process.env.DATABASE_NAME);
 		break;
 
 	default:

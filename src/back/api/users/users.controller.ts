@@ -254,7 +254,13 @@ export class UsersController {
 
 		// Récupération des données de la requête
 		const { pseudo, currentPassword, newPassword, urlPfp, theme } =
-			req.body;
+			req.body || {
+				pseudo: undefined,
+				currentPassword: undefined,
+				newPassword: undefined,
+				urlPfp: undefined,
+				theme: undefined,
+			};
 
 		const data = new UserUpdateDTO();
 		data.pseudo = pseudo;

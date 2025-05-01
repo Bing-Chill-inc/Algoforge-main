@@ -29,12 +29,12 @@
 			"./types/**/*.ts",
 			"./db/**/*.ts"
 		],
+		"readme": "../../README.MD",
 		"excludeInternal": true,
 		"excludePrivate": false,
 		"excludeNotDocumented": true,
 		"out": "docs",
 		"name": "Algoforge/Back-end",
-		"lang": "fr",
 		"mergeModulesMergeMode": "project"
 	}
 }
