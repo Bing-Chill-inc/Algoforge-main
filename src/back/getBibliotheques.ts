@@ -93,7 +93,7 @@ const routeHandler: RouteHandler = {
 };
 
 const iconHandler: RouteHandler = {
-	route: "/edit/Bibliotheque/**/**/icone.svg",
+	route: "/edit/Bibliotheque/:category/:subCategory/icone.svg",
 	callback: (req, res) => {
 		const cheminIcone = path.join(
 			__dirname,
