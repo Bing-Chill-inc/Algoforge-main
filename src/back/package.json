@@ -45,7 +45,7 @@
 		"typedoc": "^0.27.6",
 		"typedoc-github-theme": "^0.3.0",
 		"typedoc-plugin-extras": "^4.0.0",
-		"typedoc-plugin-merge-modules": "^6.1.0",
+		"typedoc-plugin-merge-modules": "^7.0.0",
 		"typescript": "^5.6.3"
 	}
 }
