@@ -1,6 +1,6 @@
 {
 	"name": "algoforge-back",
-	"version": "5.0.0",
+	"version": "4.0.0",
 	"main": "index.ts",
 	"scripts": {
 		"prod": "bun install && bun run build:front-cloud && bun run start",
@@ -41,7 +41,6 @@
 		"@types/express": "^5.0.0",
 		"@types/nodemailer": "^6.4.17",
 		"@types/supertest": "^6.0.2",
-		"tsx": "^4.19.2",
 		"typedoc": "^0.27.6",
 		"typedoc-github-theme": "^0.3.0",
 		"typedoc-plugin-extras": "^4.0.0",
