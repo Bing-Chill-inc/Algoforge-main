@@ -39,7 +39,7 @@
 		"@types/cli-color": "^2.0.6",
 		"@types/cors": "^2.8.17",
 		"@types/express": "^5.0.1",
-		"@types/nodemailer": "^6.4.17",
+		"@types/nodemailer": "^7.0.5",
 		"@types/supertest": "^6.0.3",
 		"typedoc": "^0.28.3",
 		"typedoc-github-theme": "^0.3.0",
