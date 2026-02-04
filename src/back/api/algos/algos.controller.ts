@@ -54,6 +54,10 @@ export class AlgosController {
 			"/:id",
 			expressAsyncHandler(this.updateAlgo.bind(this)),
 		);
+		this.router.patch(
+			"/:id/restore",
+			expressAsyncHandler(this.restoreAlgo.bind(this)),
+		);
 
 		this.router.delete(
 			"/:id",
@@ -267,5 +271,39 @@ export class AlgosController {
 		return res
 			.status(OkRes.statut)
 			.json(new OkRes(Responses.Algo.Success.Deleted, result));
+	}
+
+	/**
+	 * PATCH /:id/restore
+	 * Restaurer un algorithme depuis la corbeille.
+	 * @param req.params.id Id de l'algorithme
+	 * @remarks
+	 * Besoin d'être connecté, voir: {@link UsersService.verify}
+	 * @example
+	 * // Retours possibles :
+	 * {status: 404, message: "Algorithme non trouvé" }
+	 * {status: 403, message: "Permission refusée" }
+	 * {status: 400, message: "Algorithme n'est pas dans la corbeille." }
+	 * {status: 200, message: "Algorithme restauré." }
+	 */
+	private async restoreAlgo(req: Request, res: Response) {
+		const { id } = req.params;
+
+		const result = await this.algosService.restoreAlgo(
+			+id,
+			res.locals.user.id,
+		);
+
+		if (!result) {
+			return res
+				.status(NotFoundRes.statut)
+				.json(new NotFoundRes(Responses.Algo.Not_found));
+		} else if (result instanceof Res) {
+			return res.status(result.statut).json(result);
+		}
+
+		return res
+			.status(OkRes.statut)
+			.json(new OkRes(Responses.Algo.Success.Restored, result));
 	}
 }

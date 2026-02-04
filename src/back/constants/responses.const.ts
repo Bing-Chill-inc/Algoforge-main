@@ -56,12 +56,14 @@ export const Responses = {
 		Errors: {
 			While_deleting_algo:
 				"Erreur lors de la suppression de l'algorithme.",
+			Not_in_trash: "Algorithme n'est pas dans la corbeille.",
 		},
 		Success: {
 			Created: "Algorithme créé.",
 			Updated: "Algorithme mis à jour.",
 			Deleted: "Algorithme supprimé.",
 			Trash: "Algorithme déplacé dans la corbeille.",
+			Restored: "Algorithme restauré.",
 			Found: "Algorithme trouvé.",
 		},
 	},

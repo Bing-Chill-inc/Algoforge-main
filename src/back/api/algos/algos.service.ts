@@ -338,6 +338,38 @@ export class AlgosService {
 		}
 	}
 
+	/**
+	 * Restaure un algorithme depuis la corbeille.
+	 * @param id Id de l'algorithme à restaurer.
+	 * @param requestedUserId Id de l'utilisateur qui demande la restauration.
+	 * @returns L'algorithme restauré.
+	 */
+	async restoreAlgo(id: number, requestedUserId: number) {
+		const algoRepository = AppDataSource.manager.getRepository(Algorithme);
+
+		const algo = await algoRepository.findOne({
+			where: { id: id },
+			relations: {
+				permAlgorithmes: true,
+			},
+		});
+		if (!algo) return null;
+
+		const rights = await rightsOfUserOnAlgo(requestedUserId, id);
+		if (!rights || rights !== Droits.Owner)
+			return new ForbiddenRes(Responses.General.Forbidden);
+
+		if (!algo.dateSuppression) {
+			return new BadRequestRes(Responses.Algo.Errors.Not_in_trash);
+		}
+
+		algo.dateSuppression = null;
+		algo.dateModification = new Date().getTime();
+		await algoRepository.save(algo);
+
+		return new OkRes(Responses.Algo.Success.Restored, algo);
+	}
+
 	private readAlgoFromDisk(id: number) {
 		const algoPath = path.normalize(AlgosService.dataPath + id + ".json");
 		try {
