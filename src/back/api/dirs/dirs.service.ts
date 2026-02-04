@@ -5,7 +5,7 @@ import { Droits } from "../../types/droits.enum";
 import { DirCreateDTO, DirUpdateDTO } from "./dirs.dto";
 import { ForbiddenRes, OkRes } from "../../types/response.entity";
 import { Responses } from "../../constants/responses.const";
-import { rightsOfUserOnDir } from "../../utils/queries";
+import { getOwnerOfDir, rightsOfUserOnDir } from "../../utils/queries";
 
 export class DirsService {
 	/**
@@ -49,6 +49,8 @@ export class DirsService {
 	 */
 	async getDir(id: number, requestedUserId: number) {
 		const dossierRepository = AppDataSource.manager.getRepository(Dossier);
+		const permDirRepository =
+			AppDataSource.manager.getRepository(PermDossier);
 
 		// Récupération du dossier.
 		const dir = await dossierRepository.findOne({
@@ -58,7 +60,7 @@ export class DirsService {
 		if (!dir) return null;
 
 		// Récupération des permissions du dossier en utilisant la query rightsOfUserOnDir
-		const perms = rightsOfUserOnDir(requestedUserId, id);
+		const perms = await rightsOfUserOnDir(requestedUserId, id);
 
 		// Vérification des droits de l'utilisateur.
 		if (!perms) return null;
@@ -81,23 +83,27 @@ export class DirsService {
 		const permDirRepository =
 			AppDataSource.manager.getRepository(PermDossier);
 
-		// On vérifie si le dossier parent existe
-		const parentDir = await dossierRepository.findOne({
-			where: { id: dir.idParent },
-		});
+		const hasParent =
+			dir.idParent !== null && dir.idParent !== undefined;
+		if (hasParent) {
+			// On vérifie si le dossier parent existe
+			const parentDir = await dossierRepository.findOne({
+				where: { id: dir.idParent },
+			});
 
-		// Si le dossier parent n'existe pas, on renvoie une erreur.
-		if (dir.idParent && !parentDir) {
-			return new ForbiddenRes(Responses.Dir.Parent_Not_found);
+			// Si le dossier parent n'existe pas, on renvoie une erreur.
+			if (!parentDir) {
+				return new ForbiddenRes(Responses.Dir.Parent_Not_found);
+			}
+
+			// Vérification des droits de l'utilisateur
+			const perms = await rightsOfUserOnDir(
+				dir.requestedUserId,
+				dir.idParent,
+			);
+			if (!perms || perms == Droits.ReadOnly)
+				return new ForbiddenRes(Responses.Dir.Forbidden_create);
 		}
-
-		// Vérification des droits de l'utilisateur
-		const perms = await rightsOfUserOnDir(
-			dir.requestedUserId,
-			dir.idParent,
-		);
-		if (!perms || perms == Droits.ReadOnly)
-			return new ForbiddenRes(Responses.Dir.Forbidden_create);
 
 		// Création du dossier.
 		const newDir = new Dossier();
@@ -142,11 +148,44 @@ export class DirsService {
 		// Mise à jour du dossier.
 		dirToUpdate.nom = dir.nom;
 		dirToUpdate.dateModification = new Date().getTime();
-		if (dir.idParent) dirToUpdate.idParent = dir.idParent;
+		if (dir.idParent !== undefined) dirToUpdate.idParent = dir.idParent;
 
 		const savedDir = await dossierRepository.save(dirToUpdate);
 
-		// TODO : Mettre à jour les permissions du dossier.
+		if (dir.permsDossier && dir.permsDossier.length > 0) {
+			if (perms !== Droits.Owner) {
+				return new ForbiddenRes(Responses.General.Forbidden);
+			}
+
+			const owner = await getOwnerOfDir(dir.id);
+			const ownerId = owner?.id;
+			const existingPerms = await permDirRepository.find({
+				where: { idDossier: dir.id },
+			});
+			const desiredPerms = dir.permsDossier.filter(
+				(perm) => perm.idUtilisateur !== ownerId,
+			);
+			const desiredIds = new Set(
+				desiredPerms.map((perm) => perm.idUtilisateur),
+			);
+
+			const permsToRemove = existingPerms.filter(
+				(perm) =>
+					perm.idUtilisateur !== ownerId &&
+					!desiredIds.has(perm.idUtilisateur),
+			);
+			if (permsToRemove.length > 0) {
+				await permDirRepository.remove(permsToRemove);
+			}
+
+			for (const perm of desiredPerms) {
+				await permDirRepository.save({
+					idDossier: dir.id,
+					idUtilisateur: perm.idUtilisateur,
+					droits: perm.droits,
+				});
+			}
+		}
 
 
 		return savedDir;
@@ -161,6 +200,8 @@ export class DirsService {
 	// TODO : Vérifier les droits de l'utilisateur (query)
 	async deleteDir(dirId: number, requestedUserId: number) {
 		const dossierRepository = AppDataSource.manager.getRepository(Dossier);
+		const permDirRepository =
+			AppDataSource.manager.getRepository(PermDossier);
 
 		// Récupération du dossier
 		const dir = await dossierRepository.findOne({
@@ -170,11 +211,14 @@ export class DirsService {
 		if (!dir) return null;
 
 		// Vérification des droits de l'utilisateur.
+		const perms = await rightsOfUserOnDir(requestedUserId, dirId);
+		if (!perms || perms !== Droits.Owner)
+			return new ForbiddenRes(Responses.General.Forbidden);
 
 		// Supression des permissions du dossier.
-		dir.permDossiers.forEach(async (perm) => {
-			await AppDataSource.manager.getRepository(PermDossier).remove(perm);
-		});
+		for (const perm of dir.permDossiers) {
+			await permDirRepository.remove(perm);
+		}
 		delete dir.permDossiers;
 
 		// Suppression de tous les algos du dossier.

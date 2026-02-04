@@ -5,6 +5,7 @@ import { PermDossier } from "../db/schemas/PermDossier.schema";
 import { Utilisateur } from "../db/schemas/Utilisateur.schema";
 import { Droits } from "../types/droits.enum";
 import { Algorithme } from "../db/schemas/Algorithme.schema";
+import { Dossier } from "../db/schemas/Dossier.schema";
 
 /**
  * Récupère l'utilisateur propriétaire d'un algorithme.
@@ -51,45 +52,36 @@ export async function rightsOfUserOnDir(
 
 	const permDirRepository: Repository<PermDossier> =
 		AppDataSource.getRepository(PermDossier);
+	const dossierRepository: Repository<Dossier> =
+		AppDataSource.getRepository(Dossier);
 
-	let permsDir: PermDossier;
+	let currentDirId = dirId;
 	let highestRights: Droits = null;
-	let rights: Droits;
-	do {
-		rights = null;
 
-		// Récupère les permissions de l'utilisateur sur le dossier donné.
-		permsDir = await permDirRepository.findOne({
-			relations: { utilisateur: true, dossier: true },
-			where: { idDossier: dirId, idUtilisateur: userId },
+	while (true) {
+		const permsDir = await permDirRepository.findOne({
+			where: { idDossier: currentDirId, idUtilisateur: userId },
 		});
 
-		// Stocke les droits de l'utilisateur sur le dossier.
 		if (permsDir) {
-			rights = <Droits>permsDir.droits;
-		}
-
-		// Si l'utilisateur a les droits propriétaires, on sort de la boucle.
-		if (rights === Droits.Owner) {
-			highestRights = Droits.Owner;
-			break;
-		}
-
-		// Sinon, on continue, en stockant les droits les plus hauts.
-		else {
-			const parentDir: number = permsDir[0].dossier.idParent;
-			if (parentDir) {
-				dirId = parentDir;
-			}
-
+			const rights = permsDir.droits as Droits;
+			if (rights === Droits.Owner) return Droits.Owner;
 			if (
-				rights &&
-				(highestRights === null || highestRights != Droits.ReadWrite)
+				!highestRights ||
+				(highestRights === Droits.ReadOnly && rights === Droits.ReadWrite)
 			) {
 				highestRights = rights;
 			}
 		}
-	} while (permsDir[0].dossier.idParent !== null);
+
+		const currentDir = await dossierRepository.findOne({
+			where: { id: currentDirId },
+		});
+		if (!currentDir || currentDir.idParent === null) {
+			break;
+		}
+		currentDirId = currentDir.idParent;
+	}
 
 	return highestRights;
 }
@@ -159,21 +151,20 @@ export async function rightsOfUserOnAlgo(
  * @category Utils
  */
 export async function countParents(dirId: number): Promise<number> {
-	const permDirRepository = AppDataSource.getRepository(PermDossier);
+	const dossierRepository = AppDataSource.getRepository(Dossier);
 
-	let permsDir: PermDossier;
 	let count = 0;
-
-	// Récupère le dossier parent du dossier donné.
-	permsDir = await permDirRepository.findOne({
-		relations: { dossier: true },
-		where: { idDossier: dirId },
+	let currentDirId = dirId;
+	let currentDir = await dossierRepository.findOne({
+		where: { id: currentDirId },
 	});
 
-	// Compte le nombre de dossiers parents jusqu'à la racine.
-	while (permsDir[0].dossier.idParent !== null) {
+	while (currentDir?.idParent !== null) {
 		count++;
-		dirId = permsDir[0].dossier.idParent;
+		currentDirId = currentDir.idParent;
+		currentDir = await dossierRepository.findOne({
+			where: { id: currentDirId },
+		});
 	}
 
 	return count;

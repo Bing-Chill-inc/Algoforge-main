@@ -129,7 +129,7 @@ export class DirsController {
         // Récupération des données de la requête
         const { id } = req.params;
         const { nom, permsDossier, idParent } = req.body;
-        if (!id || !nom || !permsDossier) {
+        if (!id || !nom) {
             return res
                 .status(BadRequestRes.statut)
                 .json(new BadRequestRes(Responses.General.Missing_data));
