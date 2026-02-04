@@ -167,6 +167,7 @@ export class AlgosService {
 			relations: { permAlgorithmes: true },
 		});
 		if (!algo) return null;
+		if (algo.dateSuppression) return null;
 
 		// Vérification des droits de l'utilisateur.
 		const rights = await rightsOfUserOnAlgo(requestedUserId, id);
