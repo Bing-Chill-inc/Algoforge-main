@@ -184,6 +184,43 @@ app.on("ready", () => {
 				"const isElectron = true;",
 			);
 
+			// Reproduit le comportement du backend /edit pour les soumissions du transferForm.
+			if (request.method === "POST") {
+				try {
+					const formData = await request.formData();
+					const corpAlgo = formData.get("corpAlgo");
+					const nomFichier = formData.get("nomFichier");
+
+					// Chargement du contenu de l'algorithme.
+					if (typeof corpAlgo === "string" && corpAlgo.length > 0) {
+						let algoContent = JSON.parse(corpAlgo);
+						if (typeof algoContent === "string") {
+							algoContent = JSON.parse(algoContent);
+						}
+						algoContent = JSON.stringify(algoContent);
+						fileContent = fileContent.replace(
+							"</html>",
+							`<script>editeur._espacePrincipal.chargerDepuisJSON(${algoContent});</script></html>`,
+						);
+					}
+
+					// Chargement du titre de l'algorithme.
+					if (typeof nomFichier === "string" && nomFichier.length > 0) {
+						const safeNomFichier = JSON.stringify(nomFichier);
+						fileContent = fileContent.replace(
+							"</html>",
+							`<script>titreAlgo.innerText = ${safeNomFichier};
+							document.title = "Algoforge - " + ${safeNomFichier};</script></html>`,
+						);
+					}
+				} catch (error) {
+					console.error(
+						"Failed to parse posted algorithm data for /index.html",
+						error,
+					);
+				}
+			}
+
 			console.log("Serving exam index.html");
 
 			return new Response(fileContent, {
