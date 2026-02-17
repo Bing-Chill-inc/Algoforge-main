@@ -190,6 +190,7 @@ app.on("ready", () => {
 					const formData = await request.formData();
 					const corpAlgo = formData.get("corpAlgo");
 					const nomFichier = formData.get("nomFichier");
+					const sourceImport = formData.get("sourceImport");
 
 					// Chargement du contenu de l'algorithme.
 					if (typeof corpAlgo === "string" && corpAlgo.length > 0) {
@@ -210,7 +211,15 @@ app.on("ready", () => {
 						fileContent = fileContent.replace(
 							"</html>",
 							`<script>titreAlgo.innerText = ${safeNomFichier};
-							document.title = "Algoforge - " + ${safeNomFichier};</script></html>`,
+								document.title = "Algoforge - " + ${safeNomFichier};</script></html>`,
+						);
+					}
+
+					// Sur import TBR, on relance une mise en page après rendu pour utiliser les tailles réelles.
+					if (sourceImport === "tbr") {
+						fileContent = fileContent.replace(
+							"</html>",
+							`<script>requestAnimationFrame(() => editeur.prettifyPlanActif({ enregistrerEvenement: false }));</script></html>`,
 						);
 					}
 				} catch (error) {

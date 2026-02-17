@@ -67,7 +67,7 @@ app.get("/favicon.ico", (_, res) => {
 
 // Ouverture de algorithme en paramètre.
 app.post("/edit", (req, res) => {
-	const { corpAlgo, nomFichier } = req.body;
+	const { corpAlgo, nomFichier, sourceImport } = req.body;
 	let content = readFileSync(
 		path.join(__dirname, "/../front-editeur/out/index.html"),
 		"utf8",
@@ -83,6 +83,14 @@ app.post("/edit", (req, res) => {
 		content = content.replace(
 			"</html>",
 			`<script>editeur._espacePrincipal.chargerDepuisJSON(${algoContent});</script></html>`,
+		);
+	}
+
+	// Sur import TBR, on relance une mise en page après rendu pour utiliser les tailles réelles.
+	if (sourceImport === "tbr") {
+		content = content.replace(
+			"</html>",
+			`<script>requestAnimationFrame(() => editeur.prettifyPlanActif({ enregistrerEvenement: false }));</script></html>`,
 		);
 	}
 
