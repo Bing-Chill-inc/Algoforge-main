@@ -101,19 +101,19 @@ jobs:
                 build:
                     - command: "package:mac:x64"
                       tag: "mac-x64"
-                      zipFileName: "Algoforge-Mac-x64.zip"
+                      dmgFileName: "Algoforge-Mac-x64.dmg"
                       name: "MacOS x64"
                     - command: "package:mac:arm64"
                       tag: "mac-arm64"
-                      zipFileName: "Algoforge-Mac-ARM64.zip"
+                      dmgFileName: "Algoforge-Mac-ARM64.dmg"
                       name: "MacOS Apple Silicon (ARM64)"
                     - command: "package:exam:mac:x64"
                       tag: "mac-exam-x64"
-                      zipFileName: "Algoforge-ExamEdition-Mac-x64.zip"
+                      dmgFileName: "Algoforge-ExamEdition-Mac-x64.dmg"
                       name: "Exam Edition MacOS x64"
                     - command: "package:exam:mac:arm64"
                       tag: "mac-exam-arm64"
-                      zipFileName: "Algoforge-ExamEdition-Mac-ARM64.zip"
+                      dmgFileName: "Algoforge-ExamEdition-Mac-ARM64.dmg"
                       name: "Exam Edition MacOS Apple Silicon (ARM64)"
 
         steps:
@@ -135,9 +135,54 @@ jobs:
               working-directory: src/electron
               run: npm run ${{ matrix.build.command }}
 
-            - name: Package build artifact
-              working-directory: src/electron/out
-              run: zip -r ${{ matrix.build.zipFileName }} ./*
+            - name: Import Apple signing certificate
+              env:
+                  MACOS_CERTIFICATE_P12_BASE64: ${{ secrets.MACOS_CERTIFICATE_P12_BASE64 }}
+                  MACOS_CERTIFICATE_PASSWORD: ${{ secrets.MACOS_CERTIFICATE_PASSWORD }}
+              run: |
+                  set -euo pipefail
+                  if [[ -z "${MACOS_CERTIFICATE_P12_BASE64:-}" ]]; then
+                      echo "::error::Missing secret MACOS_CERTIFICATE_P12_BASE64"
+                      exit 1
+                  fi
+                  if [[ -z "${MACOS_CERTIFICATE_PASSWORD:-}" ]]; then
+                      echo "::error::Missing secret MACOS_CERTIFICATE_PASSWORD"
+                      exit 1
+                  fi
+
+                  CERTIFICATE_PATH="$RUNNER_TEMP/macos-signing-cert.p12"
+                  KEYCHAIN_PATH="$RUNNER_TEMP/build.keychain-db"
+                  KEYCHAIN_PASSWORD="$(uuidgen)"
+
+                  if ! echo "$MACOS_CERTIFICATE_P12_BASE64" | base64 --decode > "$CERTIFICATE_PATH" 2>/dev/null; then
+                      echo "$MACOS_CERTIFICATE_P12_BASE64" | base64 -D > "$CERTIFICATE_PATH"
+                  fi
+
+                  security create-keychain -p "$KEYCHAIN_PASSWORD" "$KEYCHAIN_PATH"
+                  security set-keychain-settings -lut 21600 "$KEYCHAIN_PATH"
+                  security unlock-keychain -p "$KEYCHAIN_PASSWORD" "$KEYCHAIN_PATH"
+                  security import "$CERTIFICATE_PATH" -P "$MACOS_CERTIFICATE_PASSWORD" -A -t cert -f pkcs12 -k "$KEYCHAIN_PATH"
+                  EXISTING_KEYCHAINS="$(security list-keychains -d user | tr -d '\"' | xargs)"
+                  security list-keychains -d user -s "$KEYCHAIN_PATH" $EXISTING_KEYCHAINS
+                  security default-keychain -d user -s "$KEYCHAIN_PATH"
+                  security set-key-partition-list -S apple-tool:,apple: -s -k "$KEYCHAIN_PASSWORD" "$KEYCHAIN_PATH"
+                  security find-identity -v -p codesigning "$KEYCHAIN_PATH"
+
+            - name: Build signed and notarized DMG
+              working-directory: src/electron
+              env:
+                  MACOS_SIGN_IDENTITY: ${{ secrets.MACOS_SIGN_IDENTITY }}
+                  APPLE_ID: ${{ secrets.APPLE_ID }}
+                  APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+                  APPLE_APP_SPECIFIC_PASSWORD: ${{ secrets.APPLE_APP_SPECIFIC_PASSWORD }}
+              run: |
+                  set -euo pipefail
+                  APP_PATH="$(find out -type d -name '*.app' -print -quit)"
+                  if [[ -z "${APP_PATH:-}" ]]; then
+                      echo "::error::No .app bundle found in src/electron/out"
+                      exit 1
+                  fi
+                  ./scripts/make_dmg_ci.sh "$APP_PATH" "out/${{ matrix.build.dmgFileName }}"
 
             - name: Upload build artifact to release
               uses: actions/upload-release-asset@v1
@@ -145,6 +190,6 @@ jobs:
                   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
               with:
                   upload_url: ${{ needs.create-release.outputs.upload_url }}
-                  asset_path: ./src/electron/out/${{ matrix.build.zipFileName }}
-                  asset_name: ${{ matrix.build.zipFileName }}
-                  asset_content_type: application/zip
+                  asset_path: ./src/electron/out/${{ matrix.build.dmgFileName }}
+                  asset_name: ${{ matrix.build.dmgFileName }}
+                  asset_content_type: application/x-apple-diskimage
