@@ -13,6 +13,7 @@
 - [Table des matières](#table-des-matières)
 - [Pitch](#pitch)
 - [Fonctionnalités de l'application](#fonctionnalités-de-lapplication)
+- [Suggestions d'améliorations (stabilité & UX)](#suggestions-daméliorations-stabilité--ux)
 - [Utilisation / Installation](#utilisation--installation)
   - [Version en ligne](#version-en-ligne)
   - [Autres versions](#autres-versions)
@@ -59,6 +60,17 @@ Précédemment nommé I Need Algo, **AlgoForge** a changé de nom pour aborder u
   - Bibliotheque d'algorithmes, privée et publique.
   - Décomposition des algorithmes sur un autre plan de travail pour une meilleure lisibilité.
   - Zoom dynamique, raccourcis clavier, menu contextuel complet.
+
+## Suggestions d'améliorations (stabilité & UX)
+
+- Ajouter une CI de base (build + tests back) sur chaque PR pour détecter rapidement les régressions.
+- Uniformiser les variables d'environnement entre templates (`MAIL_ACTIVE`/`MAIL_ENABLED`) pour éviter les erreurs de configuration.
+- Aligner les ports documentés et ceux utilisés par défaut (Dockerfile/backend) pour simplifier le déploiement local.
+- Ajouter des garde-fous côté API sur les opérations fichier (lecture/écriture JSON) avec messages d'erreur utilisateur plus explicites.
+- Exposer un endpoint de santé (`/api/health`) pour faciliter le monitoring et le diagnostic.
+- Afficher des messages de chargement/erreur homogènes dans l'interface cloud (connexion, récupération de fichiers, partage).
+- Ajouter des confirmations UX sur les actions destructives (suppression d'algorithmes/dossiers) et un feedback visuel post-action.
+- Améliorer l'accessibilité clavier (focus visible, ordre de tabulation, labels ARIA) sur les écrans cloud et éditeur.
 
 ## Utilisation / Installation
 
