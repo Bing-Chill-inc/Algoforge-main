@@ -1,4 +1,4 @@
-import { readFileSync, watch } from "fs";
+import { readFileSync } from "fs";
 import express from "express";
 import cors from "cors";
 import path from "path";
@@ -7,6 +7,10 @@ import { loggerMiddleware } from "./middlewares/logger.middleware";
 import { errorMiddleware } from "./middlewares/error.middleware";
 import { Logger } from "./utils/logger";
 import { $ } from "bun";
+import {
+	defaultEditorRuntimeConfig,
+	injectEditorRuntimeConfig,
+} from "./editorRuntimeConfig";
 Logger.filePath = `../../logs/`;
 Logger.log("Starting application...", "main");
 
@@ -29,29 +33,28 @@ app.get(getBibliothèque.route, getBibliothèque.callback);
 
 app.get(iconHandler.route, iconHandler.callback);
 
-// Préparation du bundle de l'éditeur - SmeltJS.
-const SmeltJS = async () => {
+const editorDirectory = path.join(__dirname, "../front-editeur");
+const editorIndexPath = path.join(editorDirectory, "out/index.html");
+const buildEditor = async () => {
 	Logger.debug(
-		await $`bun i`.cwd(`../front-editeur`).text(),
-		"smeltjs: install",
+		await $`bun install --frozen-lockfile`.cwd(editorDirectory).text(),
+		"editor: install",
+	);
+	Logger.debug(
+		await $`bun run build`.cwd(editorDirectory).text(),
+		"editor: build",
 	);
 
-	// Si le contenu du dossier ../front-editeur change, il faut relancer la commande.
-	watch(
-		path.join(__dirname, "/../front-editeur/src"),
-		{ recursive: true },
-		async () => {
-			Logger.debug(
-				await $`bun SmeltJS.ts`.cwd(`../front-editeur`).text(),
-				"smeltjs: build",
-			);
-		},
-	);
-
-	Logger.debug(
-		await $`bun SmeltJS.ts`.cwd(`../front-editeur`).text(),
-		"smeltjs: build",
-	);
+	if (process.env.BUILD === "dev") {
+		const watcher = Bun.spawn(["bun", "run", "build:watch"], {
+			cwd: editorDirectory,
+			stdout: "inherit",
+			stderr: "inherit",
+		});
+		watcher.exited.catch((error) =>
+			Logger.error(String(error), "editor: watch"),
+		);
+	}
 };
 
 app.use("/edit", express.static(path.join(__dirname, "/../front-editeur/out")));
@@ -67,35 +70,32 @@ app.get("/favicon.ico", (_, res) => {
 
 // Ouverture de algorithme en paramètre.
 app.post("/edit", (req, res) => {
-	const { corpAlgo, nomFichier } = req.body;
-	let content = readFileSync(
-		path.join(__dirname, "/../front-editeur/out/index.html"),
-		"utf8",
-	);
+	const { corpAlgo, nomFichier, sourceImport } = req.body;
+	const config = defaultEditorRuntimeConfig();
 
-	// Chargement du contenu de l'algorithme.
 	if (corpAlgo) {
-		let algoContent = JSON.parse(corpAlgo);
-		if (typeof algoContent === "string") {
-			algoContent = JSON.parse(algoContent);
+		try {
+			config.initialAlgorithm = JSON.parse(corpAlgo);
+			if (typeof config.initialAlgorithm === "string") {
+				config.initialAlgorithm = JSON.parse(config.initialAlgorithm);
+			}
+		} catch {
+			res.status(400).send("Invalid algorithm JSON.");
+			return;
 		}
-		algoContent = JSON.stringify(algoContent);
-		content = content.replace(
-			"</html>",
-			`<script>editeur._espacePrincipal.chargerDepuisJSON(${algoContent});</script></html>`,
-		);
 	}
 
-	// Chargement du titre de l'algorithme.
-	if (nomFichier) {
-		content = content.replace(
-			"</html>",
-			`<script>titreAlgo.innerText = '${nomFichier}';
-			document.title = 'Algoforge - ${nomFichier}';</script></html>`,
-		);
+	config.prettifyInitialAlgorithm = sourceImport === "tbr";
+
+	if (typeof nomFichier === "string" && nomFichier.length > 0) {
+		config.title = nomFichier;
 	}
 
-	res.send(content);
+	const content = injectEditorRuntimeConfig(
+		readFileSync(editorIndexPath, "utf8"),
+		config,
+	);
+	res.type("html").send(content);
 });
 
 import { AppDataSource } from "./db/data-source";
@@ -184,7 +184,7 @@ const mailConnexion = new Promise((resolve, reject) => {
 import { AlgosController } from "./api/algos/algos.controller";
 import { UsersController } from "./api/users/users.controller";
 import { MailService } from "./mail/mail.service";
-Promise.all([dbConnexion, mailConnexion, SmeltJS()])
+Promise.all([dbConnexion, mailConnexion, buildEditor()])
 	.then(async () => {
 		// Handling API logs.
 		app.use(loggerMiddleware);

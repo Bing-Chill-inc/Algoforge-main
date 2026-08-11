@@ -4,20 +4,21 @@
 	"main": "electron-main.js",
 	"type": "module",
 	"scripts": {
-		"start": "electron-forge start",
-		"start:exam": "echo 'const isExam = true; export default isExam;' > ./exam-mode.js && electron-forge start && echo 'const isExam = false; export default isExam;' > ./exam-mode.js",
-		"package": "electron-forge package",
-		"package:win:x64": "electron-forge package --arch x64 --platform win32",
-		"package:win:arm64": "electron-forge package --arch arm64 --platform win32",
-		"package:lnx:x64": "electron-forge package --arch x64 --platform linux",
-		"package:lnx:arm64": "electron-forge package --arch arm64 --platform linux",
-		"package:mac:x64": "electron-forge package --arch x64 --platform darwin",
-		"package:mac:arm64": "electron-forge package --arch arm64 --platform darwin",
-		"package:exam": "echo 'const isExam = true; export default isExam;' > ./exam-mode.js && electron-forge package && echo 'const isExam = false; export default isExam;' > ./exam-mode.js",
-		"package:exam:win:x64": "echo 'const isExam = true; export default isExam;' > ./exam-mode.js && electron-forge package --arch x64 --platform win32 && echo 'const isExam = false; export default isExam;' > ./exam-mode.js",
-		"package:exam:lnx:x64": "echo 'const isExam = true; export default isExam;' > ./exam-mode.js && electron-forge package --arch x64 --platform linux && echo 'const isExam = false; export default isExam;' > ./exam-mode.js",
-		"package:exam:mac:x64": "echo 'const isExam = true; export default isExam;' > ./exam-mode.js && electron-forge package --arch x64 --platform darwin && echo 'const isExam = false; export default isExam;' > ./exam-mode.js",
-		"package:exam:mac:arm64": "echo 'const isExam = true; export default isExam;' > ./exam-mode.js && electron-forge package --arch arm64 --platform darwin && echo 'const isExam = false; export default isExam;' > ./exam-mode.js"
+		"start": "bun run build:editor && electron-forge start",
+		"start:exam": "bun run build:editor && echo 'const isExam = true; export default isExam;' > ./exam-mode.js && electron-forge start && echo 'const isExam = false; export default isExam;' > ./exam-mode.js",
+		"package": "bun run build:editor && electron-forge package",
+		"package:win:x64": "bun run build:editor && electron-forge package --arch x64 --platform win32",
+		"package:win:arm64": "bun run build:editor && electron-forge package --arch arm64 --platform win32",
+		"package:lnx:x64": "bun run build:editor && electron-forge package --arch x64 --platform linux",
+		"package:lnx:arm64": "bun run build:editor && electron-forge package --arch arm64 --platform linux",
+		"package:mac:x64": "bun run build:editor && electron-forge package --arch x64 --platform darwin",
+		"package:mac:arm64": "bun run build:editor && electron-forge package --arch arm64 --platform darwin",
+		"package:exam": "bun run build:editor && echo 'const isExam = true; export default isExam;' > ./exam-mode.js && electron-forge package && echo 'const isExam = false; export default isExam;' > ./exam-mode.js",
+		"package:exam:win:x64": "bun run build:editor && echo 'const isExam = true; export default isExam;' > ./exam-mode.js && electron-forge package --arch x64 --platform win32 && echo 'const isExam = false; export default isExam;' > ./exam-mode.js",
+		"package:exam:lnx:x64": "bun run build:editor && echo 'const isExam = true; export default isExam;' > ./exam-mode.js && electron-forge package --arch x64 --platform linux && echo 'const isExam = false; export default isExam;' > ./exam-mode.js",
+		"package:exam:mac:x64": "bun run build:editor && echo 'const isExam = true; export default isExam;' > ./exam-mode.js && electron-forge package --arch x64 --platform darwin && echo 'const isExam = false; export default isExam;' > ./exam-mode.js",
+		"package:exam:mac:arm64": "bun run build:editor && echo 'const isExam = true; export default isExam;' > ./exam-mode.js && electron-forge package --arch arm64 --platform darwin && echo 'const isExam = false; export default isExam;' > ./exam-mode.js",
+		"build:editor": "bun ../front-editeur/build.ts"
 	},
 	"author": "AlgoForge inc.",
 	"license": "ISC",
@@ -46,7 +47,8 @@
 		"forge": {
 			"packagerConfig": {
 				"extraResource": [
-					"../front-editeur/src"
+					"../front-editeur/out",
+					"../front-editeur/src/Bibliotheque"
 				],
 				"icon": "./icons/AlgoForge",
 				"name": "AlgoForge"

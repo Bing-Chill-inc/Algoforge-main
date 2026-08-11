@@ -20,8 +20,11 @@ protocol.registerSchemesAsPrivileged([
 // Helper to resolve paths based on environment
 const isDev = !app.isPackaged; // Detect if running in development
 const staticPath = isDev
-	? path.join(path.resolve(), "../front-editeur/src") // Dev path
-	: path.join(process.resourcesPath, "src"); // Production path
+	? path.join(path.resolve(), "../front-editeur/out")
+	: path.join(process.resourcesPath, "out");
+const libraryPath = isDev
+	? path.join(path.resolve(), "../front-editeur/src")
+	: process.resourcesPath;
 
 // Helper function to get MIME types
 function getMimeType(filePath) {
@@ -121,7 +124,7 @@ app.on("ready", () => {
 			url.pathname.startsWith("/Bibliotheque/") &&
 			url.pathname.endsWith("/icone.svg")
 		) {
-			const cheminIcone = path.join(staticPath, url.pathname);
+			const cheminIcone = path.join(libraryPath, url.pathname);
 
 			console.log(cheminIcone);
 
@@ -168,65 +171,51 @@ app.on("ready", () => {
 		}
 
 		if (url.pathname === "/index.html") {
-			console.log("Serving exam index.html");
-			// On lit index.html, et on trouve la déclaration de la variable `isExam` pour la remplacer par `true`
-			const filePath = path.join(staticPath, url.pathname);
+			const filePath = path.join(staticPath, "index.html");
 			let fileContent = fs.readFileSync(filePath, "utf8");
-			if (isExam) {
-				fileContent = fileContent.replace(
-					"const isExam = false;",
-					"const isExam = true;",
-				);
-			}
+			const config = {
+				initialAlgorithm: null,
+				title: null,
+				isElectron: true,
+				isExam,
+				prettifyInitialAlgorithm: false,
+			};
 
-			fileContent = fileContent.replace(
-				"const isElectron = false;",
-				"const isElectron = true;",
-			);
-
-			// Reproduit le comportement du backend /edit pour les soumissions du transferForm.
 			if (request.method === "POST") {
 				try {
 					const formData = await request.formData();
 					const corpAlgo = formData.get("corpAlgo");
 					const nomFichier = formData.get("nomFichier");
+					const sourceImport = formData.get("sourceImport");
 
-					// Chargement du contenu de l'algorithme.
 					if (typeof corpAlgo === "string" && corpAlgo.length > 0) {
-						let algoContent = JSON.parse(corpAlgo);
-						if (typeof algoContent === "string") {
-							algoContent = JSON.parse(algoContent);
+						config.initialAlgorithm = JSON.parse(corpAlgo);
+						if (typeof config.initialAlgorithm === "string") {
+							config.initialAlgorithm = JSON.parse(config.initialAlgorithm);
 						}
-						algoContent = JSON.stringify(algoContent);
-						fileContent = fileContent.replace(
-							"</html>",
-							`<script>editeur._espacePrincipal.chargerDepuisJSON(${algoContent});</script></html>`,
-						);
 					}
-
-					// Chargement du titre de l'algorithme.
+					config.prettifyInitialAlgorithm = sourceImport === "tbr";
 					if (typeof nomFichier === "string" && nomFichier.length > 0) {
-						const safeNomFichier = JSON.stringify(nomFichier);
-						fileContent = fileContent.replace(
-							"</html>",
-							`<script>titreAlgo.innerText = ${safeNomFichier};
-							document.title = "Algoforge - " + ${safeNomFichier};</script></html>`,
-						);
+						config.title = nomFichier;
 					}
 				} catch (error) {
-					console.error(
-						"Failed to parse posted algorithm data for /index.html",
-						error,
-					);
+					console.error("Failed to parse posted editor data", error);
+					return new Response("Invalid algorithm JSON.", { status: 400 });
 				}
 			}
 
-			console.log("Serving exam index.html");
+			const serialized = JSON.stringify(config).replaceAll("<", "\\u003c");
+			const marker =
+				/(<script type="application\/json" id="algoforge-runtime-config">)[\s\S]*?(<\/script>)/;
+			if (!marker.test(fileContent)) {
+				return new Response("Editor runtime configuration marker is missing.", {
+					status: 500,
+				});
+			}
+			fileContent = fileContent.replace(marker, `$1${serialized}$2`);
 
 			return new Response(fileContent, {
-				headers: {
-					"Content-Type": "text/html",
-				},
+				headers: { "Content-Type": "text/html" },
 			});
 		}
 

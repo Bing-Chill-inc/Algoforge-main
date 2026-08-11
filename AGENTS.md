@@ -9,7 +9,7 @@ This document is an exhaustive, practical map of how this repository is structur
 **Top-Level Layout**
 - `src/back` Backend API and static asset server (Bun + Express + TypeORM).
 - `src/front-cloud` Cloud UI (Svelte + Vite).
-- `src/front-editeur` Editor UI (custom web components, static HTML + JS).
+- `src/front-editeur` Editor UI (custom web components and TypeScript).
 - `src/electron` Desktop wrapper (Electron Forge).
 - `data/algos` Filesystem storage for algorithm JSON files by ID.
 - `logs` Backend log files.
@@ -37,7 +37,7 @@ This document is an exhaustive, practical map of how this repository is structur
 - Serves static cloud bundle at `/cloud`.
 - Redirects `/` to `/edit`.
 - Starts dynamic asset routes used by the editor.
-- Builds the editor bundle via `SmeltJS.ts` on startup and rebuilds on file changes.
+- Builds the editor with Bun's standalone HTML bundler on startup; development mode watches sources.
 - Initializes database and mail with retry logic, then mounts API and error handling.
 
 **Key Files**
@@ -139,13 +139,13 @@ This document is an exhaustive, practical map of how this repository is structur
 **Editor (`src/front-editeur`)**
 
 **Stack**
-- Custom web components and vanilla JS.
+- Custom web components authored as TypeScript modules.
 - Static HTML in `src/front-editeur/src/index.html`.
 
 **Build Process**
-- `src/front-editeur/SmeltJS.ts` inlines JS into a single script and inlines CSS into `out/index.html`.
-- Outputs to `src/front-editeur/out`.
-- Copies `Audio/` and `modales/` into output.
+- `src/front-editeur/build.ts` uses `Bun.build` with `src/index.html` as a standalone HTML entry.
+- Outputs one self-contained `src/front-editeur/out/index.html`.
+- Embeds scripts, styles, modal markup, and audio into the standalone HTML output.
 
 **Key Files**
 - `src/front-editeur/src/index.html` main editor page.
@@ -154,14 +154,14 @@ This document is an exhaustive, practical map of how this repository is structur
 - `src/front-editeur/src/Bibliotheque/*` library assets, templates, and descriptions.
 
 **Core Classes**
-- `Editeur.js` main editor component and UI wiring.
-- `PlanTravail.js` workspace, JSON export, anomaly scanning.
-- `ElementGraphique.js` base class for graphical nodes.
+- `Editeur.ts` main editor component and UI wiring.
+- `PlanTravail.ts` workspace, JSON export, anomaly scanning.
+- `ElementGraphique.ts` base class for graphical nodes.
 - `EvenementEdition/*` undo/redo and editor actions.
 
 **Flags**
-- `isExam` and `isElectron` are defined in `index.html`.
-- Electron mode replaces these flags at runtime.
+- `isExam` and `isElectron` come from the escaped JSON runtime configuration marker.
+- Backend and Electron inject these flags through escaped runtime JSON.
 
 **Analytics**
 - `index.html` includes a Plausible script.
@@ -175,14 +175,14 @@ This document is an exhaustive, practical map of how this repository is structur
 
 **Behavior**
 - Registers custom `app://` protocol.
-- Serves editor assets directly from `front-editeur/src` in dev.
+- Serves the built `front-editeur/out/index.html` in development and production.
 - Serves bundled resources in production.
 - Implements dynamic library and asset routes inside protocol handler.
 - Exam mode toggles via `exam-mode.js`.
 
 **Packaging**
 - Configured in `src/electron/package.json` with Electron Forge.
-- Includes `../front-editeur/src` as `extraResource`.
+- Includes `../front-editeur/out` plus library data as Electron resources.
 
 ---
 
@@ -252,7 +252,7 @@ These are defined in `template-*.env` and used in backend.
 - `src/front-cloud/src/App.svelte`
 - `src/front-cloud/src/stores/*`
 - `src/front-editeur/src/index.html`
-- `src/front-editeur/SmeltJS.ts`
-- `src/front-editeur/src/PartieEditeur/Editeur.js`
+- `src/front-editeur/build.ts`
+- `src/front-editeur/src/PartieEditeur/Editeur.ts`
 - `src/electron/electron-main.js`
 

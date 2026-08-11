@@ -1,4 +1,4 @@
-name: Run unit tests
+name: Run tests
 
 on:
     push:
@@ -15,14 +15,32 @@ jobs:
             - name: Checkout repository
               uses: actions/checkout@v4
               with:
-                  submodules: true # Initialize and update submodules
+                  submodules: true
 
-            - uses: oven-sh/setup-bun@v1
+            - uses: oven-sh/setup-bun@v2
               with:
                   bun-version: latest
 
-            - name: Install dependencies
-              run: cd src/back && bun install
+            - name: Install editor dependencies
+              working-directory: src/front-editeur
+              run: bun install --frozen-lockfile
 
-            - name: Run tests
-              run: cd src/back && bun test --env-file=../../template-test.env ./tests/setup.test.ts
+            - name: Install Chromium
+              working-directory: src/front-editeur
+              run: bunx playwright install --with-deps chromium
+
+            - name: Check editor
+              working-directory: src/front-editeur
+              run: bun run check
+
+            - name: Test editor runtime injection
+              working-directory: src/back
+              run: bun test tests/editorRuntimeConfig.test.ts
+
+            - name: Install backend dependencies
+              working-directory: src/back
+              run: bun install --frozen-lockfile
+
+            - name: Run backend tests
+              working-directory: src/back
+              run: bun test --env-file=../../template-test.env ./tests/setup.test.ts

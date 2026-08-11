@@ -7,7 +7,7 @@ import { app } from "electron";
 const isDev = !app.isPackaged; // Detect if running in development
 const basePath = isDev
 	? path.join(path.resolve(), "../front-editeur/src") // Dev path
-	: path.join(process.resourcesPath, "src"); // Production path
+	: process.resourcesPath; // Production path
 
 const lireContenuFichier = (chemin) => {
 	return fs.existsSync(chemin) ? fs.readFileSync(chemin, "utf8") : "";

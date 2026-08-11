@@ -70,6 +70,14 @@ jobs:
               with:
                   node-version: 20 # Use a compatible Node.js version
 
+            - uses: oven-sh/setup-bun@v2
+              with:
+                  bun-version: latest
+
+            - name: Install and build editor
+              working-directory: src/front-editeur
+              run: bun install --frozen-lockfile && bun run build
+
             - name: Install dependencies
               working-directory: src/electron
               run: npm install
@@ -126,6 +134,14 @@ jobs:
               uses: actions/setup-node@v3
               with:
                   node-version: 20 # Use a compatible Node.js version
+
+            - uses: oven-sh/setup-bun@v2
+              with:
+                  bun-version: latest
+
+            - name: Install and build editor
+              working-directory: src/front-editeur
+              run: bun install --frozen-lockfile && bun run build
 
             - name: Install dependencies
               working-directory: src/electron
