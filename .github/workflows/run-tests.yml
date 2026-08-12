@@ -33,6 +33,29 @@ jobs:
               working-directory: src/front-editeur
               run: bun run check
 
+            - name: Install VS Code extension dependencies
+              working-directory: src/vscode-ext
+              run: bun install --frozen-lockfile
+
+            - name: Check VS Code extension
+              working-directory: src/vscode-ext
+              run: bun run check
+
+            - name: Test VS Code extension host
+              working-directory: src/vscode-ext
+              run: xvfb-run -a bun run test:integration
+
+            - name: Package VS Code extension
+              working-directory: src/vscode-ext
+              run: bun run package && bun run package:list
+
+            - name: Upload VSIX artifact
+              uses: actions/upload-artifact@v4
+              with:
+                  name: algoforge-vscode
+                  path: src/vscode-ext/out/algoforge-vscode-0.1.1.vsix
+                  if-no-files-found: error
+
             - name: Test editor runtime injection
               working-directory: src/back
               run: bun test tests/editorRuntimeConfig.test.ts

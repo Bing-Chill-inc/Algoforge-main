@@ -176,7 +176,7 @@ app.on("ready", () => {
 			const config = {
 				initialAlgorithm: null,
 				title: null,
-				isElectron: true,
+				hostKind: "electron",
 				isExam,
 				prettifyInitialAlgorithm: false,
 			};

@@ -9,3 +9,6 @@ bun.lockb
 
 logs/
 data/
+!src/vscode-ext/.vscode/
+!src/vscode-ext/.vscode/launch.json
+!src/vscode-ext/.vscode/tasks.json

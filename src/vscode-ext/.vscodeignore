@@ -1,0 +1,14 @@
+.vscode/**
+.vscode-test/**
+tests/**
+src/**
+build.ts
+verifyPackage.ts
+tsconfig.json
+bun.lock
+node_modules/**
+dist/**/*.map
+
+dist/test/**
+
+.gitignore

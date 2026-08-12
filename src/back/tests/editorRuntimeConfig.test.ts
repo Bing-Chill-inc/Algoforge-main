@@ -15,7 +15,7 @@ describe("editor runtime configuration", () => {
 
 		expect(result).not.toContain("</script><script>alert(1)");
 		expect(result).toContain("\\u003c/script>");
-		expect(result).toContain('"isElectron":false');
+		expect(result).toContain('"hostKind":"web"');
 		expect(result).toContain('"prettifyInitialAlgorithm":false');
 	});
 

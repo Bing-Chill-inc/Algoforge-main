@@ -4,3 +4,8 @@ updates:
     directory: "/src/back/"
     schedule:
       interval: "daily"
+
+  - package-ecosystem: "bun"
+    directory: "/src/vscode-ext/"
+    schedule:
+      interval: "weekly"

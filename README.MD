@@ -15,6 +15,7 @@
 - [Fonctionnalités de l'application](#fonctionnalités-de-lapplication)
 - [Utilisation / Installation](#utilisation--installation)
   - [Version en ligne](#version-en-ligne)
+  - [Extension VS Code](#extension-vs-code)
   - [Autres versions](#autres-versions)
 - [Comment contribuer au projet ?](#comment-contribuer-au-projet-)
 - [Identité collaborateurs](#identité-collaborateurs)
@@ -67,6 +68,10 @@ AlgoForge est utilisable de deux manières différentes: en ligne sur un navigat
 ### Version en ligne
 
 Pour utiliser AlgoForge en ligne, vous pouvez vous rendre sur ce lien : [https://algoforge.fr/](https://algoforge.fr/)
+
+### Extension VS Code
+
+Le paquet de développement VS Code se trouve dans `src/vscode-ext`. Il ouvre les fichiers `.algoforge` et `.af` dans l’éditeur visuel partagé. Consultez son `README.md` pour les commandes de build, de test et de packaging.
 
 ### Autres versions
 

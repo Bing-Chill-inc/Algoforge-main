@@ -1,7 +1,7 @@
 export type EditorRuntimeConfig = {
 	initialAlgorithm: unknown | null;
 	title: string | null;
-	isElectron: boolean;
+	hostKind: "web" | "electron" | "vscode";
 	isExam: boolean;
 	prettifyInitialAlgorithm: boolean;
 };
@@ -24,7 +24,7 @@ export function defaultEditorRuntimeConfig(): EditorRuntimeConfig {
 	return {
 		initialAlgorithm: null,
 		title: null,
-		isElectron: false,
+		hostKind: "web",
 		isExam: false,
 		prettifyInitialAlgorithm: false,
 	};

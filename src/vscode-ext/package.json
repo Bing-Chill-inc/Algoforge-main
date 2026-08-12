@@ -1,0 +1,101 @@
+{
+  "name": "algoforge-vscode",
+  "displayName": "AlgoForge",
+  "description": "Design AlgoForge algorithms visually inside Visual Studio Code.",
+  "version": "0.1.1",
+  "publisher": "algoforge",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Bing-Chill-inc/Algoforge-main.git"
+  },
+  "private": true,
+  "engines": {
+    "vscode": "^1.85.0"
+  },
+  "categories": [
+    "Visualization",
+    "Other"
+  ],
+  "keywords": [
+    "algorithm",
+    "education",
+    "visual editor",
+    "algoforge"
+  ],
+  "icon": "dist/media/icon.png",
+  "main": "./dist/extension.js",
+  "extensionKind": [
+    "ui"
+  ],
+  "activationEvents": [
+    "onCustomEditor:algoforge.visualEditor",
+    "onCommand:algoforge.newAlgorithm",
+    "onCommand:algoforge.reopenAsText"
+  ],
+  "capabilities": {
+    "untrustedWorkspaces": {
+      "supported": true
+    }
+  },
+  "contributes": {
+    "languages": [
+      {
+        "id": "algoforge",
+        "aliases": [
+          "AlgoForge"
+        ],
+        "extensions": [
+          ".algoforge",
+          ".af"
+        ],
+        "icon": {
+          "light": "./dist/media/algoforge-file-light.svg",
+          "dark": "./dist/media/algoforge-file-dark.svg"
+        }
+      }
+    ],
+	"commands": [
+      {
+        "command": "algoforge.newAlgorithm",
+        "title": "AlgoForge: New Algorithm"
+      },
+      {
+        "command": "algoforge.reopenAsText",
+        "title": "AlgoForge: Reopen as Text"
+      }
+    ],
+    "customEditors": [
+      {
+        "viewType": "algoforge.visualEditor",
+        "displayName": "AlgoForge Visual Editor",
+        "selector": [
+          {
+            "filenamePattern": "*.algoforge"
+          },
+          {
+            "filenamePattern": "*.af"
+          }
+        ],
+        "priority": "default"
+      }
+    ]
+  },
+  "scripts": {
+    "build": "bun run build.ts",
+    "watch": "bun --watch run build.ts --development",
+    "typecheck": "tsc --project tsconfig.json",
+    "test": "bun test tests",
+    "test:integration": "bun run build && bun run tests/runIntegration.ts",
+    "check": "bun run typecheck && bun run build && bun run test",
+    "package": "bun run build && bunx @vscode/vsce package --no-dependencies --out out/algoforge-vscode-0.1.1.vsix && bun run verifyPackage.ts",
+    "package:list": "bunx @vscode/vsce ls --no-dependencies"
+  },
+  "devDependencies": {
+    "@types/bun": "^1.3.3",
+    "@types/vscode": "^1.85.0",
+    "@vscode/test-electron": "^2.5.2",
+    "@vscode/vsce": "^3.6.2",
+    "typescript": "^5.8.3"
+  }
+}
