@@ -53,7 +53,7 @@ jobs:
               uses: actions/upload-artifact@v4
               with:
                   name: algoforge-vscode
-                  path: src/vscode-ext/out/algoforge-vscode-0.1.1.vsix
+                  path: src/vscode-ext/out/*.vsix
                   if-no-files-found: error
 
             - name: Test editor runtime injection

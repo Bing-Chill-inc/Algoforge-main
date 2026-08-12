@@ -3,6 +3,7 @@
 tests/**
 src/**
 build.ts
+publish.ts
 verifyPackage.ts
 tsconfig.json
 bun.lock
