@@ -21,7 +21,7 @@ clone_repository() {
     fi
 
     echo "⚙️ Téléchargement de l'application depuis GitHub..."
-    git clone --depth 1 --recurse-submodules https://github.com/Bing-Chill-inc/Algoforge-main.git || { echo "Échec du clonage du dépôt. Vérifiez votre connexion internet."; read -p "Appuyez sur Entrée pour continuer..."; return; }
+    git clone --depth 1 https://github.com/Bing-Chill-inc/Algoforge-main.git || { echo "Échec du clonage du dépôt. Vérifiez votre connexion internet."; read -p "Appuyez sur Entrée pour continuer..."; return; }
     mv Algoforge-main Algoforge || { echo "⚠️ Échec du renommage du dossier 'Algoforge-main' en 'Algoforge'."; del_repository; read -p "Appuyez sur Entrée pour continuer..."; return; }
     cd Algoforge || { echo "⚠️ Le dossier 'Algoforge' n'existe pas. Vérifiez le clonage du dépôt."; read -p "Appuyez sur Entrée pour continuer..."; return; }
 }
@@ -30,9 +30,6 @@ clone_repository() {
 update_repository() {
     echo "⚙️ Mise à jour du dépôt..."
     git pull || { echo "⚠️ Échec de la mise à jour du dépôt. Vérifiez votre connexion internet."; del_repository; read -p "Appuyez sur Entrée pour continuer..."; return; }
-    echo "⚙️ Mise à jour des sous-modules..."
-    git submodule update --init --recursive || { echo "⚠️ Échec de la mise à jour des sous-modules."; del_repository; read -p "Appuyez sur Entrée pour continuer..."; return; }
-    echo "✅ Sous-modules mis à jour avec succès."
 }
 
 # Renommer le fichier template-local.env en .env.

@@ -86,7 +86,7 @@ Voici comment procéder :
 2. **Clonez** votre fork en local :
 
    ```sh
-   git clone --recurse-submodules https://github.com/Bing-Chill-inc/Algoforge-main.git
+   git clone https://github.com/Bing-Chill-inc/Algoforge-main.git
    cd Algoforge-main
    ```
 

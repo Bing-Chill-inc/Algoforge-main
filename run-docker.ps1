@@ -28,12 +28,6 @@ function Clone-Or-Update-Repository {
             Read-Host -Prompt "Appuyez sur Entree pour continuer..."
             return
         }
-        git submodule update --init --recursive
-        if ($LASTEXITCODE -ne 0) {
-            Write-Host "Echec de la mise a jour des sous-modules." -ForegroundColor Red
-            Read-Host -Prompt "Appuyez sur Entree pour continuer..."
-            return
-        }
         return
     }
 
@@ -46,17 +40,11 @@ function Clone-Or-Update-Repository {
             Read-Host -Prompt "Appuyez sur Entree pour continuer..."
             return
         }
-        git submodule update --init --recursive
-        if ($LASTEXITCODE -ne 0) {
-            Write-Host "Echec de la mise a jour des sous-modules." -ForegroundColor Red
-            Read-Host -Prompt "Appuyez sur Entree pour continuer..."
-            return
-        }
         return
     }
 
     Write-Host "Telechargement de l'application depuis GitHub..."
-    git clone --depth 1 --recurse-submodules https://github.com/Bing-Chill-inc/Algoforge-main.git Algoforge
+    git clone --depth 1 https://github.com/Bing-Chill-inc/Algoforge-main.git Algoforge
     if ($LASTEXITCODE -ne 0) {
         Write-Host "Echec du clonage du depot." -ForegroundColor Red
         Read-Host -Prompt "Appuyez sur Entree pour continuer..."

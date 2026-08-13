@@ -1,0 +1,5 @@
+.obsidian/
+.DS_Store
+docs/
+node_modules/
+out/

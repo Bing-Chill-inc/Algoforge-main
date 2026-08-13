@@ -35,7 +35,7 @@ function Clone-Repository {
 
     Write-Host "Telechargement de l'application depuis GitHub..."
     try {
-        git clone --depth 1 --recurse-submodules https://github.com/Bing-Chill-inc/Algoforge-main.git
+        git clone --depth 1 https://github.com/Bing-Chill-inc/Algoforge-main.git
     }
     catch {
         Write-Host "Echec du clonage du depot. Verifiez votre connexion internet."
@@ -73,16 +73,6 @@ function Update-Repository {
         return
     }
 
-    Write-Host "Mise a jour des sous-modules..."
-    try {
-        git submodule update --init --recursive
-    }
-    catch {
-        Write-Host "Echec de la mise a jour des sous-modules."
-        Del-Repository
-        Read-Host -Prompt "Appuyez sur Entree pour continuer..."
-        return
-    }
 }
 
 # Renommer le fichier template-local.env en .env.

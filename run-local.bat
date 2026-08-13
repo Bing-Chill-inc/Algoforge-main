@@ -43,7 +43,7 @@ if exist Algoforge (
 )
 
 echo Telechargement de l'application depuis GitHub...
-git clone --depth 1 --recurse-submodules https://github.com/Bing-Chill-inc/Algoforge-main.git || (
+git clone --depth 1 https://github.com/Bing-Chill-inc/Algoforge-main.git || (
     echo Echec du clonage du depot. Verifiez votre connexion internet.
     pause
     goto :eof
@@ -69,14 +69,6 @@ git pull || (
     pause
     goto :eof
 )
-echo Mise a jour des sous-modules...
-git submodule update --init --recursive || (
-    echo Echec de la mise a jour des sous-modules.
-    call :del_repository
-    pause
-    goto :eof
-)
-echo Sous-modules mis a jour avec succes.
 exit /b 0
 
 :rename_env_file

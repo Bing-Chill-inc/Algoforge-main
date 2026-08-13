@@ -13,7 +13,6 @@ clone_or_update_repository() {
     if [ "$(basename "$(pwd)")" == "Algoforge" ]; then
         echo "⚙️ Le dossier 'Algoforge' existe déjà et vous êtes actuellement dedans. Mise à jour du dépôt..."
         git pull || { echo "⚠️ Échec de la mise à jour du dépôt. Vérifiez votre connexion internet."; read -p "Appuyez sur Entrée pour continuer..."; return; }
-        git submodule update --init --recursive || { echo "⚠️ Échec de la mise à jour des sous-modules."; read -p "Appuyez sur Entrée pour continuer..."; return; }
         return
     fi
 
@@ -21,12 +20,11 @@ clone_or_update_repository() {
         echo "⚙️ Le dossier 'Algoforge' existe déjà. Mise à jour du dépôt..."
         cd Algoforge || { echo "⚠️ Le dossier 'Algoforge' n'existe pas. Vérifiez le nom du dossier."; read -p "Appuyez sur Entrée pour continuer..."; return; }
         git pull || { echo "⚠️ Échec de la mise à jour du dépôt. Vérifiez votre connexion internet."; read -p "Appuyez sur Entrée pour continuer..."; return; }
-        git submodule update --init --recursive || { echo "⚠️ Échec de la mise à jour des sous-modules."; read -p "Appuyez sur Entrée pour continuer..."; return; }
         return
     fi
 
     echo "⚙️ Téléchargement de l'application depuis GitHub..."
-    git clone --depth 1 --recurse-submodules https://github.com/Bing-Chill-inc/Algoforge-main.git || { echo "Échec du clonage du dépôt. Vérifiez votre connexion internet."; read -p "Appuyez sur Entrée pour continuer..."; return; }
+    git clone --depth 1 https://github.com/Bing-Chill-inc/Algoforge-main.git || { echo "Échec du clonage du dépôt. Vérifiez votre connexion internet."; read -p "Appuyez sur Entrée pour continuer..."; return; }
     mv Algoforge-main Algoforge || { echo "⚠️ Échec du renommage du dossier 'Algoforge-main' en 'Algoforge'."; read -p "Appuyez sur Entrée pour continuer..."; return; }
     cd Algoforge || { echo "⚠️ Le dossier 'Algoforge' n'existe pas. Vérifiez le clonage du dépôt."; read -p "Appuyez sur Entrée pour continuer..."; return; }
 }
