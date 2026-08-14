@@ -1,4 +1,3 @@
-import type { AvertissementSProblemeJamaisExecute } from "../PartieErreur/AvertissementSProblemeJamaisExecute";
 import { classes } from "../runtime/classRegistry";
 import { editeur } from "../runtime/runtime";
 
@@ -14,7 +13,6 @@ export class ElementGraphique extends HTMLElement {
 	__abscisse!: number; // Entier
 	__ordonnee!: number; // Entier
 	__parent!: this|null; // ElementParent
-	_listeAnomalie: any; // List<AnomalieConceptuelle>
 	_elementGraphique;
 private _couleurPrimaire: any;
 private _proprietaire: any;
@@ -307,27 +305,6 @@ private _elemParent: any;
 		return [];
 	}
 
-	/**
-	 * @description Recherche les anomalies dans l'ElementGraphique et ses enfants.
-	 * @param {Array<AnomalieConceptuelle>} mesAnomalies - La liste des anomalies à rechercher.
-	 * @returns {Array<AnomalieConceptuelle>} La liste des anomalies trouvées.
-	 */
-	rechercherAnomalies(mesAnomalies: (ErreurArretHorsIteratif|ErreurArretIteratifBornee|AvertissementSProblemeJamaisExecute)[]) {
-		this._listeAnomalie = mesAnomalies;
-		let anomalieDeMesEnfantsEtLesMiennes: any[] = [];
-		let enfants = this.getEnfants();
-		for (let enfant of enfants) {
-			anomalieDeMesEnfantsEtLesMiennes = [
-				...anomalieDeMesEnfantsEtLesMiennes,
-				...enfant.rechercherAnomalies(),
-			];
-		}
-		anomalieDeMesEnfantsEtLesMiennes = [
-			...anomalieDeMesEnfantsEtLesMiennes,
-			...mesAnomalies,
-		];
-		return anomalieDeMesEnfantsEtLesMiennes;
-	}
 
 	/**
 	 * @description Colore l'ElementGraphique.

@@ -1,5 +1,4 @@
 import { ElementGraphique } from "./ElementGraphique";
-import { classes } from "../runtime/classRegistry";
 
 /**
  * @class ConditionSortie
@@ -24,29 +23,6 @@ export class ConditionSortie extends ElementGraphique {
 		return null;
 	}
 
-	rechercherAnomalies() {
-		let mesAnomalies = [];
-
-		//5
-		if (classes.ErreurArretHorsIteratif.detecterAnomalie(this)) {
-			mesAnomalies.push(new classes.ErreurArretHorsIteratif(this));
-		} else {
-			if (classes.ErreurArretIteratifBornee.detecterAnomalie(this)) {
-				mesAnomalies.push(new classes.ErreurArretIteratifBornee(this));
-			}
-		}
-		let problemeJamaisExecute =
-			classes.AvertissementSProblemeJamaisExecute.detecterAnomalie(this);
-		if (problemeJamaisExecute[0]) {
-			mesAnomalies.push(
-				new classes.AvertissementSProblemeJamaisExecute(
-					this,
-					problemeJamaisExecute[1],
-				),
-			);
-		}
-		return super.rechercherAnomalies(mesAnomalies);
-	}
 
 	extraireInformation() {
 		return [];

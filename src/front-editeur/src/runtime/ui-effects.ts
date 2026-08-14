@@ -41,6 +41,9 @@ export function initializeInterfaceEffects(): void {
 
 	preferences.glow = getCookieBool("glow", !isVsCodeHost());
 	preferences.dockEffect = getCookieBool("dockEffect", true);
+	preferences.anomalyDetection = __ALGOFORGE_ANOMALY_DETECTION__ && !isExam
+		? getCookieBool("anomalyDetection", false)
+		: false;
 
 	if (isExam) {
 		preferences.glow = false;

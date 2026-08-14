@@ -10,12 +10,14 @@ export interface EditorBuildOptions {
 	development?: boolean;
 	target?: EditorBuildTarget;
 	outputDirectory?: string;
+	anomalyDetection?: boolean;
 }
 
 export async function buildEditor({
 	development = false,
 	target = "standalone",
 	outputDirectory = join(projectRoot, "out"),
+	anomalyDetection = true,
 }: EditorBuildOptions = {}): Promise<void> {
 	const nextOutputDirectory = join(
 		dirname(outputDirectory),
@@ -28,6 +30,7 @@ export async function buildEditor({
 		compile: target === "standalone",
 		target: "browser",
 		outdir: nextOutputDirectory,
+		define: { "__ALGOFORGE_ANOMALY_DETECTION__": JSON.stringify(anomalyDetection) },
 		minify: !development,
 		sourcemap: development ? "inline" : "none",
 	});
@@ -82,5 +85,6 @@ if (import.meta.main) {
 	await buildEditor({
 		development: process.argv.includes("--development"),
 		target: process.argv.includes("--webview") ? "webview" : "standalone",
+		anomalyDetection: !process.argv.includes("--exam"),
 	});
 }

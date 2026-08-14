@@ -7,8 +7,8 @@
 		"build:dev": "bun run build.ts --development",
 		"build:watch": "bun run watch.ts",
 		"check": "bun run typecheck && bun run build && bun run test",
-		"test": "bun test tests/editor.smoke.test.ts tests/documentController.test.ts",
-		"typecheck": "tsc --project tsconfig.json && tsc --project tsconfig.build.json"
+		"test": "bun test tests/editor.smoke.test.ts tests/documentController.test.ts tests/anomalies.test.ts tests/anomaly.ui.test.ts tests/anomaly.build.test.ts tests/anomaly.host.test.ts tests/anomaly.if-consistency.test.ts tests/anomaly.incomplete-edits.test.ts tests/anomaly.transactions.test.ts tests/anomaly.valid-algorithm.test.ts",
+		"typecheck": "tsc --project tsconfig.json && tsc --project tsconfig.build.json && tsc --project tsconfig.anomalies.json"
 	},
 	"devDependencies": {
 		"@playwright/test": "^1.61.1",

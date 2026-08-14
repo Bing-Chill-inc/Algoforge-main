@@ -1,13 +1,4 @@
 export interface ClassRegistry {
-	AffichageErreur: typeof import("../PartieErreur/AffichageErreur").AffichageErreur;
-	AnomalieConceptuelle: typeof import("../PartieErreur/AnomalieConceptuelle").AnomalieConceptuelle;
-	AvertissementConceptuel: typeof import("../PartieErreur/AvertissementConceptuel").AvertissementConceptuel;
-	AvertissementDonneeDynamiquementTypee: typeof import("../PartieErreur/AvertissementDonneeDynamiquementTypee").AvertissementDonneeDynamiquementTypee;
-	AvertissementInformationsInconsistantesSi: typeof import("../PartieErreur/AvertissementInformationsInconsistantesSi").AvertissementInformationsInconsistantesSi;
-	AvertissementPlanTropGrand: typeof import("../PartieErreur/AvertissementPlanTropGrand").AvertissementPlanTropGrand;
-	AvertissementSProblemeJamaisExecute: typeof import("../PartieErreur/AvertissementSProblemeJamaisExecute").AvertissementSProblemeJamaisExecute;
-	AvertissementStructureInoptimale: typeof import("../PartieErreur/AvertissementStructureInoptimale").AvertissementStructureInoptimale;
-	AvertissementTropDeSousElements: typeof import("../PartieErreur/AvertissementTropDeSousElements").AvertissementTropDeSousElements;
 	Bibliotheque: typeof import("../PartieEditeur/Bilbiotheque").Bibliotheque;
 	Condition: typeof import("../PartieEditeur/Condition").Condition;
 	ConditionSortie: typeof import("../PartieEditeur/ConditionSortie").ConditionSortie;
@@ -18,19 +9,6 @@ export interface ClassRegistry {
 	ElementMenuCompose: typeof import("../PartieEditeur/ElementMenuCompose").ElementMenuCompose;
 	ElementMenuKeyboardTip: typeof import("../PartieEditeur/ElementMenuKeyboardTip").ElementMenuKeyboardTip;
 	ElementParent: typeof import("../PartieEditeur/ElementParent").ElementParent;
-	ErreurArretHorsIteratif: typeof import("../PartieErreur/ErreurArretHorsIteratif").ErreurArretHorsIteratif;
-	ErreurArretIteratifBornee: typeof import("../PartieErreur/ErreurArretIteratifBornee").ErreurArretIteratifBornee;
-	ErreurBoucleBorneeSansFin: typeof import("../PartieErreur/ErreurBoucleBorneeSansFin").ErreurBoucleBorneeSansFin;
-	ErreurBoucleSansSortie: typeof import("../PartieErreur/ErreurBoucleSansSortie").ErreurBoucleSansSortie;
-	ErreurComparaisonSwitch: typeof import("../PartieErreur/ErreurComparaisonSwitch").ErreurComparaisonSwitch;
-	ErreurConceptuelle: typeof import("../PartieErreur/ErreurConceptuelle").ErreurConceptuelle;
-	ErreurDonneeInutilisee: typeof import("../PartieErreur/ErreurDonneeInutilisee").ErreurDonneeInutilisee;
-	ErreurDonneeMagique: typeof import("../PartieErreur/ErreurDonneeMagique").ErreurDonneeMagique;
-	ErreurResultatInutilisee: typeof import("../PartieErreur/ErreurResultatInutilisee").ErreurResultatInutilisee;
-	ErreurSyntaxeAssignation: typeof import("../PartieErreur/ErreurSyntaxeAssignation").ErreurSyntaxeAssignation;
-	ErreurSyntaxeComparaison: typeof import("../PartieErreur/ErreurSyntaxeComparaison").ErreurSyntaxeComparaison;
-	ErreurTypesInconsistantsAlternatif: typeof import("../PartieErreur/ErreurTypesInconsistantsAlternatif").ErreurTypesInconsistantsAlternatif;
-	ErreurVariableMagique: typeof import("../PartieErreur/ErreurVariableMagique").ErreurVariableMagique;
 	EvenementDispositionAutomatique: typeof import("../PartieEditeur/EvenementEdition/EvenementDispositionAutomatique").EvenementDispositionAutomatique;
 	EvenementComposite: typeof import("../PartieEditeur/EvenementEdition/EvenementComposite").EvenementComposite;
 	EvenementCreationElement: typeof import("../PartieEditeur/EvenementEdition/EvenementCreationElement").EvenementCreationElement;

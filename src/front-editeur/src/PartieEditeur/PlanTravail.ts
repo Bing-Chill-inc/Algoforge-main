@@ -100,24 +100,6 @@ export class PlanTravail extends HTMLElement {
 		return problemeLePlusHaut;
 	}
 
-	/**
-	 * Recherche les erreurs dans le plan de travail.
-	 * @returns {Array<AnomalieConceptuelle>} La liste des anomalies trouvées.
-	 */
-	rechercherAnomalies() {
-		let listeAnomalies = [];
-		if (classes.AvertissementPlanTropGrand.detecterAnomalie(this)) {
-			listeAnomalies.push(new classes.AvertissementPlanTropGrand(this));
-		}
-		for (let elementgraphique of this.getProblemePrincipal()) {
-			listeAnomalies = [
-				...listeAnomalies,
-				...elementgraphique.rechercherAnomalies(),
-			];
-		}
-		if (verbose) console.log(listeAnomalies);
-		return listeAnomalies;
-	}
 
 	/**
 	 * Filtre les éléments graphiques d'un type donné.

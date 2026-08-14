@@ -74,7 +74,6 @@ private _init!: boolean;
 		this._menuDiv = document.createElement("div");
 		this._menuDiv.id = "MenuCompteDiv";
 		this._menuDiv.classList.add("menu-compte");
-
 		// Vérifier si l'utilisateur est connecté
 		const isLoggedIn = this._user !== null;
 
@@ -174,7 +173,7 @@ private _init!: boolean;
 					</svg>
 				</div>
 				</div>
-				
+
 				<div class="effect-option">
 					<span>Effet Glow</span>
 					<div id="switchGlowContainer" class="switch-container">
@@ -196,6 +195,9 @@ private _init!: boolean;
 		}
 
 		this.appendChild(this._menuDiv);
+		document.dispatchEvent(new CustomEvent("algoforge:settings-opened", {
+			detail: { container: this._menuDiv.querySelector(".editor-options") },
+		}));
 
 		// Mettre à jour les informations de l'utilisateur si connecté
 		if (isLoggedIn) {
@@ -210,22 +212,18 @@ private _init!: boolean;
 		const selectIndicateurs =
 			this._menuDiv.querySelector("#indicateursPage");
 
-		const switchGlow = this._menuDiv.querySelector(
-			".effect-option:nth-child(2)",
-		);
 		const switchGlowContainer = this._menuDiv.querySelector(
 			"#switchGlowContainer",
 		);
+		const switchGlow = switchGlowContainer?.closest(".effect-option");
 		const switchGlowDisplayer = this._menuDiv.querySelector(
 			"#switchGlowDisplayer",
 		);
 
-		const switchDock = this._menuDiv.querySelector(
-			".effect-option:nth-child(3)",
-		);
 		const switchDockContainer = this._menuDiv.querySelector(
 			"#switchDockContainer",
 		);
+		const switchDock = switchDockContainer?.closest(".effect-option");
 		const switchDockDisplayer = this._menuDiv.querySelector(
 			"#switchDockDisplayer",
 		);

@@ -173,29 +173,6 @@ export class StructureIterativeBornee extends StructureIterative {
 		return !this._estCroissant && parseFloat(this._pas) == 1;
 	}
 
-	/**
-	 * @description Recherche et renvoie la listes des anomalies de la boucle iterative bornée
-	 * @returns {Array<AnomalieConceptuelle>} La liste des anomalies
-	 */
-	rechercherAnomalies() {
-		let mesAnomalies = [];
-		// 11
-		if (classes.ErreurBoucleBorneeSansFin.detecterAnomalie(this)) {
-			mesAnomalies.push(new classes.ErreurBoucleBorneeSansFin(this));
-		}
-		// 12
-		let tropDeSousElements =
-			classes.AvertissementTropDeSousElements.detecterAnomalie(this);
-		if (tropDeSousElements[0]) {
-			mesAnomalies.push(
-				new classes.AvertissementTropDeSousElements(
-					this,
-					tropDeSousElements[1],
-				),
-			);
-		}
-		return super.rechercherAnomalies(mesAnomalies);
-	}
 
 	/**
 	 * @description Renvoie le corp JSON de l'instance de la StructureItérative

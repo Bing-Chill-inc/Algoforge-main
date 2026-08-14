@@ -1,5 +1,4 @@
 import type { DictionnaireDonnee } from "../PartieEditeur/DictionnaireDonnee";
-import type { AffichageErreur } from "../PartieErreur/AffichageErreur";
 import type { PlanTravail } from "../PartieEditeur/PlanTravail";
 import type { SousPlanTravail } from "../PartieEditeur/SousPlanTravail";
 import type { Probleme } from "../PartieEditeur/Probleme";
@@ -32,7 +31,6 @@ import type { Editeur } from "../PartieEditeur/Editeur";
 declare global {
 	interface HTMLElementTagNameMap {
 		"dictionnaire-donnee": DictionnaireDonnee;
-		"affichage-erreur-element": AffichageErreur;
 		"plan-travail": PlanTravail;
 		"sous-plan-travail": SousPlanTravail;
 		"probleme-element": Probleme;

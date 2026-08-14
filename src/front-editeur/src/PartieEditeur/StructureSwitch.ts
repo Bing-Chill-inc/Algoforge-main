@@ -190,49 +190,6 @@ divExpressionATester!: HTMLDivElement;
 		};
 	}
 
-	/**
-	 * @description Récupère la liste actuelles des anomalies detecté et ajoute ces propres anomalies détecté à celle ci
-	 * @returns {Array<AnomalieConceptuelle>} La liste précédantes + les anomalies détecté par la StructureSwitch
-	 */
-	rechercherAnomalies() {
-		let mesAnomalies = [];
-		//8
-		if (classes.ErreurSyntaxeComparaison.detecterAnomalie(this)) {
-			mesAnomalies.push(new classes.ErreurSyntaxeComparaison(this));
-		}
-		//12
-		let tropDeSousElements =
-			classes.AvertissementTropDeSousElements.detecterAnomalie(this);
-		if (tropDeSousElements[0]) {
-			mesAnomalies.push(
-				new classes.AvertissementTropDeSousElements(
-					this,
-					tropDeSousElements[1],
-				),
-			);
-		}
-		//16
-		let comparaisonSwitch = classes.ErreurComparaisonSwitch.detecterAnomalie(this);
-		if (comparaisonSwitch[0]) {
-			mesAnomalies.push(
-				new classes.ErreurComparaisonSwitch(this, comparaisonSwitch[1]),
-			);
-		}
-		if (!comparaisonSwitch[0]) {
-			let typesInconsistantsAlternatif =
-				classes.ErreurTypesInconsistantsAlternatif.detecterAnomalie(this);
-			if (typesInconsistantsAlternatif[0]) {
-				mesAnomalies.push(
-					new classes.ErreurTypesInconsistantsAlternatif(
-						this,
-						typesInconsistantsAlternatif[1],
-						typesInconsistantsAlternatif[2],
-					),
-				);
-			}
-		}
-		return super.rechercherAnomalies(mesAnomalies);
-	}
 
 	/**
 	 * @description Extrait les informations de la StructureSwitch

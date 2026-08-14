@@ -2,6 +2,7 @@ import type { Editeur } from "../PartieEditeur/Editeur";
 import type { EditorHostKind, EditorRuntimeConfig } from "./config";
 
 export interface EditorPreferences {
+	anomalyDetection: boolean;
 	glow: boolean;
 	dockEffect: boolean;
 	renderScale: number;
@@ -9,6 +10,7 @@ export interface EditorPreferences {
 
 export const verbose = false;
 export const preferences: EditorPreferences = {
+	anomalyDetection: false,
 	glow: false,
 	dockEffect: true,
 	renderScale: 4,

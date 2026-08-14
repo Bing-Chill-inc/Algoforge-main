@@ -1807,6 +1807,17 @@ export class Editeur extends HTMLElement {
 		} finally {
 			this._suspendDocumentEvents = false;
 		}
+		this.notifyDocumentChange("hydration");
+	}
+
+	applyDocumentSnapshot(algorithm: unknown[]): void {
+		this._suspendDocumentEvents = true;
+		try {
+			this.resetDocumentForHydration();
+			this._espacePrincipal!.chargerDepuisJSON(algorithm as never, false);
+		} finally {
+			this._suspendDocumentEvents = false;
+		}
 	}
 
 	resetDocumentForHydration(): void {
@@ -2288,9 +2299,11 @@ export class Editeur extends HTMLElement {
 	 * @param {Object} evenement - L'événement à ajouter.
 	 */
 	ajouterEvenement(evenement: EvenementPlaceholder|EvenementComposite) {
+		if (this._suspendDocumentEvents) return;
 		this._pileAnnuler.push(evenement);
 		this._pileRétablir = [];
-		if (!this._suspendDocumentEvents) commitDocumentChange();
+		commitDocumentChange();
+		this.notifyDocumentChange("commit");
 	}
 
 	/**
@@ -2301,7 +2314,10 @@ export class Editeur extends HTMLElement {
 			let evenement = this._pileAnnuler.pop();
 			evenement!.annuler();
 			this._pileRétablir.push(evenement);
-			if (!this._suspendDocumentEvents) commitDocumentChange();
+			if (!this._suspendDocumentEvents) {
+				commitDocumentChange();
+				this.notifyDocumentChange("undo");
+			}
 		}
 	}
 
@@ -2313,8 +2329,15 @@ export class Editeur extends HTMLElement {
 			let evenement = this._pileRétablir.pop();
 			evenement!.retablir();
 			this._pileAnnuler.push(evenement);
-			if (!this._suspendDocumentEvents) commitDocumentChange();
+			if (!this._suspendDocumentEvents) {
+				commitDocumentChange();
+				this.notifyDocumentChange("redo");
+			}
 		}
+	}
+
+	notifyDocumentChange(source = "commit"): void {
+		this.dispatchEvent(new CustomEvent("algoforge:document-change", { detail: { source } }));
 	}
 
 	retirerExtensionNomFichier(nomFichier) {

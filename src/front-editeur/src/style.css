@@ -2860,86 +2860,6 @@ ligne-element {
 		transform-origin: top;
 	}
 }
-affichage-erreur-element {
-	display: none;
-	position: relative;
-	margin: 0;
-	height: fit-content;
-}
-
-affichage-erreur-element > div.img {
-	background-image: var(--assetErreurs);
-	background-position: center;
-	background-repeat: no-repeat;
-	background-size: contain;
-	width: 100%;
-}
-affichage-erreur-element button {
-	display: block;
-	background: none;
-	border: var(--fgColor) solid 0.1vw;
-	border-radius: 1vw;
-	font-size: 1vw;
-	color: var(--fgColor);
-	cursor: pointer;
-	margin: 0;
-	padding: 0.75vw;
-}
-
-affichage-erreur-element .erreur-container {
-	position: absolute;
-	top: calc(100% + 0.2vw); /* Place la div juste en dessous du bouton */
-	left: calc(-7.5vw + 50%); /* Centre la div par rapport au bouton */
-	background-color: var(--bgColor); /* Couleur de fond */
-	border: 0.1vw solid var(--fgColor); /* Bordure */
-	padding: 0.2vw; /* Espacement intérieur */
-	border-radius: 0.3vw; /* Bord arrondi */
-	z-index: 999; /* S'assure que la boîte est au-dessus des autres éléments */
-	width: 15vw;
-	font-size: 1vw;
-	padding-bottom: 1vw;
-	display: flex;
-	flex-direction: column;
-	align-items: center;
-	justify-content: center;
-	animation: 0.2s ease-in-out zoomFromAbove;
-}
-
-affichage-erreur-element div.fleches {
-	display: flex;
-	flex-direction: row;
-	align-items: center;
-	justify-content: space-evenly;
-	width: 100%;
-	height: 1vw;
-	margin-bottom: 1vw;
-}
-
-affichage-erreur-element p.texte-erreur {
-	min-height: 2vw;
-}
-
-affichage-erreur-element .erreur-container .fleche {
-	cursor: pointer; /* Curseur de la flèche */
-}
-affichage-erreur-element #RechercheAnomalie {
-	display: block;
-	width: 2vw;
-	height: 2vw;
-}
-affichage-erreur-element .erreur-container {
-	z-index: 9000;
-}
-affichage-erreur-element .erreur-container span,
-p {
-	display: inline-block;
-}
-affichage-erreur-element .fleche,
-button,
-.numero-erreur {
-	user-select: none;
-}
-
 .rotate {
 	rotate: 360deg;
 }
@@ -3293,9 +3213,18 @@ menu-compte-element > #MenuCompte {
 .switch-container {
 	width: 40px;
 	height: 20px;
+	box-sizing: border-box;
+	padding: 0;
+	border: 0;
 	border-radius: 10px;
 	position: relative;
 	transition: background-color 0.3s;
+	cursor: pointer;
+}
+
+.switch-container:focus-visible {
+	outline: 2px solid var(--titleColor);
+	outline-offset: 2px;
 }
 
 .switch-displayer {

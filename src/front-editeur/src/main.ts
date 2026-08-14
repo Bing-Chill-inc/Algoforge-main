@@ -2,34 +2,12 @@ import "./modules/safari-pollyfill.js";
 import { readRuntimeConfig } from "./runtime/config";
 import { registerClasses } from "./runtime/classRegistry";
 import { initializeHost } from "./runtime/host";
-import { editeur, initializeRuntime, requiredElement, titreAlgo } from "./runtime/runtime";
+import { editeur, initializeRuntime, preferences, requiredElement, titreAlgo } from "./runtime/runtime";
 import { initializeInterfaceEffects } from "./runtime/ui-effects";
 import { initializeVsCodeIntegration } from "./runtime/vscodeIntegration";
 import { Type } from "./PartieEditeur/Type";
 import { Information } from "./PartieEditeur/Information";
 import { DictionnaireDonnee } from "./PartieEditeur/DictionnaireDonnee";
-import { AnomalieConceptuelle } from "./PartieErreur/AnomalieConceptuelle";
-import { ErreurConceptuelle } from "./PartieErreur/ErreurConceptuelle";
-import { AvertissementConceptuel } from "./PartieErreur/AvertissementConceptuel";
-import { AvertissementDonneeDynamiquementTypee } from "./PartieErreur/AvertissementDonneeDynamiquementTypee";
-import { AvertissementInformationsInconsistantesSi } from "./PartieErreur/AvertissementInformationsInconsistantesSi";
-import { AvertissementPlanTropGrand } from "./PartieErreur/AvertissementPlanTropGrand";
-import { AvertissementSProblemeJamaisExecute } from "./PartieErreur/AvertissementSProblemeJamaisExecute";
-import { AvertissementStructureInoptimale } from "./PartieErreur/AvertissementStructureInoptimale";
-import { AvertissementTropDeSousElements } from "./PartieErreur/AvertissementTropDeSousElements";
-import { ErreurArretHorsIteratif } from "./PartieErreur/ErreurArretHorsIteratif";
-import { ErreurArretIteratifBornee } from "./PartieErreur/ErreurArretIteratifBornee";
-import { ErreurBoucleBorneeSansFin } from "./PartieErreur/ErreurBoucleBorneeSansFin";
-import { ErreurBoucleSansSortie } from "./PartieErreur/ErreurBoucleSansSortie";
-import { ErreurComparaisonSwitch } from "./PartieErreur/ErreurComparaisonSwitch";
-import { ErreurDonneeInutilisee } from "./PartieErreur/ErreurDonneeInutilisee";
-import { ErreurDonneeMagique } from "./PartieErreur/ErreurDonneeMagique";
-import { ErreurResultatInutilisee } from "./PartieErreur/ErreurResultatInutilisee";
-import { ErreurSyntaxeAssignation } from "./PartieErreur/ErreurSyntaxeAssignation";
-import { ErreurSyntaxeComparaison } from "./PartieErreur/ErreurSyntaxeComparaison";
-import { ErreurTypesInconsistantsAlternatif } from "./PartieErreur/ErreurTypesInconsistantsAlternatif";
-import { ErreurVariableMagique } from "./PartieErreur/ErreurVariableMagique";
-import { AffichageErreur } from "./PartieErreur/AffichageErreur";
 import { PlanTravail } from "./PartieEditeur/PlanTravail";
 import { SousPlanTravail } from "./PartieEditeur/SousPlanTravail";
 import { ElementGraphique } from "./PartieEditeur/ElementGraphique";
@@ -92,28 +70,6 @@ registerClasses({
 	Type,
 	Information,
 	DictionnaireDonnee,
-	AnomalieConceptuelle,
-	ErreurConceptuelle,
-	AvertissementConceptuel,
-	AvertissementDonneeDynamiquementTypee,
-	AvertissementInformationsInconsistantesSi,
-	AvertissementPlanTropGrand,
-	AvertissementSProblemeJamaisExecute,
-	AvertissementStructureInoptimale,
-	AvertissementTropDeSousElements,
-	ErreurArretHorsIteratif,
-	ErreurArretIteratifBornee,
-	ErreurBoucleBorneeSansFin,
-	ErreurBoucleSansSortie,
-	ErreurComparaisonSwitch,
-	ErreurDonneeInutilisee,
-	ErreurDonneeMagique,
-	ErreurResultatInutilisee,
-	ErreurSyntaxeAssignation,
-	ErreurSyntaxeComparaison,
-	ErreurTypesInconsistantsAlternatif,
-	ErreurVariableMagique,
-	AffichageErreur,
 	PlanTravail,
 	SousPlanTravail,
 	ElementGraphique,
@@ -171,7 +127,6 @@ registerClasses({
 });
 
 defineCustomElement("dictionnaire-donnee", DictionnaireDonnee);
-defineCustomElement("affichage-erreur-element", AffichageErreur);
 defineCustomElement("plan-travail", PlanTravail);
 defineCustomElement("sous-plan-travail", SousPlanTravail);
 defineCustomElement("probleme-element", Probleme);
@@ -218,6 +173,32 @@ if (config.initialAlgorithm !== null) {
 	if (config.prettifyInitialAlgorithm) {
 		requestAnimationFrame(() => editeur.prettifyPlanActif({ enregistrerEvenement: false }));
 	}
+}
+
+if (__ALGOFORGE_ANOMALY_DETECTION__ && !config.isExam) {
+	let preferenceVersion = 0;
+	let integration: Promise<typeof import("./anomalies/integration")> | undefined;
+	const synchronizeAnomalyDetection = async (enabled: boolean): Promise<void> => {
+		const version = ++preferenceVersion;
+		if (!enabled && !integration) return;
+		try {
+			integration ??= import("./anomalies/integration");
+			const { setAnomalyDetectionEnabled } = await integration;
+			if (version !== preferenceVersion) return;
+			setAnomalyDetectionEnabled(editeur, enabled);
+		} catch (error) {
+			console.error("[Anomalies] Initialisation impossible", error);
+		}
+	};
+	void import("./anomalies/preference")
+		.then(({ initializeAnomalyPreference }) => {
+			initializeAnomalyPreference(editeur, preferences.anomalyDetection, (enabled) => {
+				preferences.anomalyDetection = enabled;
+				void synchronizeAnomalyDetection(enabled);
+			});
+			void synchronizeAnomalyDetection(preferences.anomalyDetection);
+		})
+		.catch((error) => console.error("[Anomalies] Préférence indisponible", error));
 }
 
 function defineCustomElement(

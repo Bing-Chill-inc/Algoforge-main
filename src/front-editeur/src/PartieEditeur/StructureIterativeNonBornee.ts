@@ -32,29 +32,6 @@ export class StructureIterativeNonBornee extends StructureIterative {
 		super.afficher(); // Affichage de la boucle seule
 	}
 
-	/**
-	 * @description Recherche et renvoie la liste des anomalies de la boucle itérative non bornée
-	 * @returns {Array<AnomalieConceptuelle>} La liste des anomalies précédentes + celles trouvées par la structure
-	 */
-	rechercherAnomalies() {
-		let mesAnomalies = [];
-		// 10
-		if (classes.ErreurBoucleSansSortie.detecterAnomalie(this)) {
-			mesAnomalies.push(new classes.ErreurBoucleSansSortie(this));
-		}
-		// 12
-		let tropDeSousElements =
-			classes.AvertissementTropDeSousElements.detecterAnomalie(this);
-		if (tropDeSousElements[0]) {
-			mesAnomalies.push(
-				new classes.AvertissementTropDeSousElements(
-					this,
-					tropDeSousElements[1],
-				),
-			);
-		}
-		return super.rechercherAnomalies(mesAnomalies);
-	}
 
 	/**
 	 * @description Renvoie le corps JSON de l'instance de la StructureIterativeNonBornee

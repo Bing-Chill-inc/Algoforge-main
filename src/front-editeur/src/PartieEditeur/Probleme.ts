@@ -565,68 +565,6 @@ divResultatsEditable: any;
 		return listeDesEnfants.sort((a, b) => a._abscisse - b._abscisse);
 	}
 
-	/**
-	 * @description Recherche les anomalies dans l'instance de Problème.
-	 * @returns {Array<AnomalieConceptuelle>} La liste des anomalies trouvées.
-	 */
-	rechercherAnomalies() {
-		let mesAnomalies = [];
-		// 1
-		let donneesMagiques = classes.ErreurDonneeMagique.detecterAnomalie(this);
-		if (donneesMagiques[0]) {
-			mesAnomalies.push(
-				new classes.ErreurDonneeMagique(this, donneesMagiques[1]),
-			);
-		}
-
-		// 2
-		let donneesInutilisees = classes.ErreurDonneeInutilisee.detecterAnomalie(this);
-		if (donneesInutilisees![0]) {
-			mesAnomalies.push(
-				new classes.ErreurDonneeInutilisee(this, donneesInutilisees![1]),
-			);
-		}
-
-		// 3
-		let resultatsInutilisees =
-			classes.ErreurResultatInutilisee.detecterAnomalie(this);
-		if (resultatsInutilisees[0]) {
-			mesAnomalies.push(
-				new classes.ErreurResultatInutilisee(this, resultatsInutilisees[1]),
-			);
-		}
-
-		// 9
-		if (classes.ErreurSyntaxeAssignation.detecterAnomalie(this)) {
-			mesAnomalies.push(new classes.ErreurSyntaxeAssignation(this));
-		}
-
-		// 12
-		let tropDeSousElements =
-			classes.AvertissementTropDeSousElements.detecterAnomalie(this);
-		if (tropDeSousElements[0]) {
-			mesAnomalies.push(
-				new classes.AvertissementTropDeSousElements(
-					this,
-					tropDeSousElements[1],
-				),
-			);
-		}
-
-		// 18
-		let donneesDynamiqumentTypee =
-			classes.AvertissementDonneeDynamiquementTypee.detecterAnomalie(this);
-		if (donneesDynamiqumentTypee[0]) {
-			mesAnomalies.push(
-				new classes.AvertissementDonneeDynamiquementTypee(
-					this,
-					donneesDynamiqumentTypee[1],
-				),
-			);
-		}
-
-		return super.rechercherAnomalies(mesAnomalies);
-	}
 
 	/**
 	 * @description Retourne les Donnees sous Formes d'informations.
