@@ -97,6 +97,6 @@
 		"@types/vscode": "^1.85.0",
 		"@vscode/test-electron": "^2.5.2",
 		"@vscode/vsce": "^3.6.2",
-		"typescript": "^5.8.3"
+		"typescript": "^7.0.2"
 	}
 }
