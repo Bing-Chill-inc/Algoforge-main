@@ -22,7 +22,7 @@ export function initializeAnomalyPreference(
 		option.id = "anomalyDetectionOption";
 		option.className = "effect-option";
 		const label = document.createElement("span");
-		label.textContent = "Détection des anomalies";
+		label.textContent = "Détection des anomalies — Expérimental";
 		const toggle = document.createElement("button");
 		toggle.id = "switchAnomalyContainer";
 		toggle.type = "button";
