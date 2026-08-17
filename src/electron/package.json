@@ -1,6 +1,6 @@
 {
 	"name": "algoforge-electron",
-	"version": "1.0.0",
+	"version": "4.1.0",
 	"main": "electron-main.js",
 	"type": "module",
 	"scripts": {
@@ -18,6 +18,8 @@
 		"package:exam:lnx:x64": "bun run build:editor:exam && echo 'const isExam = true; export default isExam;' > ./exam-mode.js && electron-forge package --arch x64 --platform linux && echo 'const isExam = false; export default isExam;' > ./exam-mode.js",
 		"package:exam:mac:x64": "bun run build:editor:exam && echo 'const isExam = true; export default isExam;' > ./exam-mode.js && electron-forge package --arch x64 --platform darwin && echo 'const isExam = false; export default isExam;' > ./exam-mode.js",
 		"package:exam:mac:arm64": "bun run build:editor:exam && echo 'const isExam = true; export default isExam;' > ./exam-mode.js && electron-forge package --arch arm64 --platform darwin && echo 'const isExam = false; export default isExam;' > ./exam-mode.js",
+		"make": "bun run build:editor && electron-forge make",
+		"test": "bun test tests",
 		"build:editor": "bun ../front-editeur/build.ts",
 		"build:editor:exam": "bun ../front-editeur/build.ts --exam"
 	},
@@ -47,12 +49,44 @@
 	"config": {
 		"forge": {
 			"packagerConfig": {
+				"appBundleId": "com.algoforge.desktop",
 				"extraResource": [
 					"../front-editeur/out",
 					"../front-editeur/src/Bibliotheque"
 				],
 				"icon": "./icons/AlgoForge",
-				"name": "AlgoForge"
+				"name": "AlgoForge",
+				"extendInfo": {
+					"CFBundleDocumentTypes": [
+						{
+							"CFBundleTypeExtensions": [
+								"af"
+							],
+							"CFBundleTypeIconFile": "AlgoForge.icns",
+							"CFBundleTypeName": "AlgoForge Algorithm",
+							"CFBundleTypeRole": "Editor",
+							"LSHandlerRank": "Owner",
+							"LSItemContentTypes": [
+								"com.algoforge.algorithm"
+							]
+						}
+					],
+					"UTExportedTypeDeclarations": [
+						{
+							"UTTypeConformsTo": [
+								"public.json"
+							],
+							"UTTypeDescription": "AlgoForge Algorithm",
+							"UTTypeIdentifier": "com.algoforge.algorithm",
+							"UTTypeTagSpecification": {
+								"public.filename-extension": [
+									"af"
+								],
+								"public.mime-type": "application/vnd.algoforge+json"
+							}
+						}
+					]
+				}
 			},
 			"makers": [
 				{
@@ -61,7 +95,7 @@
 						"name": "AlgoForge",
 						"description": "L'application de création d'algorithmes",
 						"authors": "AlgoForge inc.",
-						"version": "1.0.0",
+						"version": "4.1.0",
 						"setupExe": "AlgoForgeSetup.exe"
 					}
 				},
@@ -73,11 +107,23 @@
 				},
 				{
 					"name": "@electron-forge/maker-deb",
-					"config": {}
+					"config": {
+						"options": {
+							"mimeType": [
+								"application/vnd.algoforge+json"
+							]
+						}
+					}
 				},
 				{
 					"name": "@electron-forge/maker-rpm",
-					"config": {}
+					"config": {
+						"options": {
+							"mimeType": [
+								"application/vnd.algoforge+json"
+							]
+						}
+					}
 				}
 			]
 		}

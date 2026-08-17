@@ -1,9 +1,19 @@
-import { app, BrowserWindow, protocol } from "electron";
+import { app, BrowserWindow, dialog, protocol } from "electron";
 import path from "path";
 import fs from "fs";
+import squirrelStartup from "electron-squirrel-startup";
 import AssetsDynamiques from "./assetsDynamiquesForElectron.js";
 import getBibliothèque from "./getBibliothequesForElectron.js";
 import isExam from "./exam-mode.js";
+import {
+	findAlgoForgeFileArguments,
+	MAX_ALGOFORGE_FILE_SIZE,
+	parseAlgoForgeFile,
+} from "./algorithm-file.js";
+import {
+	registerWindowsFileAssociation,
+	unregisterWindowsFileAssociation,
+} from "./windows-file-association.js";
 
 protocol.registerSchemesAsPrivileged([
 	{
@@ -50,10 +60,122 @@ function getMimeType(filePath) {
 	}
 }
 
-// Electron main window
-let mainWindow;
+const windowDocuments = new Map();
+const queuedFilePaths = new Set();
+let nextDocumentId = 0;
 
-app.on("ready", () => {
+function createEditorWindow(initialDocument = null) {
+	const editorWindow = new BrowserWindow({
+		width: 1200,
+		height: 800,
+		webPreferences: {
+			nodeIntegration: true,
+			contextIsolation: false,
+			webSecurity: false,
+			allowRunningInsecureContent: true,
+			devTools: !isExam,
+		},
+	});
+
+	let editorUrl = "app://edit/index.html";
+	if (initialDocument) {
+		const documentId = String(++nextDocumentId);
+		windowDocuments.set(documentId, initialDocument);
+		editorUrl += `?document=${encodeURIComponent(documentId)}`;
+		editorWindow.on("closed", () => windowDocuments.delete(documentId));
+	}
+
+	editorWindow.loadURL(editorUrl);
+	return editorWindow;
+}
+
+function readAlgoForgeFile(filePath) {
+	if (!fs.existsSync(filePath) || !fs.statSync(filePath).isFile()) {
+		throw new Error(`The file no longer exists: ${filePath}`);
+	}
+	if (fs.statSync(filePath).size > MAX_ALGOFORGE_FILE_SIZE) {
+		throw new Error("AlgoForge files cannot be larger than 5 MB.");
+	}
+
+	return {
+		initialAlgorithm: parseAlgoForgeFile(fs.readFileSync(filePath, "utf8")),
+		title: path.basename(filePath, path.extname(filePath)),
+	};
+}
+
+function showFileOpenError(filePath, error) {
+	const message = error instanceof Error ? error.message : String(error);
+	dialog.showErrorBox(`Unable to open ${path.basename(filePath)}`, message);
+}
+
+function openAlgoForgeFile(filePath) {
+	if (!app.isReady()) {
+		queuedFilePaths.add(filePath);
+		return false;
+	}
+
+	try {
+		createEditorWindow(readAlgoForgeFile(filePath));
+		return true;
+	} catch (error) {
+		showFileOpenError(filePath, error);
+		return false;
+	}
+}
+
+function openFileArguments(args, workingDirectory) {
+	const filePaths = findAlgoForgeFileArguments(args, workingDirectory);
+	for (const filePath of filePaths) openAlgoForgeFile(filePath);
+	return filePaths.length > 0;
+}
+
+const squirrelEvent = process.platform === "win32" ? process.argv[1] : null;
+if (
+	squirrelEvent === "--squirrel-install" ||
+	squirrelEvent === "--squirrel-updated"
+) {
+	registerWindowsFileAssociation(process.execPath);
+} else if (squirrelEvent === "--squirrel-uninstall") {
+	unregisterWindowsFileAssociation(process.execPath);
+}
+
+const shouldRun = !squirrelStartup && app.requestSingleInstanceLock();
+if (!shouldRun) app.quit();
+
+if (shouldRun) initializeApplication();
+
+function initializeApplication() {
+	openFileArguments(process.argv.slice(1), process.cwd());
+
+	app.on("open-file", (event, filePath) => {
+		event.preventDefault();
+		openAlgoForgeFile(path.resolve(filePath));
+	});
+
+	app.on("second-instance", (_event, argv, workingDirectory) => {
+		if (!openFileArguments(argv, workingDirectory)) {
+			const existingWindow = BrowserWindow.getAllWindows()[0];
+			if (existingWindow?.isMinimized()) existingWindow.restore();
+			existingWindow?.focus();
+		}
+	});
+
+	app.on("ready", handleReady);
+
+	app.on("window-all-closed", () => {
+		if (process.platform !== "darwin") {
+			app.quit();
+		}
+	});
+
+	app.on("activate", () => {
+		if (BrowserWindow.getAllWindows().length === 0) {
+			createEditorWindow();
+		}
+	});
+}
+
+function handleReady() {
 	protocol.handle("app", async (request) => {
 		const url = new URL(request.url);
 		console.log("Request received:", url.pathname);
@@ -95,7 +217,9 @@ app.on("ready", () => {
 			);
 			if (asset) {
 				// Simulate Express-like req/res objects
-				const fakeReq = { query: Object.fromEntries(url.searchParams) };
+				const fakeReq = {
+					query: Object.fromEntries(url.searchParams),
+				};
 				let responseData = null;
 
 				const fakeRes = {
@@ -173,9 +297,13 @@ app.on("ready", () => {
 		if (url.pathname === "/index.html") {
 			const filePath = path.join(staticPath, "index.html");
 			let fileContent = fs.readFileSync(filePath, "utf8");
+			const documentId = url.searchParams.get("document");
+			const launchDocument = documentId
+				? windowDocuments.get(documentId)
+				: null;
 			const config = {
-				initialAlgorithm: null,
-				title: null,
+				initialAlgorithm: launchDocument?.initialAlgorithm ?? null,
+				title: launchDocument?.title ?? null,
 				hostKind: "electron",
 				isExam,
 				prettifyInitialAlgorithm: false,
@@ -191,26 +319,39 @@ app.on("ready", () => {
 					if (typeof corpAlgo === "string" && corpAlgo.length > 0) {
 						config.initialAlgorithm = JSON.parse(corpAlgo);
 						if (typeof config.initialAlgorithm === "string") {
-							config.initialAlgorithm = JSON.parse(config.initialAlgorithm);
+							config.initialAlgorithm = JSON.parse(
+								config.initialAlgorithm,
+							);
 						}
 					}
 					config.prettifyInitialAlgorithm = sourceImport === "tbr";
-					if (typeof nomFichier === "string" && nomFichier.length > 0) {
+					if (
+						typeof nomFichier === "string" &&
+						nomFichier.length > 0
+					) {
 						config.title = nomFichier;
 					}
 				} catch (error) {
 					console.error("Failed to parse posted editor data", error);
-					return new Response("Invalid algorithm JSON.", { status: 400 });
+					return new Response("Invalid algorithm JSON.", {
+						status: 400,
+					});
 				}
 			}
 
-			const serialized = JSON.stringify(config).replaceAll("<", "\\u003c");
+			const serialized = JSON.stringify(config).replaceAll(
+				"<",
+				"\\u003c",
+			);
 			const marker =
 				/(<script type="application\/json" id="algoforge-runtime-config">)[\s\S]*?(<\/script>)/;
 			if (!marker.test(fileContent)) {
-				return new Response("Editor runtime configuration marker is missing.", {
-					status: 500,
-				});
+				return new Response(
+					"Editor runtime configuration marker is missing.",
+					{
+						status: 500,
+					},
+				);
 			}
 			fileContent = fileContent.replace(marker, `$1${serialized}$2`);
 
@@ -235,42 +376,14 @@ app.on("ready", () => {
 		return new Response("Not Found", { status: 404 });
 	});
 
-	// Create the Electron BrowserWindow
-	mainWindow = new BrowserWindow({
-		width: 1200,
-		height: 800,
-		webPreferences: {
-			nodeIntegration: true,
-			contextIsolation: false, // Allows the renderer process to use Node.js features directly
-			webSecurity: false, // Disable certain security features to allow cookie access
-			allowRunningInsecureContent: true,
-			devTools: !isExam,
-		},
-	});
-
-	// Point to the custom protocol URL
-	mainWindow.loadURL("app://edit/index.html");
-});
-
-app.on("window-all-closed", () => {
-	if (process.platform !== "darwin") {
-		app.quit();
+	if (process.platform === "win32" && app.isPackaged) {
+		registerWindowsFileAssociation(process.execPath);
 	}
-});
 
-app.on("activate", () => {
-	if (BrowserWindow.getAllWindows().length === 0) {
-		mainWindow = new BrowserWindow({
-			width: 1200,
-			height: 800,
-			webPreferences: {
-				nodeIntegration: true,
-				contextIsolation: false, // Allows the renderer process to use Node.js features directly
-				webSecurity: false, // Disable certain security features to allow cookie access
-				devTools: !isExam,
-			},
-		});
-
-		mainWindow.loadURL("app://edit/index.html");
+	let openedDocument = false;
+	for (const filePath of queuedFilePaths) {
+		openedDocument = openAlgoForgeFile(filePath) || openedDocument;
 	}
-});
+	queuedFilePaths.clear();
+	if (!openedDocument) createEditorWindow();
+}

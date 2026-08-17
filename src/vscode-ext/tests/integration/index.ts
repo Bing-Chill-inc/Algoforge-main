@@ -16,7 +16,7 @@ export async function run(): Promise<void> {
 	assert.ok(commands.includes("algoforge.reopenAsText"));
 
 	const customEditors = extension.packageJSON.contributes.customEditors;
-	assert.equal(extension.packageJSON.version, "0.1.2");
+	assert.equal(extension.packageJSON.version, "4.1.0");
 	const language = extension.packageJSON.contributes.languages[0];
 	assert.equal(language.id, "algoforge");
 	assert.deepEqual(language.extensions, [".algoforge", ".af"]);
