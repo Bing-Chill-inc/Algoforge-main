@@ -1,3 +1,4 @@
+import { serializeAlgoForgeDocument } from "../../../common/algorithmFormat";
 import { ElementGraphique } from "./ElementGraphique";
 import { classes } from "../runtime/classRegistry";
 import { editeur, verbose } from "../runtime/runtime";
@@ -867,9 +868,11 @@ divResultatsEditable: any;
 		exporter.ajouterElementMenu(sousTitreGénéral);
 
 		exporter.ajouterElementMenu(
-			new classes.ElementMenu(".json", () => {
-				if (verbose) console.log("Exporter en .json");
-				this._editeur.exporterJSON(JSON.stringify([this.toJSON()]));
+			new classes.ElementMenu(".af", () => {
+				if (verbose) console.log("Exporter en .af");
+				this._editeur.exporterJSON(
+					serializeAlgoForgeDocument([this.toJSON()]),
+				);
 			}),
 		);
 

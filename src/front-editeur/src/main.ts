@@ -1,3 +1,4 @@
+import { decodeAlgoForgeDocument } from "../../common/algorithmFormat";
 import "./modules/safari-pollyfill.js";
 import { readRuntimeConfig } from "./runtime/config";
 import { registerClasses } from "./runtime/classRegistry";
@@ -166,10 +167,11 @@ if (config.title !== null) {
 	document.title = `Algoforge - ${config.title}`;
 }
 if (config.initialAlgorithm !== null) {
+	const initialDocument = decodeAlgoForgeDocument(config.initialAlgorithm);
 	const workspace = editeur._espacePrincipal as unknown as {
 		chargerDepuisJSON(value: unknown): void;
 	};
-	workspace.chargerDepuisJSON(config.initialAlgorithm);
+	workspace.chargerDepuisJSON(initialDocument.algorithm);
 	if (config.prettifyInitialAlgorithm) {
 		requestAnimationFrame(() => editeur.prettifyPlanActif({ enregistrerEvenement: false }));
 	}

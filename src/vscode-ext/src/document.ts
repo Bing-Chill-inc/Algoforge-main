@@ -1,5 +1,9 @@
 import { posix } from "node:path";
 import type { Uri } from "vscode";
+import {
+	decodeAlgoForgeDocument,
+	serializeAlgoForgeDocument,
+} from "../../common/algorithmFormat";
 
 export const EMPTY_ALGORITHM = [
 	{
@@ -10,7 +14,7 @@ export const EMPTY_ALGORITHM = [
 ] as const;
 
 export type ParsedAlgorithm =
-	| { ok: true; algorithm: unknown[] }
+	| { ok: true; algorithm: unknown[]; formatVersion: 0 | 1 }
 	| { ok: false; error: string };
 
 export function parseAlgorithmDocument(text: string): ParsedAlgorithm {
@@ -19,13 +23,12 @@ export function parseAlgorithmDocument(text: string): ParsedAlgorithm {
 	}
 	try {
 		const value: unknown = JSON.parse(text);
-		if (!Array.isArray(value)) {
-			return {
-				ok: false,
-				error: "AlgoForge documents must contain a JSON array at the root.",
-			};
-		}
-		return { ok: true, algorithm: value };
+		const decoded = decodeAlgoForgeDocument(value);
+		return {
+			ok: true,
+			algorithm: decoded.algorithm,
+			formatVersion: decoded.version,
+		};
 	} catch (error) {
 		return {
 			ok: false,
@@ -35,7 +38,7 @@ export function parseAlgorithmDocument(text: string): ParsedAlgorithm {
 }
 
 export function serializeAlgorithm(algorithm: unknown[]): string {
-	return `${JSON.stringify(algorithm, null, 2)}\n`;
+	return serializeAlgoForgeDocument(algorithm);
 }
 
 export function titleFromUri(uri: Uri): string {
@@ -50,7 +53,7 @@ export function siblingUri(uri: Uri, filename: string): Uri {
 
 export function ensureAlgoForgeExtension(uri: Uri): Uri {
 	if (/\.(?:algoforge|af)$/i.test(uri.path)) return uri;
-	return uri.with({ path: `${uri.path}.algoforge` });
+	return uri.with({ path: `${uri.path}.af` });
 }
 
 export function decodeExportContent(

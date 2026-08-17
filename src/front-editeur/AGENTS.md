@@ -163,7 +163,7 @@ Undo/redo is event-driven:
 
 **Export Pipeline**
 Exports are all driven from `Editeur`:
-- JSON export: downloads `PlanTravail.exporterEnJSON()` as a file.
+- AlgoForge export: wraps `PlanTravail.exporterEnJSON()` in the version 1 document envelope and downloads it as an `.af` file.
 - SVG export: builds a temporary `PlanTravail`, injects inline CSS, and serializes with `XMLSerializer`. It wraps the result in a `<svg><foreignObject>` container.
 - PNG/JPG export: calls `exporterSVG`, draws it to `canvasExport` at `renderScale`, then downloads a data URL.
 - Dictionary export: `DictionnaireDonnee.exporter("csv")` and `exporter("md")`.

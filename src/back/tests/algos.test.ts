@@ -178,9 +178,13 @@ export const AlgosTests = async () => {
 				"message",
 				Responses.Algo.Success.Found,
 			);
-			expect(response.body.data.sourceCode).toEqual(
-				readAlgo("algo-complet"),
-			);
+			expect(response.body.data.sourceCode).toEqual({
+				version: 1,
+				algorithm: readAlgo("algo-complet"),
+			});
+			expect(Array.isArray(JSON.parse(
+				readFileSync(AlgosService.dataPath + "1.json", "utf8"),
+			))).toBe(true);
 		});
 	});
 
@@ -224,7 +228,10 @@ export const AlgosTests = async () => {
 			const payload = new AlgoCreateDTO();
 			payload.nom = "Algorithme test";
 			payload.ownerId = UserSet.unitTestAlgo1.id;
-			payload.sourceCode = readAlgo("algo-complet");
+			payload.sourceCode = {
+				version: 1,
+				algorithm: readAlgo("algo-complet"),
+			};
 
 			const response = await request
 				.post("/api/algos")
@@ -241,6 +248,10 @@ export const AlgosTests = async () => {
 			// Vérification de la création de l'algorithme.
 			const filePath = AlgosService.dataPath + "2.json";
 			expect(existsSync(filePath)).toBe(true);
+			expect(JSON.parse(readFileSync(filePath, "utf8"))).toEqual({
+				version: 1,
+				algorithm: readAlgo("algo-complet"),
+			});
 		});
 	});
 
@@ -280,6 +291,8 @@ export const AlgosTests = async () => {
 			// Vérification de la mise à jour de l'algorithme.
 			const filePath = AlgosService.dataPath + "1.json";
 			expect(existsSync(filePath)).toBe(true);
+			const storedDocument = JSON.parse(readFileSync(filePath, "utf8"));
+			expect(storedDocument).toMatchObject({ version: 1 });
 		});
 	});
 
@@ -382,6 +395,34 @@ export const AlgosTests = async () => {
 			// Vérification du résultat.
 			expect(result).toHaveProperty("success", true);
 		});
+		test("accepte le format versionné v1.", async () => {
+			const algorithm = readAlgo("algo-1");
+			const result = AlgoValidator.validateAlgo({
+				version: 1,
+				algorithm,
+			});
+			expect(result).toEqual({
+				success: true,
+				data: { version: 1, algorithm },
+			});
+		});
+		test("refuse les enveloppes v0 explicites et les versions futures.", async () => {
+			const explicitV0 = AlgoValidator.validateAlgo({
+				version: 0,
+				algorithm: readAlgo("algo-1"),
+			});
+			expect(explicitV0.success).toBe(false);
+			const future = AlgoValidator.validateAlgo({
+				version: 2,
+				algorithm: readAlgo("algo-1"),
+			});
+			expect(future.success).toBe(false);
+			if (!future.success) {
+				expect(future.error.issues[0]?.message).toContain(
+					"a newer AlgoForge version is required",
+				);
+			}
+		});
 	});
 };
 
@@ -391,7 +432,7 @@ export const AlgosTests = async () => {
  * @returns Objet contenant le résultat de la validation.
  * @example
  * const result = validationAlgo("algo-1");
- * // => { success: true, data: [{...}] }
+ * // => { success: true, data: { version: 1, algorithm: [{...}] } }
  */
 function validationAlgo(algoName: string) {
 	let result;

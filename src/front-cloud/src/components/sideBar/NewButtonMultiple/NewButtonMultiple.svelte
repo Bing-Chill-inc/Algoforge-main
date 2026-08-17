@@ -40,9 +40,16 @@
 			defaultAlgo = {
 				nom: "Nouvel Algorithme",
 				ownerId: user.id || 0,
-				sourceCode: JSON.parse(
-					`[{"typeElement":"DictionnaireDonnee","types":{},"signification":{}}]`,
-				),
+				sourceCode: {
+					version: 1,
+					algorithm: [
+						{
+							typeElement: "DictionnaireDonnee",
+							types: {},
+							signification: {},
+						},
+					],
+				},
 			};
 		} else {
 			notifications.add(

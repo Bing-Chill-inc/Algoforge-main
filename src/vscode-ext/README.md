@@ -1,6 +1,10 @@
 # AlgoForge for Visual Studio Code
 
-AlgoForge's visual algorithm editor for `.algoforge` and `.af` files.
+AlgoForge's visual algorithm editor creates `.af` files by default and continues
+to open existing `.algoforge` files. Legacy root-array JSON documents are treated
+as format version 0 and are upgraded to the version 1
+`{ "version": 1, "algorithm": [...] }` envelope on the next visual edit or
+Save As. `.json` files remain available through the Import command.
 
 ## Development
 

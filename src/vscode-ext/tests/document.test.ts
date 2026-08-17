@@ -12,18 +12,36 @@ describe("AlgoForge text document contract", () => {
 		expect(parseAlgorithmDocument("[]")).toEqual({
 			ok: true,
 			algorithm: [],
+			formatVersion: 0,
 		});
+		expect(
+			parseAlgorithmDocument('{"version":1,"algorithm":[]}'),
+		).toEqual({ ok: true, algorithm: [], formatVersion: 1 });
 		expect(parseAlgorithmDocument("")).toEqual({
 			ok: false,
 			error: "The file is empty.",
 		});
+		expect(parseAlgorithmDocument('{"version":0,"algorithm":[]}').ok).toBe(
+			false,
+		);
+		expect(parseAlgorithmDocument('{"version":1}').ok).toBe(false);
+		expect(
+			parseAlgorithmDocument('{"version":"1","algorithm":[]}').ok,
+		).toBe(false);
 		expect(parseAlgorithmDocument("{}").ok).toBe(false);
+		expect(
+			parseAlgorithmDocument('{"version":2,"algorithm":[]}'),
+		).toEqual({
+			ok: false,
+			error:
+				"This document uses AlgoForge format version 2. AlgoForge format version 1 is the newest version supported here; a newer AlgoForge version is required.",
+		});
 		expect(parseAlgorithmDocument("{").ok).toBe(false);
 	});
 
 	test("serializes canonical two-space JSON with a final newline", () => {
 		expect(serializeAlgorithm([{ typeElement: "DictionnaireDonnee" }])).toBe(
-			'[\n  {\n    "typeElement": "DictionnaireDonnee"\n  }\n]\n',
+			'{\n  "version": 1,\n  "algorithm": [\n    {\n      "typeElement": "DictionnaireDonnee"\n    }\n  ]\n}\n',
 		);
 	});
 
@@ -39,7 +57,7 @@ describe("AlgoForge text document contract", () => {
 
 		const withoutExtension = { ...uri, path: "/course/search" };
 		expect(ensureAlgoForgeExtension(withoutExtension as never).path).toBe(
-			"/course/search.algoforge",
+			"/course/search.af",
 		);
 	});
 

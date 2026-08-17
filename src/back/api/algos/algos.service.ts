@@ -25,6 +25,10 @@ import {
 	rightsOfUserOnAlgo,
 	rightsOfUserOnDir,
 } from "../../utils/queries";
+import {
+	createAlgoForgeDocument,
+	decodeAlgoForgeDocument,
+} from "../../../common/algorithmFormat";
 import { Responses } from "../../constants/responses.const";
 import { SortAlgos } from "../../types/sortAlgos.enum";
 import { FindOperator, IsNull, Not } from "typeorm";
@@ -219,7 +223,7 @@ export class AlgosService {
 
 		// TODO : Ranger l'algorithme dans le dossier de l'owner
 		// Enregistrement de l'algorithme dans le système de fichiers.
-		this.writeAlgoToDisk(savedAlgo.id, algo.sourceCode);
+		this.writeAlgoToDisk(savedAlgo.id, validationResult.data);
 
 		return savedAlgo;
 	}
@@ -342,10 +346,11 @@ export class AlgosService {
 		const algoPath = path.normalize(AlgosService.dataPath + id + ".json");
 		try {
 			if (existsSync(algoPath)) {
-				const algo = JSON.parse(
+				const storedAlgo = JSON.parse(
 					readFileSync(algoPath, { encoding: "utf8" }),
 				);
-				return algo;
+				const document = decodeAlgoForgeDocument(storedAlgo);
+				return createAlgoForgeDocument(document.algorithm);
 			}
 			return null;
 		} catch (error) {

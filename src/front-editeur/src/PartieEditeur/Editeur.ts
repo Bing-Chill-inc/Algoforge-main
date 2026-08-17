@@ -1,3 +1,8 @@
+import {
+	createAlgoForgeDocument,
+	decodeAlgoForgeDocument,
+	serializeAlgoForgeDocument,
+} from "../../../common/algorithmFormat";
 import { classes } from "../runtime/classRegistry";
 import { resolveDynamicAssetUrl } from "../runtime/dynamicAssets";
 import {
@@ -480,7 +485,9 @@ export class Editeur extends HTMLElement {
 				id: id,
 				nom: this.querySelector("#titreAlgo")!.innerText,
 				permsAlgorithme: [],
-				sourceCode: this._espacePrincipal!.exporterEnJSON(),
+				sourceCode: createAlgoForgeDocument(
+					this._espacePrincipal!.exporterEnJSON(),
+				),
 			};
 
 			const API_BASE_URL = "/api/algos";
@@ -583,7 +590,7 @@ export class Editeur extends HTMLElement {
 				// On crée un input de type file pour que l'utilisateur puisse choisir un fichier
 				var fileInput = document.createElement("input");
 				fileInput.type = "file";
-				fileInput.accept = ".json,.tbr,.xml";
+				fileInput.accept = ".af,.algoforge,.json,.tbr,.xml";
 				fileInput.style.display = "none";
 				fileInput.addEventListener("change", () => {
 					if (!fileInput.files || fileInput.files.length === 0) return;
@@ -638,7 +645,7 @@ export class Editeur extends HTMLElement {
 							this._transferForm!.submit();
 						} catch (error) {
 							alert(
-								"Le fichier n'a pas été chargé correctement.",
+								error instanceof Error ? error.message : "Le fichier n'a pas été chargé correctement.",
 							);
 							console.error(error);
 						}
@@ -703,10 +710,10 @@ export class Editeur extends HTMLElement {
 		exporter.ajouterElementMenu(sousTitreGénéral);
 
 		exporter.ajouterElementMenu(
-			new classes.ElementMenu(".json", () => {
-				if (verbose) console.log("Exporter en .json");
+			new classes.ElementMenu(".af", () => {
+				if (verbose) console.log("Exporter en .af");
 				this.exporterJSON(
-					JSON.stringify(this._espacePrincipal!.exporterEnJSON()),
+					serializeAlgoForgeDocument(this._espacePrincipal!.exporterEnJSON()),
 				);
 			}),
 		);
@@ -2265,7 +2272,7 @@ export class Editeur extends HTMLElement {
 		if (
 			typeof jsonString === "string" &&
 			saveHostFile(
-				this.querySelector("#titreAlgo")!.innerText + ".json",
+				this.querySelector("#titreAlgo")!.innerText + ".af",
 				"application/json",
 				jsonString,
 			)
@@ -2281,7 +2288,7 @@ export class Editeur extends HTMLElement {
 		downloadLink.href = url;
 		downloadLink.download = `${
 			this.querySelector("#titreAlgo")!.innerText
-		}.json`;
+		}.af`;
 
 		// Pour des raisons de compatibilité, on simule un clic sur le lien et on le supprime après
 		document.body.appendChild(downloadLink);
@@ -2378,7 +2385,8 @@ export class Editeur extends HTMLElement {
 		if (typeof parsedData === "string") {
 			parsedData = JSON.parse(parsedData);
 		}
-		return { algo: parsedData, nomAlgo: "", estTabulaRasa: false };
+		const document = decodeAlgoForgeDocument(parsedData);
+		return { algo: document.algorithm, nomAlgo: "", estTabulaRasa: false };
 	}
 
 	convertirPxTbrEnVw(positionPx) {
@@ -4215,7 +4223,7 @@ export class Editeur extends HTMLElement {
 		// On crée un input de type file pour que l'utilisateur puisse choisir un fichier
 		var fileInput = document.createElement("input");
 		fileInput.type = "file";
-		fileInput.accept = ".json,.tbr,.xml";
+		fileInput.accept = ".af,.algoforge,.json,.tbr,.xml";
 		fileInput.style.display = "none";
 		fileInput.addEventListener("change", () => {
 			if (!fileInput.files || fileInput.files.length === 0) return;
@@ -4243,7 +4251,9 @@ export class Editeur extends HTMLElement {
 						});
 					}
 				} catch (error) {
-					alert("Le fichier n'a pas été chargé correctement.");
+					alert(
+						error instanceof Error ? error.message : "Le fichier n'a pas été chargé correctement.",
+					);
 					console.error(error);
 				}
 			};

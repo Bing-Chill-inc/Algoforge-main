@@ -107,6 +107,57 @@ describe("standalone editor", () => {
 		expect(pageErrors).toEqual([]);
 		await page.close();
 	});
+	test("imports v0 and v1 documents and exports with the .af extension", async () => {
+		const page = await browser.newPage();
+		await page.route("https://plausible.feror.fr/**", (route) => route.abort());
+		await page.goto(`http://127.0.0.1:${server.port}/`);
+		await page.waitForFunction(
+			() => customElements.get("editeur-interface") !== undefined,
+		);
+
+		const imports = await page.evaluate(() => {
+			const editor = document.querySelector("editeur-interface") as HTMLElement & {
+				interpreterFichierAlgorithme(
+					name: string,
+					content: string,
+				): { algo: Array<Record<string, unknown>> };
+			};
+			const algorithm = [{ typeElement: "DictionnaireDonnee" }];
+			const legacy = editor.interpreterFichierAlgorithme(
+				"legacy.json",
+				JSON.stringify(algorithm),
+			);
+			const current = editor.interpreterFichierAlgorithme(
+				"current.af",
+				JSON.stringify({ version: 1, algorithm }),
+			);
+			let futureError = "";
+			try {
+				editor.interpreterFichierAlgorithme(
+					"future.algoforge",
+					JSON.stringify({ version: 2, algorithm }),
+				);
+			} catch (error) {
+				futureError = error instanceof Error ? error.message : String(error);
+			}
+			return { legacy: legacy.algo, current: current.algo, futureError };
+		});
+		expect(imports.legacy).toEqual([{ typeElement: "DictionnaireDonnee" }]);
+		expect(imports.current).toEqual(imports.legacy);
+		expect(imports.futureError).toContain("a newer AlgoForge version is required");
+
+		const downloadPromise = page.waitForEvent("download");
+		await page.evaluate(() => {
+			const editor = document.querySelector("editeur-interface") as HTMLElement & {
+				exporterJSON(content: string): void;
+			};
+			editor.exporterJSON('{"version":1,"algorithm":[]}');
+		});
+		const download = await downloadPromise;
+		expect(download.suggestedFilename()).toBe("Titre de l'algorithme.af");
+		await page.close();
+	});
+
 
 	test("imports TBR content and prettifies the active plan", async () => {
 		const page = await browser.newPage();

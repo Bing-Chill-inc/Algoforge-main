@@ -15,6 +15,7 @@
 - [Fonctionnalités de l'application](#fonctionnalités-de-lapplication)
 - [Utilisation / Installation](#utilisation--installation)
   - [Version en ligne](#version-en-ligne)
+  - [Format de fichier AlgoForge](#format-de-fichier-algoforge)
   - [Extension VS Code](#extension-vs-code)
   - [Autres versions](#autres-versions)
 - [Comment contribuer au projet ?](#comment-contribuer-au-projet-)
@@ -71,7 +72,26 @@ Pour utiliser AlgoForge en ligne, vous pouvez vous rendre sur ce lien : [https:/
 
 ### Extension VS Code
 
-Le paquet de développement VS Code se trouve dans `src/vscode-ext`. Il ouvre les fichiers `.algoforge` et `.af` dans l’éditeur visuel partagé. Consultez son `README.md` pour les commandes de build, de test et de packaging.
+Le paquet de développement VS Code se trouve dans `src/vscode-ext`. `.af` est l'extension AlgoForge standard ; l'extension continue également d'ouvrir les fichiers `.algoforge` existants. Consultez son `README.md` pour les commandes de build, de test et de packaging.
+
+### Format de fichier AlgoForge
+
+Les éditeurs web, desktop et VS Code créent et exportent des fichiers `.af`. Le format courant est la version 1 :
+
+```json
+{
+  "version": 1,
+  "algorithm": [
+    {
+      "typeElement": "DictionnaireDonnee",
+      "types": {},
+      "signification": {}
+    }
+  ]
+}
+```
+
+Les anciens documents constitués directement d'un tableau JSON sont interprétés comme la version 0. Les fichiers `.json` et `.algoforge` restent importables. Un document créé par une version plus récente d'AlgoForge est refusé afin d'éviter de perdre des données inconnues.
 
 ### Autres versions
 

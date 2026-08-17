@@ -2,8 +2,8 @@ import {
 	IsArray,
 	IsBoolean,
 	IsDate,
-	IsJSON,
 	IsNumber,
+	IsObject,
 	IsOptional,
 	IsString,
 	MaxLength,
@@ -79,7 +79,7 @@ export class AlgoCreateDTO {
 	 * L'algorithme en lui-même.
 	 * @type {Object}
 	 */
-	@IsJSON()
+	@IsObject()
 	sourceCode: Object;
 }
 
@@ -133,8 +133,8 @@ export class AlgoUpdateDTO {
 	 * L'algorithme mise à jour.
 	 * @type {Object}
 	 */
-	@IsJSON()
-	sourceCode: string;
+	@IsObject()
+	sourceCode: Object;
 }
 
 export class AlgoSelectDTO {

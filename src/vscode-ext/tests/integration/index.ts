@@ -4,7 +4,7 @@ import { join } from "node:path";
 import * as vscode from "vscode";
 
 const EMPTY_DOCUMENT =
-	'[\n  {\n    "typeElement": "DictionnaireDonnee",\n    "types": {},\n    "signification": {}\n  }\n]\n';
+	'{\n  "version": 1,\n  "algorithm": [\n    {\n      "typeElement": "DictionnaireDonnee",\n      "types": {},\n      "signification": {}\n    }\n  ]\n}\n';
 
 export async function run(): Promise<void> {
 	const extension = vscode.extensions.getExtension("algoforge.algoforge-vscode");
@@ -16,7 +16,7 @@ export async function run(): Promise<void> {
 	assert.ok(commands.includes("algoforge.reopenAsText"));
 
 	const customEditors = extension.packageJSON.contributes.customEditors;
-	assert.equal(extension.packageJSON.version, "0.1.1");
+	assert.equal(extension.packageJSON.version, "0.1.2");
 	const language = extension.packageJSON.contributes.languages[0];
 	assert.equal(language.id, "algoforge");
 	assert.deepEqual(language.extensions, [".algoforge", ".af"]);
@@ -56,7 +56,7 @@ export async function run(): Promise<void> {
 			await vscode.commands.executeCommand("workbench.action.closeActiveEditor");
 		}
 
-		const emptyUri = vscode.Uri.joinPath(testDirectory, "empty.algoforge");
+		const emptyUri = vscode.Uri.joinPath(testDirectory, "empty.af");
 		await vscode.workspace.fs.writeFile(emptyUri, Buffer.from("  \n"));
 		const emptyDocument = await vscode.workspace.openTextDocument(emptyUri);
 		await vscode.commands.executeCommand(

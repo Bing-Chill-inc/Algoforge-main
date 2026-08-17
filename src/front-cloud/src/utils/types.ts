@@ -1,3 +1,7 @@
+import type { AlgoForgeDocumentV1 } from "../../../common/algorithmFormat";
+
+export type AlgoForgeSourceCode = AlgoForgeDocumentV1 | unknown[];
+
 // Définition du type notification
 export type notification = "error" | "success" | "warning";
 
@@ -22,7 +26,7 @@ export type Algo = {
 	id: number;
 	nom: string;
 	ownerId: number;
-	sourceCode: JSON;
+	sourceCode: AlgoForgeSourceCode;
 	dateCreation?: string;
 	dateModification?: string;
 	dateSuppression?: string;

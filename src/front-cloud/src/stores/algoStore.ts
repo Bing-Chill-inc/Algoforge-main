@@ -1,18 +1,18 @@
 import { writable, get } from "svelte/store";
-import type { Algo } from "../utils/types";
+import type { Algo, AlgoForgeSourceCode } from "../utils/types";
 import { getSessionData } from "./userStores";
 
 export type TAlgoCreateDTO = {
 	nom: string;
 	ownerId: number;
-	sourceCode: JSON;
+	sourceCode: AlgoForgeSourceCode;
 };
 
 export type TAlgoUpdateDTO = {
 	id: number;
 	nom: string;
 	requestedUserId: number;
-	sourceCode: JSON;
+	sourceCode: AlgoForgeSourceCode;
 };
 
 export type TAlgoFetch = {
@@ -40,7 +40,7 @@ export const convertAlgoFetch = (algo: TAlgoFetch): Algo => {
 		id: algo.algorithme.id,
 		nom: algo.algorithme.nom,
 		ownerId: algo.idUtilisateur,
-		sourceCode: {} as JSON,
+		sourceCode: { version: 1, algorithm: [] },
 		dateCreation: algo.algorithme.dateCreation,
 		dateModification: algo.algorithme.dateModification,
 		dateSuppression: algo.algorithme.dateSuppression,

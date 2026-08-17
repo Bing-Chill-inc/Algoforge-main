@@ -288,7 +288,7 @@ export class AlgoForgeEditorProvider implements vscode.CustomTextEditorProvider 
 				await document.save();
 				return;
 			case "saveAs":
-				await vscode.commands.executeCommand("workbench.action.files.saveAs");
+				await saveAlgorithmAs(document);
 				return;
 			case "undo":
 			case "redo":
@@ -357,7 +357,7 @@ export class AlgoForgeEditorProvider implements vscode.CustomTextEditorProvider 
 		const uri = await vscode.window.showSaveDialog({
 			defaultUri: siblingUri(
 				documentUri,
-				`${sanitizeFilename(name || "algorithm")}.algoforge`,
+				`${sanitizeFilename(name || "algorithm")}.af`,
 			),
 			filters: { "AlgoForge files": ["algoforge", "af"] },
 			saveLabel: "Create AlgoForge Document",
@@ -456,10 +456,34 @@ async function replaceWholeDocument(
 	return vscode.workspace.applyEdit(edit);
 }
 
+async function saveAlgorithmAs(document: vscode.TextDocument): Promise<void> {
+	const parsed = parseAlgorithmDocument(document.getText());
+	if (!parsed.ok) throw new Error(parsed.error);
+	const uri = await vscode.window.showSaveDialog({
+		defaultUri: siblingUri(
+			document.uri,
+			`${sanitizeFilename(titleFromUri(document.uri))}.af`,
+		),
+		filters: { "AlgoForge files": ["algoforge", "af"] },
+		saveLabel: "Save AlgoForge Algorithm As",
+	});
+	if (!uri) return;
+	const target = ensureAlgoForgeExtension(uri);
+	await vscode.workspace.fs.writeFile(
+		target,
+		Buffer.from(serializeAlgorithm(parsed.algorithm), "utf8"),
+	);
+	await vscode.commands.executeCommand(
+		"vscode.openWith",
+		target,
+		AlgoForgeEditorProvider.viewType,
+	);
+}
+
 export async function createNewAlgorithm(): Promise<void> {
 	const workspaceFolder = vscode.workspace.workspaceFolders?.[0];
 	const defaultUri = workspaceFolder
-		? vscode.Uri.joinPath(workspaceFolder.uri, "algorithm.algoforge")
+		? vscode.Uri.joinPath(workspaceFolder.uri, "algorithm.af")
 		: undefined;
 	const uri = await vscode.window.showSaveDialog({
 		defaultUri,

@@ -1,3 +1,4 @@
+import { serializeAlgoForgeDocument } from "../../../common/algorithmFormat";
 import { classes } from "../runtime/classRegistry";
 import { editeur, verbose } from "../runtime/runtime";
 
@@ -289,9 +290,11 @@ export class MenuContextuel extends HTMLElement {
 			exporter.ajouterElementMenu(sousTitreGénéral);
 
 			exporter.ajouterElementMenu(
-				new classes.ElementMenu(".json", () => {
-					if (verbose) console.log("Exporter en .json");
-					this._editeur.exporterJSON(this._editeur.copy(false));
+				new classes.ElementMenu(".af", () => {
+					if (verbose) console.log("Exporter en .af");
+					this._editeur.exporterJSON(
+						serializeAlgoForgeDocument(JSON.parse(this._editeur.copy(false))),
+					);
 				}),
 			);
 

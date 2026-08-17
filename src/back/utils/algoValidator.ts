@@ -1,5 +1,9 @@
 import { z } from "zod";
 import { Logger } from "./logger";
+import {
+	createAlgoForgeDocument,
+	decodeAlgoForgeDocument,
+} from "../../common/algorithmFormat";
 
 // Définition des types d'éléments possibles.
 enum TypeElement {
@@ -150,16 +154,32 @@ export class AlgoValidator {
 	 * Pour sauvegarder l'algorithme conforme, utilisez la propriété `data`.
 	 * @example
 	 * // Types de retour possibles:
-	 * // { success: true, data: [{...}] }
+	 * // { success: true, data: { version: 1, algorithm: [{...}] } }
 	 * // { success: false, error: [{...}] }
 	 */
-	static validateAlgo(algo: Object) {
+	static validateAlgo(algo: unknown) {
 		try {
-			const parsedAlgo = AlgoSchema.safeParse(algo);
+			const document = decodeAlgoForgeDocument(algo);
+			const parsedAlgo = AlgoSchema.safeParse(document.algorithm);
 			Logger.debug(JSON.stringify(parsedAlgo), "AlgoValidator", 6);
-			return parsedAlgo;
+			if (!parsedAlgo.success) return parsedAlgo;
+			return {
+				success: true as const,
+				data: createAlgoForgeDocument(parsedAlgo.data),
+			};
 		} catch (error) {
-			throw error;
+			return {
+				success: false as const,
+				error: {
+					issues: [{
+						code: "custom",
+						path: [],
+						message: error instanceof Error
+							? error.message
+							: "Invalid AlgoForge document.",
+					}],
+				},
+			};
 		}
 	}
 }

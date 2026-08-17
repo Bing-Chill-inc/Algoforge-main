@@ -1,3 +1,4 @@
+import { decodeAlgoForgeDocument } from "../../../common/algorithmFormat";
 import { classes } from "../runtime/classRegistry";
 import { editeur, verbose } from "../runtime/runtime";
 import type { ElementGraphique } from "./ElementGraphique";
@@ -200,11 +201,13 @@ export class PlanTravail extends HTMLElement {
 	chargerFichier(fichier: string) {
 		try {
 			var parsedData = JSON.parse(fichier);
-			this.chargerDepuisJSON(parsedData);
+			const document = decodeAlgoForgeDocument(parsedData);
+			this.chargerDepuisJSON(document.algorithm);
 			if (verbose) console.log("Le fichier a été chargé avec succès.");
 		} catch (error) {
-			alert("Le fichier n'est pas au format JSON.");
+			alert(error instanceof Error ? error.message : "Le fichier n'est pas au format JSON.");
 			if (verbose) console.log(error);
+			throw error;
 		}
 	}
 
