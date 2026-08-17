@@ -107,6 +107,71 @@ describe("standalone editor", () => {
 		expect(pageErrors).toEqual([]);
 		await page.close();
 	});
+
+	test("converts a top-level IF from its context menu without leaving an empty IF", async () => {
+		const page = await browser.newPage();
+		const pageErrors: string[] = [];
+		page.on("pageerror", (error) => pageErrors.push(error.message));
+		await page.route("https://plausible.feror.fr/**", (route) => route.abort());
+		await page.goto(`http://127.0.0.1:${server.port}/`);
+		await page.waitForFunction(
+			() => customElements.get("editeur-interface") !== undefined,
+		);
+
+		await page.evaluate(() => {
+			const editor = document.querySelector("editeur-interface") as HTMLElement & {
+				replaceDocument(algorithm: unknown[]): void;
+				_selection: { selectionnerElement(element: HTMLElement): void };
+			};
+			editor.replaceDocument([
+				{
+					typeElement: "StructureSi",
+					abscisse: "20vw",
+					ordonnee: "10vw",
+					conditions: [
+						{ typeElement: "Condition", libelle: "choix = 1", enfants: [{ typeElement: "Probleme", abscisse: "10vw", ordonnee: "20vw", libelle: "one", listeDonnes: [], listeResultats: [], enfants: [] }] },
+						{ typeElement: "Condition", libelle: "choix = 2", enfants: [{ typeElement: "Probleme", abscisse: "20vw", ordonnee: "20vw", libelle: "two", listeDonnes: [], listeResultats: [], enfants: [] }] },
+						{ typeElement: "Condition", libelle: "choix = 3", enfants: [{ typeElement: "Probleme", abscisse: "30vw", ordonnee: "20vw", libelle: "three", listeDonnes: [], listeResultats: [], enfants: [] }] },
+						{ typeElement: "Condition", libelle: "Sinon", enfants: [{ typeElement: "Probleme", abscisse: "40vw", ordonnee: "20vw", libelle: "fallback", listeDonnes: [], listeResultats: [], enfants: [] }] },
+					],
+				},
+				{ typeElement: "DictionnaireDonnee", types: {}, signification: {} },
+			]);
+			const structure = document.querySelector("structure-si-element") as HTMLElement;
+			editor._selection.selectionnerElement(structure);
+		});
+
+		await page.locator("structure-si-element").click({ button: "right" });
+		await page.getByText("Transformer en Switch", { exact: true }).click();
+
+		expect(await page.locator("structure-si-element").count()).toBe(0);
+		expect(await page.locator("structure-switch-element").count()).toBe(1);
+		const converted = await page.evaluate(() =>
+			(document.querySelector("editeur-interface") as HTMLElement & {
+				serializeDocument(): Array<Record<string, unknown>>;
+			}).serializeDocument()[0],
+		);
+		expect(converted).toMatchObject({
+			typeElement: "StructureSwitch",
+			expressionATester: "choix",
+			conditions: [
+				{ libelle: "1", enfants: [{ libelle: "one" }] },
+				{ libelle: "2", enfants: [{ libelle: "two" }] },
+				{ libelle: "3", enfants: [{ libelle: "three" }] },
+				{ libelle: "Sinon", enfants: [{ libelle: "fallback" }] },
+			],
+		});
+
+		await page.locator("#boutonUndo").click();
+		expect(await page.locator("structure-si-element").count()).toBe(1);
+		expect(await page.locator("structure-switch-element").count()).toBe(0);
+		await page.locator("#boutonRedo").click();
+		expect(await page.locator("structure-si-element").count()).toBe(0);
+		expect(await page.locator("structure-switch-element").count()).toBe(1);
+		expect(pageErrors).toEqual([]);
+		await page.close();
+	});
+
 	test("imports v0 and v1 documents and exports with the .af extension", async () => {
 		const page = await browser.newPage();
 		await page.route("https://plausible.feror.fr/**", (route) => route.abort());

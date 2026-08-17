@@ -55,4 +55,35 @@ describe("anomaly fix transactions", () => {
 		)).toBe(false);
 		expect(history).toHaveLength(0);
 	});
+
+	test("converts a nested IF in place without replacing its parent", () => {
+		const document: unknown[] = [{
+			typeElement: "Probleme",
+			libelle: "parent",
+			enfants: [{
+				typeElement: "StructureSi",
+				conditions: [
+					{ typeElement: "Condition", libelle: "choix = 1", enfants: [{ typeElement: "Probleme", libelle: "one", enfants: [] }] },
+					{ typeElement: "Condition", libelle: "choix = 2", enfants: [{ typeElement: "Probleme", libelle: "two", enfants: [] }] },
+					{ typeElement: "Condition", libelle: "choix = 3", enfants: [{ typeElement: "Probleme", libelle: "three", enfants: [] }] },
+				],
+			}],
+		}];
+
+		expect(replaceIfWithSwitch(document, "plan:root/n0/s0/n0", "choix", ["1", "2", "3"])).toBe(true);
+		expect(document[0]).toMatchObject({
+			typeElement: "Probleme",
+			libelle: "parent",
+			enfants: [{
+				typeElement: "StructureSwitch",
+				expressionATester: "choix",
+				conditions: [
+					{ libelle: "1", enfants: [{ libelle: "one" }] },
+					{ libelle: "2", enfants: [{ libelle: "two" }] },
+					{ libelle: "3", enfants: [{ libelle: "three" }] },
+				],
+			}],
+		});
+	});
+
 });

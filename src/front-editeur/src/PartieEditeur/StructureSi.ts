@@ -1,6 +1,8 @@
 import { StructureAlternative } from "./StructureAlternative";
 import { classes } from "../runtime/classRegistry";
-import { editeur, verbose } from "../runtime/runtime";
+import { verbose } from "../runtime/runtime";
+import { captureEditorAnalysis } from "../anomalies/domAdapter";
+import { replaceIfWithSwitch, runDocumentTransaction } from "../anomalies/transactions";
 
 /**
  * @class StructureSi
@@ -158,35 +160,25 @@ export class StructureSi extends StructureAlternative {
 			listeOptions.push(
 				new classes.ElementMenu("Transformer en Switch", () => {
 					if (verbose) console.log("Transformer en Switch");
-					// On crée la nouvelle structure Switch
-					const newSwitch = this.parentNode!.ajouterElement(
-						classes.StructureSwitch,
-						this._abscisse,
-						this._ordonnee,
-						true,
+					const targetPath = [...captureEditorAnalysis(editeur).elements]
+						.find(([, element]) => element === this)?.[0];
+					if (!targetPath) {
+						console.error("Impossible de localiser la structure SI à transformer.");
+						return;
+					}
+					const valeurs = potentielTransformationSwitch.valeurs!.map((condition) =>
+						condition._libelle.split("=")[1].trim(),
 					);
-
-					potentielTransformationSwitch.valeurs!.forEach((cond) => {
-						cond._libelle = cond._libelle.split("=")[1].trim();
-						newSwitch.ajouterCondition(cond);
-					});
-
-					Array.from(
-						newSwitch.querySelectorAll("condition-element"),
-					).forEach((cond) => {
-						if (cond._libelle.length == 0) {
-							newSwitch.supprimerCondition(cond);
-						}
-					});
-
-					newSwitch.expressionATester =
-						potentielTransformationSwitch.variable;
-
-					// On lie le parent de la structure Si à la structure Switch
-					this._parent.lierEnfant(newSwitch);
-					this._parent.delierEnfant(this);
-
-					this.supprimer();
+					runDocumentTransaction(
+						editeur,
+						"Transformer le SI en switch",
+						(document) => replaceIfWithSwitch(
+							document,
+							targetPath,
+							potentielTransformationSwitch.variable,
+							valeurs,
+						),
+					);
 				}),
 			);
 		}
