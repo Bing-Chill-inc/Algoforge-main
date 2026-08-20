@@ -37,69 +37,60 @@ let token: string;
 
 // NOTE: idéalement, chaque test devrait avoir son jeu de données,
 // au lieu de partager les mêmes données entre les tests avec le beforeAll.
-export const AlgosTests = async () => {
-	beforeAll(async (done) => {
-		const interval = setInterval(async () => {
-			if (server.locals.testSetupDone) {
-				clearInterval(interval);
+export const AlgosTests = () => {
+	beforeAll(async () => {
+		while (!server.locals.testSetupDone) {
+			await Bun.sleep(50);
+		}
 
-				Logger.log("Clearing data/algos folder...", "test: algos");
-				if (existsSync(AlgosService.dataPath)) {
-					rmdirSync(AlgosService.dataPath, { recursive: true });
-				}
-				mkdirSync(AlgosService.dataPath, { recursive: true });
-				Logger.log("Cleared !", "test: algos");
+		Logger.log("Clearing data/algos folder...", "test: algos");
+		if (existsSync(AlgosService.dataPath)) {
+			rmdirSync(AlgosService.dataPath, { recursive: true });
+		}
+		mkdirSync(AlgosService.dataPath, { recursive: true });
+		Logger.log("Cleared !", "test: algos");
 
-				Logger.log("Creating test users...", "test: users");
-				for (const user of [
-					UserSet.unitTestAlgo1,
-					UserSet.unitTestAlgo2,
-				]) {
-					const u = new Utilisateur();
-					u.id = user.id;
-					u.adresseMail = user.email;
-					u.mdpHash = hashString(user.password);
-					u.pseudo = user.pseudo;
-					u.dateInscription = new Date().getTime();
-					u.isVerified = true;
-					await utilisateursRepository.save(u);
-				}
-				Logger.log("Test users created.", "test: users");
+		Logger.log("Creating test users...", "test: users");
+		for (const user of [
+			UserSet.unitTestAlgo1,
+			UserSet.unitTestAlgo2,
+		]) {
+			const u = new Utilisateur();
+			u.id = user.id;
+			u.adresseMail = user.email;
+			u.mdpHash = hashString(user.password);
+			u.pseudo = user.pseudo;
+			u.dateInscription = new Date().getTime();
+			u.isVerified = true;
+			await utilisateursRepository.save(u);
+		}
+		Logger.log("Test users created.", "test: users");
 
-				Logger.log("Logging in with user (ID: 111)...", "test: algos");
-				const payload = new UserLoginDTO();
-				payload.email = UserSet.unitTestAlgo1.email;
-				payload.password = UserSet.unitTestAlgo1.password;
-				const response = await request
-					.post("/api/users/login")
-					.send(payload);
-				Logger.debug(JSON.stringify(response.body), "test: algos", 5);
-				token = response.headers.authorization;
-				Logger.log(`Logged in ! Token: ${token}`, "test: algos");
+		Logger.log("Logging in with user (ID: 111)...", "test: algos");
+		const payload = new UserLoginDTO();
+		payload.email = UserSet.unitTestAlgo1.email;
+		payload.password = UserSet.unitTestAlgo1.password;
+		const response = await request.post("/api/users/login").send(payload);
+		Logger.debug(JSON.stringify(response.body), "test: algos", 5);
+		token = response.headers.authorization;
+		Logger.log("Logged in ! Token: " + token, "test: algos");
 
-				Logger.log("Creating test algos...", "test: algos");
-				const algo = new Algorithme();
-				algo.nom = "Algorithme test";
-				algo.dateCreation = new Date().getTime();
-				algo.dateModification = new Date().getTime();
-				const savedAlgo = await algoRepository.save(algo);
-				const ownerPerm = new PermAlgorithme();
-				ownerPerm.idUtilisateur = UserSet.unitTestAlgo1.id;
-				ownerPerm.idAlgorithme = savedAlgo.id;
-				ownerPerm.droits = Droits.Owner;
-				await permAlgoRepository.save(ownerPerm);
+		Logger.log("Creating test algos...", "test: algos");
+		const algo = new Algorithme();
+		algo.nom = "Algorithme test";
+		algo.dateCreation = new Date().getTime();
+		algo.dateModification = new Date().getTime();
+		const savedAlgo = await algoRepository.save(algo);
+		const ownerPerm = new PermAlgorithme();
+		ownerPerm.idUtilisateur = UserSet.unitTestAlgo1.id;
+		ownerPerm.idAlgorithme = savedAlgo.id;
+		ownerPerm.droits = Droits.Owner;
+		await permAlgoRepository.save(ownerPerm);
 
-				const sourcePath = path.join(
-					__dirname,
-					"./json/algo-complet.json",
-				);
-				const destPath = path.join(AlgosService.dataPath, "1.json");
-				copyFileSync(sourcePath, destPath);
-				Logger.log("Test algos created.", "test: algos");
-
-				done();
-			}
-		}, 100);
+		const sourcePath = path.join(__dirname, "./json/algo-complet.json");
+		const destPath = path.join(AlgosService.dataPath, "1.json");
+		copyFileSync(sourcePath, destPath);
+		Logger.log("Test algos created.", "test: algos");
 	});
 
 	describe("Algos: GET /api/algos/byUserId/:id", () => {

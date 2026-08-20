@@ -26,31 +26,27 @@ import { Theme } from "../types/theme.enum";
 
 const utilisateursRepository = AppDataSource.getRepository(Utilisateur);
 
-export const UsersTests = async () => {
-	beforeAll(async (done) => {
-		const interval = setInterval(async () => {
-			if (server.locals.testSetupDone) {
-				clearInterval(interval);
+export const UsersTests = () => {
+	beforeAll(async () => {
+		while (!server.locals.testSetupDone) {
+			await Bun.sleep(50);
+		}
 
-				Logger.log("Creating test users...", "test: users");
-				for (const user of [
-					UserSet.unitTestUser1,
-					UserSet.unitTestUser2,
-				]) {
-					const u = new Utilisateur();
-					u.id = user.id;
-					u.adresseMail = user.email;
-					u.mdpHash = hashString(user.password);
-					u.pseudo = user.pseudo;
-					u.dateInscription = new Date().getTime();
-					u.isVerified = true;
-					await utilisateursRepository.save(u);
-				}
-				Logger.log("Test users created.", "test: users");
-
-				done();
-			}
-		}, 100);
+		Logger.log("Creating test users...", "test: users");
+		for (const user of [
+			UserSet.unitTestUser1,
+			UserSet.unitTestUser2,
+		]) {
+			const u = new Utilisateur();
+			u.id = user.id;
+			u.adresseMail = user.email;
+			u.mdpHash = hashString(user.password);
+			u.pseudo = user.pseudo;
+			u.dateInscription = new Date().getTime();
+			u.isVerified = true;
+			await utilisateursRepository.save(u);
+		}
+		Logger.log("Test users created.", "test: users");
 	});
 
 	let confirmToken: string = "";
