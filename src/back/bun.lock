@@ -33,7 +33,7 @@
         "@types/nodemailer": "^6.4.17",
         "@types/supertest": "^6.0.3",
         "typedoc": "^0.28.3",
-        "typedoc-github-theme": "^0.3.0",
+        "typedoc-github-theme": "^0.4.0",
         "typedoc-plugin-extras": "^4.0.0",
         "typedoc-plugin-merge-modules": "^7.0.0",
         "typescript": "^5.8.3",
@@ -649,7 +649,7 @@
 
     "typedoc": ["typedoc@0.28.20", "", { "dependencies": { "@gerrit0/mini-shiki": "^3.23.0", "lunr": "^2.3.9", "markdown-it": "^14.3.0", "minimatch": "^10.2.5", "yaml": "^2.9.0" }, "peerDependencies": { "typescript": "5.0.x || 5.1.x || 5.2.x || 5.3.x || 5.4.x || 5.5.x || 5.6.x || 5.7.x || 5.8.x || 5.9.x || 6.0.x" }, "bin": { "typedoc": "bin/typedoc" } }, "sha512-uSKqkh8Cr48vllnEy+jdaAgOeR6Y+QCBW7usgUsKj7gJEfR7stw9U/fE49LBnj2tPRKPY0c0EBJSWe9Appmplg=="],
 
-    "typedoc-github-theme": ["typedoc-github-theme@0.3.1", "", { "peerDependencies": { "typedoc": "~0.28.0" } }, "sha512-j6PmkAGmf/MGCzYjQcUH6jS9djPsNl/IoTXooxC+MoeMkBhbmPyKJlpR6Lw12BLoe2OYpYA2J1KMktUJXp/8Sw=="],
+    "typedoc-github-theme": ["typedoc-github-theme@0.4.0", "", { "peerDependencies": { "typedoc": "~0.28.0" } }, "sha512-lo/hr4EFZxq0SsMGeAscKUzljIKFgrJf5fb4nOAJcqaiSShQv7kzwF6M1s2fVRvUyx6UsmD4zEb+MtKkbucYpg=="],
 
     "typedoc-plugin-extras": ["typedoc-plugin-extras@4.0.1", "", { "peerDependencies": { "typedoc": "0.27.x || 0.28.x" } }, "sha512-ab3T37ukHCwBjwBJpAcWdxy/XAaLdUyy5pwbgF9WDqCRN0DTJmJPLew9Kv6qrx5qnxiyfe6F4Og+PUp15kJWLw=="],
 
