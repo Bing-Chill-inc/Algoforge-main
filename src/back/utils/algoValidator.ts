@@ -65,8 +65,8 @@ const ProblemeSchema = BaseProblemeSchema.extend({
 // -> Dictionnaire de données
 const DictionnaireDonneeSchema = z.object({
 	typeElement: TypeElementEnum.extract([TypeElement.DictionnaireDonnee]),
-	types: z.record(z.string()).optional(),
-	signification: z.record(z.string()).optional(),
+	types: z.record(z.string(), z.string()).optional(),
+	signification: z.record(z.string(), z.string()).optional(),
 });
 
 // -> Structure itérative non bornée

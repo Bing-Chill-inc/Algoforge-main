@@ -123,7 +123,7 @@ export class UsersController {
 	private async confirm(req: Request, res: Response) {
 		// Récupération des données de la requête
 		const token = req.params.token;
-		if (!token)
+		if (typeof token !== "string" || !token)
 			return res.status(400).json({ message: Responses.Token.Missing });
 
 		const reponse = await this.usersService.confirm(token);

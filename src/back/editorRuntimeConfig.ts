@@ -13,7 +13,7 @@ export function injectEditorRuntimeConfig(
 	content: string,
 	config: EditorRuntimeConfig,
 ): string {
-	const serialized = JSON.stringify(config).replaceAll("<", "\\u003c");
+	const serialized = JSON.stringify(config).replace(/</g, "\\u003c");
 	if (!runtimeConfigPattern.test(content)) {
 		throw new Error("Editor runtime configuration marker is missing.");
 	}
