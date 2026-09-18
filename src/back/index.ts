@@ -36,6 +36,8 @@ app.get(iconHandler.route, iconHandler.callback);
 const editorDirectory = path.join(__dirname, "../front-editeur");
 const editorIndexPath = path.join(editorDirectory, "out/index.html");
 const buildEditor = async () => {
+	if (process.env.PREBUILT_FRONTENDS === "true") return;
+
 	Logger.debug(
 		await $`bun install --frozen-lockfile`.cwd(editorDirectory).text(),
 		"editor: install",

@@ -1,5 +1,5 @@
-import fs from "fs";
 import path from "path";
+import { existsSync, statSync } from "fs";
 import "reflect-metadata";
 import { DataSource } from "typeorm";
 import { Utilisateur } from "./schemas/Utilisateur.schema";
@@ -11,6 +11,7 @@ import { PermAlgorithme } from "./schemas/PermAlgorithme.schema";
 
 // Configuration de la source de données.
 let dataSource: any = {};
+let shouldBootstrapSqlite = false;
 switch (process.env.DATABASE_TYPE) {
 	case "mysql":
 	case "postgres":
@@ -23,10 +24,17 @@ switch (process.env.DATABASE_TYPE) {
 		break;
 
 	case "sqlite":
-		dataSource["type"] = process.env.DATABASE_TYPE;
-		dataSource["database"] = path.isAbsolute(process.env.DATABASE_NAME)
+		if (!process.env.DATABASE_NAME) {
+			throw new Error(".env: DATABASE_NAME is not defined for sqlite.");
+		}
+
+		const sqlitePath = path.isAbsolute(process.env.DATABASE_NAME)
 			? process.env.DATABASE_NAME
 			: path.resolve(process.cwd(), process.env.DATABASE_NAME);
+		shouldBootstrapSqlite =
+			!existsSync(sqlitePath) || statSync(sqlitePath).size === 0;
+		dataSource["type"] = process.env.DATABASE_TYPE;
+		dataSource["database"] = sqlitePath;
 		break;
 
 	default:
@@ -46,7 +54,10 @@ switch (process.env.DATABASE_TYPE) {
 export const AppDataSource = new DataSource({
 	...dataSource,
 	dropSchema: process.env.BUILD == "test" ? true : false,
-	synchronize: ["dev", "test"].includes(process.env.BUILD) ? true : false,
+	// A brand-new SQLite database has no external schema initializer. Bootstrap it
+	// once, then keep production synchronization disabled on subsequent starts.
+	synchronize:
+		["dev", "test"].includes(process.env.BUILD) || shouldBootstrapSqlite,
 	logging: false,
 	entities: [
 		Utilisateur,

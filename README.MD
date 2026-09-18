@@ -15,6 +15,7 @@
 - [Fonctionnalités de l'application](#fonctionnalités-de-lapplication)
 - [Utilisation / Installation](#utilisation--installation)
   - [Version en ligne](#version-en-ligne)
+  - [Image conteneur](#image-conteneur)
   - [Format de fichier AlgoForge](#format-de-fichier-algoforge)
   - [Extension VS Code](#extension-vs-code)
   - [Autres versions](#autres-versions)
@@ -69,6 +70,58 @@ AlgoForge est utilisable de deux manières différentes: en ligne sur un navigat
 ### Version en ligne
 
 Pour utiliser AlgoForge en ligne, vous pouvez vous rendre sur ce lien : [https://algoforge.fr/](https://algoforge.fr/)
+
+### Image conteneur
+
+L'image autonome officielle est publiée sur GitHub Container Registry :
+`ghcr.io/bing-chill-inc/algoforge-main`. Elle contient le backend ainsi que les
+interfaces web déjà compilées et ne télécharge aucune dépendance au démarrage.
+
+Pour une installation simple avec SQLite :
+
+```sh
+docker volume create algoforge-data
+docker run -d \
+  --name algoforge \
+  --restart unless-stopped \
+  -p 5205:5205 \
+  -v algoforge-data:/app/data \
+  ghcr.io/bing-chill-inc/algoforge-main:latest
+```
+
+La base SQLite et les algorithmes sont conservés dans `/app/data`. Le dossier
+`/app/logs` peut également être monté si les journaux doivent être conservés.
+
+Aucune variable supplémentaire n’est requise en mode SQLite. L’envoi de courriels
+est désactivé par défaut ; pour l’activer, fournissez `MAIL_ACTIVE=true`,
+`EDITOR_URL` et les variables `MAIL_HOST`, `MAIL_PORT`, `MAIL_USER` et
+`MAIL_PASSWORD`.
+
+Pour utiliser une base PostgreSQL existante, initialisez-la avec
+`src/back/db/scripts/init.sql`, puis surchargez la configuration :
+
+```sh
+docker run -d \
+  --name algoforge \
+  --restart unless-stopped \
+  -p 5205:5205 \
+  -v algoforge-data:/app/data \
+  -e DATABASE_TYPE=postgres \
+  -e DATABASE_HOST=postgres.example.net \
+  -e DATABASE_PORT=5432 \
+  -e DATABASE_NAME=algoforge \
+  -e DATABASE_USER=algoforge \
+  -e DATABASE_PASSWORD='change-me' \
+  ghcr.io/bing-chill-inc/algoforge-main:latest
+```
+
+Les balises `X.Y.Z`, `X.Y`, `X` et `latest` suivent les versions publiées.
+`edge` suit la branche `main`, et les balises `sha-...` identifient précisément
+une révision. Pour une mise à jour reproductible, utilisez une balise `X.Y.Z`,
+téléchargez la nouvelle image puis recréez le conteneur avec les mêmes volumes
+et variables. Sauvegardez `/app/data` avant toute mise à jour ; avec PostgreSQL,
+sauvegardez aussi la base externe. Le fichier `docker-compose.yml` existant
+reste destiné au développement à partir des sources.
 
 ### Extension VS Code
 

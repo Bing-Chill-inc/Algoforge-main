@@ -1,0 +1,218 @@
+name: Build and publish container
+
+on:
+  pull_request:
+    branches:
+      - main
+    paths:
+      - ".dockerignore"
+      - ".github/workflows/publish-container.yml"
+      - "src/back/**"
+      - "src/common/**"
+      - "src/front-cloud/**"
+      - "src/front-editeur/**"
+  push:
+    branches:
+      - main
+    tags:
+      - "v*.*.*"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: container-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ !startsWith(github.ref, 'refs/tags/v') }}
+
+jobs:
+  validate:
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build validation image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: src/back/Dockerfile
+          platforms: linux/amd64
+          load: true
+          push: false
+          tags: algoforge-ci:validation
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: Smoke test SQLite and image contents
+        shell: bash
+        run: |
+          set -euo pipefail
+          docker network create algoforge-ci
+          docker volume create algoforge-ci-data
+          cleanup() {
+            docker rm -f algoforge-sqlite algoforge-postgres-app algoforge-postgres >/dev/null 2>&1 || true
+            docker volume rm algoforge-ci-data >/dev/null 2>&1 || true
+            docker network rm algoforge-ci >/dev/null 2>&1 || true
+          }
+          trap cleanup EXIT
+
+          test "$(docker image inspect algoforge-ci:validation --format '{{.Config.User}}')" = "bun"
+          docker run --rm --entrypoint sh algoforge-ci:validation -c '
+            test ! -e /app/.git
+            test ! -e /app/.env
+            test ! -e /app/src/electron
+            test ! -e /app/src/obsidian-plugin
+            test ! -e /app/src/vscode-ext
+            test ! -e /app/src/back/tests
+            test ! -e /app/src/back/docs
+          '
+
+          docker run -d --name algoforge-sqlite \
+            --network algoforge-ci \
+            -p 5205:5205 \
+            -v algoforge-ci-data:/app/data \
+            algoforge-ci:validation
+
+          for attempt in {1..60}; do
+            if curl --fail --location --silent http://127.0.0.1:5205/edit/ >/dev/null; then
+              break
+            fi
+            if [[ "$attempt" == 60 ]]; then
+              docker logs algoforge-sqlite
+              exit 1
+            fi
+            sleep 1
+          done
+          curl --fail --location --silent http://127.0.0.1:5205/ >/dev/null
+          curl --fail --location --silent http://127.0.0.1:5205/edit/ >/dev/null
+          curl --fail --location --silent http://127.0.0.1:5205/cloud/ >/dev/null
+          docker exec algoforge-sqlite test -s /app/data/algoforge.sqlite
+
+          docker restart algoforge-sqlite
+          for attempt in {1..60}; do
+            if curl --fail --location --silent http://127.0.0.1:5205/edit/ >/dev/null; then
+              break
+            fi
+            if [[ "$attempt" == 60 ]]; then
+              docker logs algoforge-sqlite
+              exit 1
+            fi
+            sleep 1
+          done
+          docker rm -f algoforge-sqlite
+
+          docker run -d --name algoforge-postgres \
+            --network algoforge-ci \
+            -e POSTGRES_USER=algoforge \
+            -e POSTGRES_PASSWORD=algoforge \
+            -e POSTGRES_DB=algoforge \
+            -v "$PWD/src/back/db/scripts/init.sql:/docker-entrypoint-initdb.d/init.sql:ro" \
+            postgres:17-alpine
+          for attempt in {1..60}; do
+            if docker exec algoforge-postgres pg_isready -U algoforge -d algoforge >/dev/null 2>&1; then
+              break
+            fi
+            if [[ "$attempt" == 60 ]]; then
+              docker logs algoforge-postgres
+              exit 1
+            fi
+            sleep 1
+          done
+
+          docker run -d --name algoforge-postgres-app \
+            --network algoforge-ci \
+            -p 5206:5205 \
+            -e DATABASE_TYPE=postgres \
+            -e DATABASE_HOST=algoforge-postgres \
+            -e DATABASE_PORT=5432 \
+            -e DATABASE_NAME=algoforge \
+            -e DATABASE_USER=algoforge \
+            -e DATABASE_PASSWORD=algoforge \
+            -v algoforge-ci-data:/app/data \
+            algoforge-ci:validation
+          for attempt in {1..60}; do
+            if curl --fail --location --silent http://127.0.0.1:5206/edit/ >/dev/null; then
+              break
+            fi
+            if [[ "$attempt" == 60 ]]; then
+              docker logs algoforge-postgres-app
+              exit 1
+            fi
+            sleep 1
+          done
+          curl --fail --location --silent http://127.0.0.1:5206/ >/dev/null
+          curl --fail --location --silent http://127.0.0.1:5206/cloud/ >/dev/null
+
+  publish:
+    if: github.event_name == 'push'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+      attestations: write
+      id-token: write
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v4
+
+      - name: Set image name
+        id: image
+        shell: bash
+        run: echo "name=ghcr.io/${GITHUB_REPOSITORY,,}" >> "$GITHUB_OUTPUT"
+
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v3
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Generate image metadata
+        id: metadata
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ steps.image.outputs.name }}
+          flavor: latest=false
+          tags: |
+            type=raw,value=edge,enable=${{ github.ref == 'refs/heads/main' }}
+            type=sha,prefix=sha-
+            type=semver,pattern={{version}}
+            type=semver,pattern={{major}}.{{minor}}
+            type=semver,pattern={{major}}
+            type=raw,value=latest,enable=${{ startsWith(github.ref, 'refs/tags/v') }}
+
+      - name: Build and push image
+        id: build
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: src/back/Dockerfile
+          platforms: linux/amd64,linux/arm64
+          push: true
+          tags: ${{ steps.metadata.outputs.tags }}
+          labels: ${{ steps.metadata.outputs.labels }}
+          build-args: |
+            OCI_SOURCE=${{ github.server_url }}/${{ github.repository }}
+            OCI_REVISION=${{ github.sha }}
+            OCI_VERSION=${{ github.ref_name }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+          provenance: mode=max
+          sbom: true
+
+      - name: Attest image provenance
+        uses: actions/attest-build-provenance@v3
+        with:
+          subject-name: ${{ steps.image.outputs.name }}
+          subject-digest: ${{ steps.build.outputs.digest }}
+          push-to-registry: true
