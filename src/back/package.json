@@ -28,7 +28,7 @@
 		"nodemailer-mock": "^2.0.8",
 		"pg": "^8.15.6",
 		"reflect-metadata": "^0.2.2",
-		"sqlite3": "^5.1.7",
+		"sqlite3": "^6.0.1",
 		"supertest": "^7.1.0",
 		"typeorm": "^0.3.22",
 		"zod": "^4.4.3"
