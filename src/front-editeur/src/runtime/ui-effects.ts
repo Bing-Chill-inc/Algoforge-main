@@ -5,7 +5,7 @@ import {
 	preferences,
 	requiredElement,
 } from "./runtime";
-import { isVsCodeHost } from "./host";
+import { isEmbeddedHost } from "./host";
 
 type DockItem = Element & ElementCSSInlineStyle & {
 	isHover?: boolean;
@@ -39,7 +39,7 @@ export function initializeInterfaceEffects(): void {
 				: defaultValue;
 	};
 
-	preferences.glow = getCookieBool("glow", !isVsCodeHost());
+	preferences.glow = getCookieBool("glow", !isEmbeddedHost());
 	preferences.dockEffect = getCookieBool("dockEffect", true);
 	preferences.anomalyDetection = __ALGOFORGE_ANOMALY_DETECTION__ && !isExam
 		? getCookieBool("anomalyDetection", false)

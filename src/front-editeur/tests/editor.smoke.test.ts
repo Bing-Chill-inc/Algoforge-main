@@ -28,7 +28,7 @@ beforeAll(async () => {
 					? withRuntimeConfig(standaloneHtml, {
 						initialAlgorithm: null,
 						title: null,
-						hostKind: "vscode",
+						hostKind: "embedded",
 						isExam: false,
 						prettifyInitialAlgorithm: false,
 					})
@@ -418,12 +418,12 @@ describe("standalone editor", () => {
 			(globalThis as typeof globalThis & { __hostMessages: unknown[] }).__hostMessages =
 				messages;
 			(globalThis as typeof globalThis & {
-				acquireVsCodeApi: () => {
+				acquireAlgoForgeHostApi: () => {
 					postMessage(message: unknown): void;
 					getState(): unknown;
 					setState(state: unknown): void;
 				};
-			}).acquireVsCodeApi = () => ({
+			}).acquireAlgoForgeHostApi = () => ({
 				postMessage(message: unknown) {
 					messages.push(message);
 					if (
@@ -623,6 +623,55 @@ describe("standalone editor", () => {
 		expect(renderingAndCleanup.linkedLines).toBeGreaterThan(0);
 		expect(renderingAndCleanup.orphanLines).toBe(0);
 
+		const previewResult = await page.evaluate(async () => {
+			window.dispatchEvent(new MessageEvent("message", { data: {
+				type: "renderPreview",
+				requestId: 41,
+				title: "Preview",
+				algorithm: [
+					{ typeElement: "StructureIterativeNonBornee", abscisse: "35vw", ordonnee: "5vw", enfants: [] },
+					{ typeElement: "ConditionSortie", abscisse: "45vw", ordonnee: "12vw" },
+					{ typeElement: "Probleme", abscisse: "10vw", ordonnee: "5vw", libelle: "Preview", listeDonnes: [], listeResultats: [], enfants: [] },
+					{ typeElement: "DictionnaireDonnee", types: {}, signification: {} },
+				],
+				theme: { background: "#123456", foreground: "#abcdef", border: "#654321" },
+			} }));
+			for (let attempt = 0; attempt < 100; attempt++) {
+				const message = (globalThis as typeof globalThis & {
+					__hostMessages: Array<{ type?: string; requestId?: number; svg?: string; error?: string }>;
+				}).__hostMessages.find((candidate) => candidate.type === "previewRendered" && candidate.requestId === 41);
+				if (message) return message;
+				await new Promise((resolve) => setTimeout(resolve, 10));
+			}
+			return undefined;
+		});
+		expect(previewResult?.error).toBeUndefined();
+		expect(previewResult?.svg).toContain("<svg");
+		expect(previewResult?.svg).toContain("viewBox=\"0 0 ");
+		expect(previewResult?.svg).toContain("#123456");
+		expect(previewResult?.svg).toContain("#abcdef");
+		expect(previewResult?.svg).toContain("class=\"boucleSVG\"");
+		expect(previewResult?.svg).toContain("condition-sortie-element");
+		expect(previewResult?.svg).toContain("background-color:transparent!important");
+		expect(previewResult?.svg?.toLowerCase()).not.toContain("#838787");
+
+		await page.evaluate(() => {
+			window.dispatchEvent(new MessageEvent("message", { data: {
+				type: "replaceDocument",
+				title: "lesson",
+				version: 50,
+				algorithm: [{ typeElement: "DictionnaireDonnee", types: {}, signification: {} }],
+				capabilities: { undoRedo: "editor" },
+			} }));
+		});
+		await page.locator("#boutonProbleme").click();
+		await page.locator("#espacePrincipal").click({ position: { x: 280, y: 170 } });
+		expect(await page.locator("probleme-element").count()).toBe(1);
+		await page.locator("body").press("Control+z");
+		expect(await page.locator("probleme-element").count()).toBe(0);
+		await page.locator("body").press("Control+y");
+		expect(await page.locator("probleme-element").count()).toBe(1);
+
 		await page.evaluate(() => {
 			document.documentElement.style.setProperty(
 				"--vscode-editor-background",
@@ -661,7 +710,7 @@ function withRuntimeConfig(
 	config: {
 		initialAlgorithm: unknown | null;
 		title: string | null;
-		hostKind: "web" | "electron" | "vscode";
+		hostKind: "web" | "electron" | "embedded";
 		isExam: boolean;
 		prettifyInitialAlgorithm: boolean;
 	},

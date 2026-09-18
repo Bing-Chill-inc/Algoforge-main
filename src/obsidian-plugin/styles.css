@@ -1,0 +1,84 @@
+.algoforge-view,
+.algoforge-view .view-content {
+	padding: 0;
+	height: 100%;
+	overflow: hidden;
+}
+
+.algoforge-editor-frame {
+	border: 0;
+	width: 100%;
+	height: 100%;
+	display: block;
+	background: var(--background-primary);
+}
+
+.algoforge-editor-frame.is-hidden { display: none; }
+
+.algoforge-error-card,
+.algoforge-preview-error {
+	color: var(--text-error);
+	background: var(--background-secondary);
+	border: 1px solid var(--background-modifier-border);
+	border-radius: var(--radius-m);
+	padding: var(--size-4-3);
+}
+
+.algoforge-error-card { margin: var(--size-4-6); }
+.algoforge-renderer-host {
+	position: fixed;
+	left: -10000px;
+	top: 0;
+	width: 1280px;
+	height: 720px;
+	opacity: 0;
+	overflow: hidden;
+	pointer-events: none;
+	z-index: -1;
+}
+.algoforge-renderer-frame { width: 1280px; height: 720px; border: 0; }
+
+.algoforge-embed-container,
+.algoforge-preview,
+.algoforge-live-preview {
+	display: block !important;
+	width: 100% !important;
+	height: auto !important;
+	min-height: 0 !important;
+	max-height: none !important;
+	overflow: visible !important;
+	margin: var(--size-4-3) 0;
+	padding: 0;
+	border: 0;
+	background: transparent;
+}
+.algoforge-preview-button {
+	display: block !important;
+	width: 100% !important;
+	height: auto !important;
+	max-height: none !important;
+	overflow: visible !important;
+	border: 0;
+	border-radius: 0;
+	background: transparent !important;
+	background-color: transparent !important;
+	box-shadow: none !important;
+	appearance: none;
+	color: var(--text-normal);
+	padding: 0;
+	cursor: pointer;
+}
+.algoforge-preview-button:hover,
+.algoforge-preview-button:active {
+	background: transparent !important;
+	background-color: transparent !important;
+	box-shadow: none !important;
+}
+.algoforge-preview-button:focus-visible { outline: 2px solid var(--interactive-accent); outline-offset: 2px; }
+.algoforge-preview-button img { display: block !important; width: 100% !important; height: auto !important; max-height: none !important; object-fit: contain; }
+.algoforge-preview-status {
+	padding: var(--size-4-3);
+	color: var(--text-muted);
+	background: var(--background-secondary);
+	border-radius: var(--radius-m);
+}

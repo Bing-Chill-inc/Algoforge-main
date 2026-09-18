@@ -9,7 +9,8 @@ import {
 	commitDocumentChange,
 	executeHostCommand,
 	getCustomLibrary,
-	isVsCodeHost,
+	isEmbeddedHost,
+	usesHostUndoRedo,
 	openExternal,
 	readHostClipboard,
 	reportHostError,
@@ -259,7 +260,7 @@ export class Editeur extends HTMLElement {
 		);
 
 		// Ajouter les options de thème
-		if (isVsCodeHost()) {
+		if (isEmbeddedHost()) {
 			this._themeSelect!.appendChild(
 				new classes.ThemeEditeur(
 					"VS Code",
@@ -370,7 +371,7 @@ export class Editeur extends HTMLElement {
 		let theme = this.getCookie("theme");
 		if (theme) {
 			this._themeSelect!.value = theme;
-		} else if (isVsCodeHost()) {
+		} else if (isEmbeddedHost()) {
 			this._themeSelect!.value = "VS Code";
 		} else {
 			this._themeSelect!.selectedIndex = 0;
@@ -392,7 +393,7 @@ export class Editeur extends HTMLElement {
 
 		// Logo AlgoForge
 		this._logoAlgoForge!.addEventListener("click", () => {
-			if (isVsCodeHost()) {
+			if (isEmbeddedHost()) {
 				openExternal("https://algoforge.fr/");
 				return;
 			}
@@ -564,7 +565,7 @@ export class Editeur extends HTMLElement {
 		// Fichier
 		this._menuDeroulantFichier!.ajouterElementMenu(
 			new classes.ElementMenu("Nouveau", () => {
-				if (isVsCodeHost()) {
+				if (isEmbeddedHost()) {
 					executeHostCommand("new");
 					return;
 				}
@@ -581,7 +582,7 @@ export class Editeur extends HTMLElement {
 		);
 		this._menuDeroulantFichier!.ajouterElementMenu(
 			new classes.ElementMenu("Ouvrir", () => {
-				if (isVsCodeHost()) {
+				if (isEmbeddedHost()) {
 					executeHostCommand("open");
 					return;
 				}
@@ -657,7 +658,7 @@ export class Editeur extends HTMLElement {
 		);
 		this._menuDeroulantFichier!.ajouterElementMenu(
 			new classes.ElementMenu("Créer une copie", () => {
-				if (isVsCodeHost()) {
+				if (isEmbeddedHost()) {
 					executeHostCommand("saveAs");
 					return;
 				}
@@ -672,7 +673,7 @@ export class Editeur extends HTMLElement {
 				this._transferForm!.submit();
 			}),
 		);
-		if (!isVsCodeHost()) {
+		if (!isEmbeddedHost()) {
 			this._menuDeroulantFichier!.ajouterElementMenu(
 				new classes.ElementMenu(
 					"Partager",
@@ -777,7 +778,7 @@ export class Editeur extends HTMLElement {
 
 		exporter.ajouterElementMenu(
 			new classes.ElementMenu(".pdf", () => {
-				if (isVsCodeHost()) {
+				if (isEmbeddedHost()) {
 					reportHostError("PDF export is not available in VS Code yet.");
 					return;
 				}
@@ -1088,12 +1089,12 @@ export class Editeur extends HTMLElement {
 				}
 
 				// Raccourcis clavier en Ctrl + ... pour l'édition
-				if (!isVsCodeHost() && e.key.toLowerCase() === "z") {
+				if (!usesHostUndoRedo() && e.key.toLowerCase() === "z") {
 					// Ctrl + Z
 					e.preventDefault();
 					this.undo();
 				}
-				if (!isVsCodeHost() && e.key.toLowerCase() === "y") {
+				if (!usesHostUndoRedo() && e.key.toLowerCase() === "y") {
 					// Ctrl + Y
 					e.preventDefault();
 					this.redo();
@@ -1103,9 +1104,14 @@ export class Editeur extends HTMLElement {
 					e.preventDefault();
 					this.cut();
 				}
-				if (!isVsCodeHost() && e.key.toLowerCase() === "s") {
-					e.preventDefault();
-					if (isCloud()) await handdleSave();
+				if (e.key.toLowerCase() === "s") {
+					if (isEmbeddedHost() && !usesHostUndoRedo()) {
+						e.preventDefault();
+						executeHostCommand("save");
+					} else if (isCloud()) {
+						e.preventDefault();
+						await handdleSave();
+					}
 				}
 				if (e.key.toLowerCase() === "c") {
 					// Ctrl + C
@@ -1852,17 +1858,18 @@ export class Editeur extends HTMLElement {
 	}
 
 	setCookie(cname: string, cvalue: string, exdays: number) {
-		if (isVsCodeHost() && cname === "elementsPersonnalises") {
+		if (isEmbeddedHost() && cname === "elementsPersonnalises") {
 			updateCustomLibrary(JSON.parse(cvalue));
 			return;
 		}
-		if (isVsCodeHost() && (cname === "theme" || cname === "glow")) {
+		if (isEmbeddedHost() && (cname === "theme" || cname === "glow")) {
 			updateHostPreference(
 				cname,
 				cname === "glow" ? cvalue === "true" : cvalue,
 			);
 			return;
 		}
+		if (isEmbeddedHost()) return;
 		const d = new Date();
 		d.setTime(d.getTime() + exdays * 24 * 60 * 60 * 1000);
 		let expires = "expires=" + d.toUTCString();
@@ -1877,9 +1884,12 @@ export class Editeur extends HTMLElement {
 	 * @returns {string} La valeur du cookie si trouvé, sinon une chaîne vide.
 	 */
 	getCookie(cname: string) {
-		if (isVsCodeHost() && cname === "elementsPersonnalises") {
-			const value = getCustomLibrary();
-			return value.length > 0 ? JSON.stringify(value) : "";
+		if (isEmbeddedHost()) {
+			if (cname === "elementsPersonnalises") {
+				const value = getCustomLibrary();
+				return value.length > 0 ? JSON.stringify(value) : "";
+			}
+			return "";
 		}
 		let name = cname + "=";
 		let decodedCookie = decodeURIComponent(document.cookie);
@@ -2038,7 +2048,7 @@ export class Editeur extends HTMLElement {
 	 * Appelle la méthode `annuler` pour effectuer l'annulation.
 	 */
 	undo() {
-		if (isVsCodeHost()) {
+		if (usesHostUndoRedo()) {
 			executeHostCommand("undo");
 			return;
 		}
@@ -2050,7 +2060,7 @@ export class Editeur extends HTMLElement {
 	 * Appelle la méthode `retablir` pour rétablir l'état précédent.
 	 */
 	redo() {
-		if (isVsCodeHost()) {
+		if (usesHostUndoRedo()) {
 			executeHostCommand("redo");
 			return;
 		}
@@ -4216,7 +4226,7 @@ export class Editeur extends HTMLElement {
 	 * Importe des données JSON dans l'éditeur.
 	 */
 	importerJSON() {
-		if (isVsCodeHost()) {
+		if (isEmbeddedHost()) {
 			executeHostCommand("import");
 			return;
 		}

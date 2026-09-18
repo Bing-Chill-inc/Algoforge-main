@@ -5,7 +5,7 @@ import { registerClasses } from "./runtime/classRegistry";
 import { initializeHost } from "./runtime/host";
 import { editeur, initializeRuntime, preferences, requiredElement, titreAlgo } from "./runtime/runtime";
 import { initializeInterfaceEffects } from "./runtime/ui-effects";
-import { initializeVsCodeIntegration } from "./runtime/vscodeIntegration";
+import { initializeEmbeddedIntegration } from "./runtime/embeddedIntegration";
 import { Type } from "./PartieEditeur/Type";
 import { Information } from "./PartieEditeur/Information";
 import { DictionnaireDonnee } from "./PartieEditeur/DictionnaireDonnee";
@@ -160,7 +160,7 @@ defineCustomElement("menu-compte-element", MenuCompte);
 defineCustomElement("editeur-interface", Editeur);
 
 initializeInterfaceEffects();
-initializeVsCodeIntegration();
+initializeEmbeddedIntegration();
 
 if (config.title !== null) {
 	titreAlgo.innerText = config.title;

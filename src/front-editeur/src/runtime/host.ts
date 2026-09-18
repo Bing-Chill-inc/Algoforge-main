@@ -1,3 +1,10 @@
+import type {
+	EditorToHostMessage,
+	EmbeddedHostCapabilities,
+	EmbeddedHostCommand,
+	EmbeddedLibraryCategory,
+	HostToEditorMessage,
+} from "../../../common/embeddedEditorProtocol";
 import { hostKind } from "./runtime";
 import {
 	EditorDocumentController,
@@ -12,78 +19,40 @@ export const EMPTY_ALGORITHM = [
 	},
 ] as const;
 
-export interface LibraryEntry {
-	nom?: string;
-	nomCourt?: string;
-	descriptif?: string;
-	algo?: string;
-	path?: string;
-}
+export type LibraryCategory = EmbeddedLibraryCategory;
+export type LibraryEntry = EmbeddedLibraryCategory["contenu"][number];
+export type HostCommand = EmbeddedHostCommand;
 
-export interface LibraryCategory {
-	nom: string;
-	nomCourt?: string;
-	contenu: LibraryEntry[];
-}
-
-export type VsCodeCommand =
-	| "new"
-	| "open"
-	| "save"
-	| "saveAs"
-	| "undo"
-	| "redo"
-	| "import";
-
-type VsCodeApi = {
-	postMessage(message: unknown): void;
+type EmbeddedHostApi = {
+	postMessage(message: EditorToHostMessage): void;
 	getState(): unknown;
 	setState(state: unknown): void;
 };
 
-export type HostMessage =
-	| {
-			type: "initialize" | "replaceDocument";
-			algorithm: unknown[];
-			title: string;
-			version: number;
-			library?: LibraryCategory[];
-			customLibrary?: unknown[];
-			preferences?: { theme?: string; glow?: boolean };
-	  }
-	| {
-			type: "editRejected";
-			algorithm: unknown[];
-			title: string;
-			version: number;
-			error?: string;
-	  }
-	| { type: "editAccepted"; editId: number; version: number }
-	| { type: "clipboardResult"; requestId: number; text: string }
-	| { type: "importSource"; name: string; content: string };
-
-const globalWithVsCode = globalThis as typeof globalThis & {
-	acquireVsCodeApi?: () => VsCodeApi;
+const globalWithHost = globalThis as typeof globalThis & {
+	acquireAlgoForgeHostApi?: () => EmbeddedHostApi;
 };
 
-let vscodeApi: VsCodeApi | undefined;
+let hostApi: EmbeddedHostApi | undefined;
 let requestId = 0;
 let library: LibraryCategory[] = [];
 let customLibrary: unknown[] = [];
+let capabilities: EmbeddedHostCapabilities = { undoRedo: "host" };
 const clipboardRequests = new Map<number, (text: string) => void>();
-const messageListeners = new Set<(message: HostMessage) => void>();
+const messageListeners = new Set<(message: HostToEditorMessage) => void>();
 let documentController: EditorDocumentController | undefined;
 let hostPreferencesReady = false;
 
 export function initializeHost(): void {
-	if (hostKind !== "vscode" || vscodeApi) return;
-	vscodeApi = globalWithVsCode.acquireVsCodeApi?.();
-	window.addEventListener("message", (event: MessageEvent<HostMessage>) => {
+	if (hostKind !== "embedded" || hostApi) return;
+	hostApi = globalWithHost.acquireAlgoForgeHostApi?.();
+	window.addEventListener("message", (event: MessageEvent<HostToEditorMessage>) => {
 		const message = event.data;
 		if (!message || typeof message !== "object" || !("type" in message)) return;
 		if (message.type === "initialize" || message.type === "replaceDocument") {
 			if (message.library) library = message.library;
 			if (message.customLibrary) customLibrary = message.customLibrary;
+			if (message.capabilities) capabilities = message.capabilities;
 		}
 		if (message.type === "clipboardResult") {
 			clipboardRequests.get(message.requestId)?.(message.text);
@@ -94,17 +63,25 @@ export function initializeHost(): void {
 	});
 }
 
-export function onHostMessage(listener: (message: HostMessage) => void): () => void {
+export function onHostMessage(listener: (message: HostToEditorMessage) => void): () => void {
 	messageListeners.add(listener);
 	return () => messageListeners.delete(listener);
 }
 
-export function isVsCodeHost(): boolean {
-	return hostKind === "vscode";
+export function isEmbeddedHost(): boolean {
+	return hostKind === "embedded";
+}
+
+export function usesHostUndoRedo(): boolean {
+	return isEmbeddedHost() && capabilities.undoRedo === "host";
+}
+
+export function postHostMessage(message: EditorToHostMessage): void {
+	hostApi?.postMessage(message);
 }
 
 export function hostReady(): void {
-	vscodeApi?.postMessage({ type: "ready" });
+	postHostMessage({ type: "ready" });
 }
 
 export function initializeDocumentController(
@@ -112,7 +89,7 @@ export function initializeDocumentController(
 ): EditorDocumentController {
 	documentController = new EditorDocumentController(
 		serialize,
-		(message: DocumentChangeMessage) => vscodeApi?.postMessage(message),
+		(message: DocumentChangeMessage) => postHostMessage(message),
 	);
 	return documentController;
 }
@@ -125,30 +102,28 @@ export function updateHostPreference(
 	name: "theme" | "glow",
 	value: string | boolean,
 ): void {
-	if (hostPreferencesReady) {
-		vscodeApi?.postMessage({ type: "preference", name, value });
-	}
+	if (hostPreferencesReady) postHostMessage({ type: "preference", name, value });
 }
 
-export function executeHostCommand(command: VsCodeCommand): void {
-	vscodeApi?.postMessage({ type: "command", command });
+export function executeHostCommand(command: HostCommand): void {
+	postHostMessage({ type: "command", command });
 }
 
 export async function readHostClipboard(): Promise<string> {
-	if (!isVsCodeHost()) return navigator.clipboard.readText();
+	if (!isEmbeddedHost()) return navigator.clipboard.readText();
 	const currentRequestId = ++requestId;
 	return new Promise((resolve) => {
 		clipboardRequests.set(currentRequestId, resolve);
-		vscodeApi?.postMessage({ type: "clipboardRead", requestId: currentRequestId });
+		postHostMessage({ type: "clipboardRead", requestId: currentRequestId });
 	});
 }
 
 export async function writeHostClipboard(text: string): Promise<void> {
-	if (!isVsCodeHost()) {
+	if (!isEmbeddedHost()) {
 		await navigator.clipboard.writeText(text);
 		return;
 	}
-	vscodeApi?.postMessage({ type: "clipboardWrite", text });
+	postHostMessage({ type: "clipboardWrite", text });
 }
 
 export function saveHostFile(
@@ -157,23 +132,17 @@ export function saveHostFile(
 	content: string,
 	encoding: "utf8" | "data-url" = "utf8",
 ): boolean {
-	if (!isVsCodeHost()) return false;
-	vscodeApi?.postMessage({
-		type: "exportFile",
-		suggestedName,
-		mimeType,
-		content,
-		encoding,
-	});
+	if (!isEmbeddedHost()) return false;
+	postHostMessage({ type: "exportFile", suggestedName, mimeType, content, encoding });
 	return true;
 }
 
 export function createImportedDocument(name: string, algorithm: unknown[]): void {
-	vscodeApi?.postMessage({ type: "createImportedDocument", name, algorithm });
+	postHostMessage({ type: "createImportedDocument", name, algorithm });
 }
 
 export function openExternal(href: string): void {
-	if (isVsCodeHost()) vscodeApi?.postMessage({ type: "openExternal", href });
+	if (isEmbeddedHost()) postHostMessage({ type: "openExternal", href });
 	else window.open(href, "_blank", "noopener,noreferrer");
 }
 
@@ -187,9 +156,9 @@ export function getCustomLibrary(): unknown[] {
 
 export function updateCustomLibrary(value: unknown[]): void {
 	customLibrary = value;
-	if (isVsCodeHost()) vscodeApi?.postMessage({ type: "customLibrary", value });
+	if (isEmbeddedHost()) postHostMessage({ type: "customLibrary", value });
 }
 
 export function reportHostError(message: string): void {
-	vscodeApi?.postMessage({ type: "error", message });
+	postHostMessage({ type: "error", message });
 }

@@ -1,0 +1,10 @@
+{
+  "id": "algoforge",
+  "name": "AlgoForge",
+  "version": "1.0.7",
+  "minAppVersion": "1.6.0",
+  "description": "Edit AlgoForge algorithms visually and embed them in your notes.",
+  "author": "AlgoForge",
+  "authorUrl": "https://algoforge.fr",
+  "isDesktopOnly": true
+}

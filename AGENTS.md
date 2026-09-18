@@ -11,6 +11,8 @@ This document is an exhaustive, practical map of how this repository is structur
 - `src/front-cloud` Cloud UI (Svelte + Vite).
 - `src/front-editeur` Editor UI (custom web components and TypeScript).
 - `src/electron` Desktop wrapper (Electron Forge).
+- `src/vscode-ext` VS Code custom editor for `.af` files.
+- `src/obsidian-plugin` Desktop Obsidian custom editor and note embeds for `.af` files.
 - `data/algos` Filesystem storage for algorithm JSON files by ID.
 - `logs` Backend log files.
 - `docker-compose.yml` Docker compose stack (backend + Postgres + pgAdmin).
@@ -167,6 +169,13 @@ This document is an exhaustive, practical map of how this repository is structur
 - `index.html` includes a Plausible script.
 
 ---
+
+**Obsidian Plugin (`src/obsidian-plugin`)**
+
+- Registers `.af` and `.algoforge` with a custom `TextFileView`.
+- Bundles the editor into a sandboxed, offline iframe through the shared embedded-host protocol.
+- Renders cached SVG previews for wiki embeds in Reading view and Live Preview.
+- `bun run check` typechecks, builds the three-file Community release, and runs plugin tests.
 
 **Electron (`src/electron`)**
 

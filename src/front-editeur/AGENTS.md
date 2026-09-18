@@ -31,7 +31,7 @@ If you only read one file, start with `src/front-editeur/src/PartieEditeur/Edite
 
 **Runtime Globals And Flags**
 Initialized from `src/runtime/runtime.ts` and the JSON marker in `src/index.html`:
-- `hostKind`: `"web" | "electron" | "vscode"`; selects host adapters and persistence/command behavior.
+- `hostKind`: `"web" | "electron" | "embedded"`; selects host adapters and persistence/command behavior.
 - `isExam`: disables library, glow/dock effects, and error UI; can also load `exam-style.css`.
 - `verbose`: console debug switch used throughout the editor.
 - `preferences`: `{ glow, dockEffect, renderScale }`.

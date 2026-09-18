@@ -4,7 +4,7 @@ import { basename, dirname, join } from "node:path";
 const projectRoot = import.meta.dir;
 const sourceEntry = join(projectRoot, "src", "index.html");
 
-export type EditorBuildTarget = "standalone" | "webview";
+export type EditorBuildTarget = "standalone" | "webview" | "embedded";
 
 export interface EditorBuildOptions {
 	development?: boolean;
@@ -27,7 +27,7 @@ export async function buildEditor({
 
 	const result = await Bun.build({
 		entrypoints: [sourceEntry],
-		compile: target === "standalone",
+		compile: target !== "webview",
 		target: "browser",
 		outdir: nextOutputDirectory,
 		define: { "__ALGOFORGE_ANOMALY_DETECTION__": JSON.stringify(anomalyDetection) },
@@ -50,23 +50,23 @@ export async function buildEditor({
 				.join(", ")}`,
 		);
 	}
-	if (target === "standalone" && result.outputs.length !== 1) {
+	if (target !== "webview" && result.outputs.length !== 1) {
 		throw new Error(
 			`Expected one standalone index.html output, received ${result.outputs.length} outputs.`,
 		);
 	}
 
-	if (target === "webview") {
+	if (target === "webview" || target === "embedded") {
 		const htmlPath = join(nextOutputDirectory, "index.html");
-		const html = await readFile(htmlPath, "utf8");
-		await writeFile(
-			htmlPath,
-			html.replace(
-				/\s*<script\s+defer\s+data-domain="algoforge\.fr"\s+src="https:\/\/plausible\.feror\.fr\/js\/script\.js"\s*><\/script>/,
+		let html = await readFile(htmlPath, "utf8");
+		html = html.replace(
+			/\s*<script\s+defer\s+data-domain="algoforge\.fr"\s+src="https:\/\/plausible\.feror\.fr\/js\/script\.js"\s*><\/script>/,
 				"",
-			),
-			"utf8",
 		);
+		if (target === "embedded") {
+			html = html.replaceAll("/api/algos", "").replaceAll("/api/users", "");
+		}
+		await writeFile(htmlPath, html, "utf8");
 	}
 
 	const outputSize = result.outputs.reduce(
@@ -84,7 +84,11 @@ export async function buildEditor({
 if (import.meta.main) {
 	await buildEditor({
 		development: process.argv.includes("--development"),
-		target: process.argv.includes("--webview") ? "webview" : "standalone",
+		target: process.argv.includes("--webview")
+			? "webview"
+			: process.argv.includes("--embedded")
+				? "embedded"
+				: "standalone",
 		anomalyDetection: !process.argv.includes("--exam"),
 	});
 }

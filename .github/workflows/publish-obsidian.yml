@@ -1,0 +1,93 @@
+name: Publish AlgoForge Obsidian
+
+on:
+  push:
+    tags:
+      - "obsidian-v*.*.*"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: algoforge-obsidian-publish
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    environment: obsidian-release
+    steps:
+      - name: Check out tagged source
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Validate source tag
+        id: version
+        run: |
+          set -euo pipefail
+          git fetch origin main
+          git merge-base --is-ancestor "$GITHUB_SHA" origin/main || {
+            echo "::error::Obsidian releases must point to a commit on main."
+            exit 1
+          }
+          version="${GITHUB_REF_NAME#obsidian-v}"
+          if [[ ! "$version" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            echo "::error::Use an obsidian-vX.Y.Z source tag."
+            exit 1
+          fi
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+
+      - name: Set up Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: 1.4.2
+
+      - name: Install plugin dependencies
+        working-directory: src/obsidian-plugin
+        run: bun install --frozen-lockfile
+
+      - name: Check plugin
+        working-directory: src/obsidian-plugin
+        run: bun run check
+
+      - name: Stage release mirror
+        working-directory: src/obsidian-plugin
+        env:
+          VERSION: ${{ steps.version.outputs.version }}
+        run: bun run release:stage --version "$VERSION" --output "$RUNNER_TEMP/algoforge-obsidian-release"
+
+      - name: Configure destination deploy key
+        env:
+          OBSIDIAN_DEPLOY_KEY: ${{ secrets.OBSIDIAN_DEPLOY_KEY }}
+        run: |
+          set -euo pipefail
+          if [[ -z "${OBSIDIAN_DEPLOY_KEY:-}" ]]; then
+            echo "::error::Missing OBSIDIAN_DEPLOY_KEY secret."
+            exit 1
+          fi
+          install -d -m 700 "$RUNNER_TEMP/obsidian-ssh"
+          printf '%s\n' "$OBSIDIAN_DEPLOY_KEY" > "$RUNNER_TEMP/obsidian-ssh/id_ed25519"
+          chmod 600 "$RUNNER_TEMP/obsidian-ssh/id_ed25519"
+          ssh-keyscan -t ed25519 github.com 2>/dev/null > "$RUNNER_TEMP/obsidian-ssh/known_hosts"
+          fingerprint="$(ssh-keygen -lf "$RUNNER_TEMP/obsidian-ssh/known_hosts" -E sha256 | awk '{ print $2 }')"
+          expected="SHA256:+DiY3wvvV6TuJJhbpZisF/zLDA0zPtwuh6K0="
+          if [[ "$fingerprint" != "$expected" ]]; then
+            echo "::error::Unexpected GitHub SSH host key fingerprint: $fingerprint"
+            exit 1
+          fi
+
+      - name: Publish immutable destination tag
+        env:
+          VERSION: ${{ steps.version.outputs.version }}
+          GIT_SSH_COMMAND: >-
+            ssh -i ${{ runner.temp }}/obsidian-ssh/id_ed25519
+            -o IdentitiesOnly=yes
+            -o UserKnownHostsFile=${{ runner.temp }}/obsidian-ssh/known_hosts
+        run: |
+          set -euo pipefail
+          src/obsidian-plugin/scripts/publish-tag.sh \
+            "$RUNNER_TEMP/algoforge-obsidian-release" \
+            git@github.com:Bing-Chill-inc/algoforge-obsidian.git \
+            "$VERSION" \
+            "$RUNNER_TEMP/algoforge-obsidian-publish"

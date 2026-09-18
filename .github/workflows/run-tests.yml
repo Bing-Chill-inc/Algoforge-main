@@ -56,6 +56,14 @@ jobs:
                   path: src/vscode-ext/out/*.vsix
                   if-no-files-found: error
 
+            - name: Install Obsidian plugin dependencies
+              working-directory: src/obsidian-plugin
+              run: bun install --frozen-lockfile
+
+            - name: Check Obsidian plugin
+              working-directory: src/obsidian-plugin
+              run: bun run check
+
             - name: Test editor runtime injection
               working-directory: src/back
               run: bun test tests/editorRuntimeConfig.test.ts

@@ -1,7 +1,7 @@
 export type EditorRuntimeConfig = {
 	initialAlgorithm: unknown | null;
 	title: string | null;
-	hostKind: "web" | "electron" | "vscode";
+	hostKind: "web" | "electron" | "embedded";
 	isExam: boolean;
 	prettifyInitialAlgorithm: boolean;
 };

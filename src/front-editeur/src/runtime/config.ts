@@ -6,7 +6,7 @@ export interface EditorRuntimeConfig {
 	prettifyInitialAlgorithm: boolean;
 }
 
-export type EditorHostKind = "web" | "electron" | "vscode";
+export type EditorHostKind = "web" | "electron" | "embedded";
 
 const defaultConfig: EditorRuntimeConfig = {
 	initialAlgorithm: null,
@@ -42,7 +42,7 @@ function isRuntimeConfig(value: unknown): value is EditorRuntimeConfig {
 		(config.title === null || typeof config.title === "string") &&
 		(config.hostKind === "web" ||
 			config.hostKind === "electron" ||
-			config.hostKind === "vscode") &&
+			config.hostKind === "embedded") &&
 		typeof config.isExam === "boolean" &&
 		typeof config.prettifyInitialAlgorithm === "boolean" &&
 		"initialAlgorithm" in config

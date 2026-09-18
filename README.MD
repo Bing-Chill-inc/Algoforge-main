@@ -74,9 +74,13 @@ Pour utiliser AlgoForge en ligne, vous pouvez vous rendre sur ce lien : [https:/
 
 Le paquet de développement VS Code se trouve dans `src/vscode-ext`. `.af` est l'extension AlgoForge standard ; l'extension continue également d'ouvrir les fichiers `.algoforge` existants. Consultez son `README.md` pour les commandes de build, de test et de packaging.
 
+### Extension Obsidian
+
+Le plugin Obsidian desktop se trouve dans `src/obsidian-plugin`. Il ouvre les fichiers `.af` dans l'éditeur visuel et rend `![[algorithme.af]]` dans les notes. Consultez son `README.md` pour le build, les tests et l'installation locale.
+
 ### Format de fichier AlgoForge
 
-Les éditeurs web, desktop et VS Code créent et exportent des fichiers `.af`. Le format courant est la version 1 :
+Les éditeurs web, desktop, VS Code et Obsidian créent et exportent des fichiers `.af`. Le format courant est la version 1 :
 
 ```json
 {

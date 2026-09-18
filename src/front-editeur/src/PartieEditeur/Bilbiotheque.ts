@@ -1,5 +1,5 @@
 import { classes } from "../runtime/classRegistry";
-import { isVsCodeHost, type LibraryCategory } from "../runtime/host";
+import { isEmbeddedHost, type LibraryCategory } from "../runtime/host";
 import { editeur, isExam, titreAlgo, verbose } from "../runtime/runtime";
 
 /**
@@ -37,7 +37,7 @@ export class Bibliotheque extends HTMLElement {
 
 		// Construire le contenu de la bibliothèque
 		// On commence par récupérer la structure de la bibliothèque
-		if (!isVsCodeHost()) fetch("Bibliotheque/getStructure")
+		if (!isEmbeddedHost()) fetch("Bibliotheque/getStructure")
 			.then((response) => {
 				if (!response.ok) {
 					// If the server response is not OK, throw an error

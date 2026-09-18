@@ -1,16 +1,18 @@
+import type { EmbeddedPreviewTheme } from "../../../common/embeddedEditorProtocol";
 import {
 	createImportedDocument,
 	hostReady,
 	initializeDocumentController,
-	isVsCodeHost,
+	isEmbeddedHost,
 	onHostMessage,
 	openExternal,
 	reportHostError,
+	postHostMessage,
 } from "./host";
 import { editeur, preferences, titreAlgo } from "./runtime";
 
-export function initializeVsCodeIntegration(): void {
-	if (!isVsCodeHost()) return;
+export function initializeEmbeddedIntegration(): void {
+	if (!isEmbeddedHost()) return;
 
 	titreAlgo.contentEditable = "false";
 	titreAlgo.nextElementSibling?.setAttribute("hidden", "true");
@@ -85,6 +87,9 @@ export function initializeVsCodeIntegration(): void {
 				);
 				if (message.error) reportHostError(message.error);
 			}
+			if (message.type === "renderPreview") {
+				void renderPreview(message.requestId, message.algorithm, message.title, message.theme);
+			}
 			if (message.type === "importSource") {
 				const imported = editeur.interpreterFichierAlgorithme(
 					message.name,
@@ -113,4 +118,78 @@ export function initializeVsCodeIntegration(): void {
 	});
 
 	hostReady();
+}
+
+async function waitForPreviewLayout(): Promise<void> {
+	await new Promise<void>((resolve) => {
+		let finished = false;
+		const finish = (): void => {
+			if (finished) return;
+			finished = true;
+			window.clearTimeout(timeout);
+			resolve();
+		};
+		const timeout = window.setTimeout(finish, 250);
+		requestAnimationFrame(() => requestAnimationFrame(finish));
+	});
+	if (document.fonts) {
+		await Promise.race([
+			document.fonts.ready.then(() => undefined),
+			new Promise<void>((resolve) => window.setTimeout(resolve, 1_000)),
+		]);
+	}
+}
+
+function preparePreviewSvg(svg: string, theme?: EmbeddedPreviewTheme): string {
+	const planStyle = /<plan-travail\b[^>]*\bstyle="([^"]*)"/i.exec(svg)?.[1] ?? "";
+	const widthValue = /(?:^|;)\s*width\s*:\s*([0-9.]+)vw/i.exec(planStyle)?.[1];
+	const heightValue = /(?:^|;)\s*height\s*:\s*([0-9.]+)vw/i.exec(planStyle)?.[1];
+	const viewportScale = (document.documentElement.clientWidth || window.innerWidth || 1280) / 100;
+	const width = widthValue ? Number(widthValue) : undefined;
+	const height = heightValue ? Number(heightValue) : undefined;
+	let result = svg.replace(/(-?[0-9]+(?:\.[0-9]+)?)vw\b/g, (_match, value: string) =>
+		(Number(value) * viewportScale).toString() + "px");
+	result = result.replace("</style>", "plan-travail{background-color:transparent!important;border:none!important}</style>");
+	if (width && height) {
+		const pixelWidth = width * viewportScale;
+		const pixelHeight = height * viewportScale;
+		const root = "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 " + pixelWidth + " " + pixelHeight + "\" width=\"" + pixelWidth + "\" height=\"" + pixelHeight + "\" preserveAspectRatio=\"xMidYMid meet\">";
+		result = result.replace(/<svg xmlns="http:\/\/www\.w3\.org\/2000\/svg">/, root);
+	}
+	if (theme) {
+		result = replaceSvgColor(result, "#ffffff", theme.background);
+		result = replaceSvgColor(result, "#222222", theme.foreground);
+		result = replaceSvgColor(result, "#000000", theme.foreground);
+		result = replaceSvgColor(result, "#838787", theme.foreground);
+	}
+	return result;
+}
+
+function replaceSvgColor(svg: string, source: string, replacement: string): string {
+	return svg.replace(new RegExp(source + "(?![0-9a-f])", "gi"), replacement);
+}
+
+async function renderPreview(
+	requestId: number,
+	algorithm: unknown[],
+	title: string,
+	theme?: EmbeddedPreviewTheme,
+): Promise<void> {
+	try {
+		titreAlgo.innerText = title;
+		editeur.replaceDocument(algorithm);
+		await waitForPreviewLayout();
+		const rawSvg = editeur.exporterSVG(editeur._planActif as never, false, false);
+		const svg = typeof rawSvg === "string" ? preparePreviewSvg(rawSvg, theme) : rawSvg;
+		if (typeof svg !== "string" || !svg.includes("<svg")) {
+			throw new Error("The editor did not produce an SVG preview.");
+		}
+		postHostMessage({ type: "previewRendered", requestId, svg });
+	} catch (error) {
+		postHostMessage({
+			type: "previewRendered",
+			requestId,
+			error: error instanceof Error ? error.message : "Unable to render the preview.",
+		});
+	}
 }

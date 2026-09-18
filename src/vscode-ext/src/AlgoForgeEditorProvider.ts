@@ -97,6 +97,7 @@ export class AlgoForgeEditorProvider implements vscode.CustomTextEditorProvider 
 				message.library = (await this.catalog) as never[];
 				message.customLibrary =
 					this.context.globalState.get<unknown[]>(CUSTOM_LIBRARY_KEY) ?? [];
+				message.capabilities = { undoRedo: "host" };
 				message.preferences = {
 					theme: this.context.globalState.get<string>(THEME_KEY),
 					glow: this.context.globalState.get<boolean>(GLOW_KEY),
@@ -404,14 +405,14 @@ export class AlgoForgeEditorProvider implements vscode.CustomTextEditorProvider 
 		].join("; ");
 		html = html.replace(
 			"<head>",
-			`<head><base href="${escapeHtml(baseUri)}/"><meta http-equiv="Content-Security-Policy" content="${escapeHtml(csp)}">`,
+			`<head><base href="${escapeHtml(baseUri)}/"><meta http-equiv="Content-Security-Policy" content="${escapeHtml(csp)}"><script nonce="${nonce}">globalThis.acquireAlgoForgeHostApi=()=>acquireVsCodeApi();</script>`,
 		);
 		html = html.replace(
 			/(<script type="application\/json" id="algoforge-runtime-config")[^>]*>[\s\S]*?(<\/script>)/,
 			`$1 nonce="${nonce}">${JSON.stringify({
 				initialAlgorithm: null,
 				title: null,
-				hostKind: "vscode",
+				hostKind: "embedded",
 				isExam: false,
 				prettifyInitialAlgorithm: false,
 			})}$2`,
