@@ -71,7 +71,7 @@ jobs:
           chmod 600 "$RUNNER_TEMP/obsidian-ssh/id_ed25519"
           ssh-keyscan -t ed25519 github.com 2>/dev/null > "$RUNNER_TEMP/obsidian-ssh/known_hosts"
           fingerprint="$(ssh-keygen -lf "$RUNNER_TEMP/obsidian-ssh/known_hosts" -E sha256 | awk '{ print $2 }')"
-          expected="SHA256:+DiY3wvvV6TuJJhbpZisF/zLDA0zPtwuh6K0="
+          expected="SHA256:+DiY3wvvV6TuJJhbpZisF/zLDA0zPMSvHdkr4UvCOqU"
           if [[ "$fingerprint" != "$expected" ]]; then
             echo "::error::Unexpected GitHub SSH host key fingerprint: $fingerprint"
             exit 1
