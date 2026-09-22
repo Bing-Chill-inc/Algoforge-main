@@ -67,6 +67,8 @@ describe("Obsidian release publication", () => {
 		expect(mirrorWorkflow).toContain("gh attestation verify");
 		expect(mirrorWorkflow).toContain('gh release create "$VERSION" main.js manifest.json styles.css');
 		expect(mirrorWorkflow).not.toContain(".zip");
+		expect(sourceWorkflow).toContain("scripts/advance-main.sh");
+		expect(mirrorWorkflow).not.toContain("git push origin");
 	});
 
 	test("publishes immutable tags and safely accepts an identical rerun", async () => {
@@ -93,7 +95,12 @@ describe("Obsidian release publication", () => {
 		expect(run(["git", "--git-dir", remote, "rev-parse", "refs/heads/main"]).stdout.trim()).toBe(initialMain);
 		const releaseCommit = run(["git", "--git-dir", remote, "rev-parse", `refs/tags/${currentVersion}`]).stdout.trim();
 		expect(releaseCommit).not.toBe("");
-		run(["git", "--git-dir", remote, "update-ref", "refs/heads/main", releaseCommit]);
+		const advanceScript = join(pluginRoot, "scripts", "advance-main.sh");
+		const advance = run([advanceScript, join(temporary, "first", "mirror"), currentVersion]);
+		expect(advance.stdout).toContain("Advanced destination main");
+		expect(run(["git", "--git-dir", remote, "rev-parse", "refs/heads/main"]).stdout.trim()).toBe(releaseCommit);
+		const alreadyAdvanced = run([advanceScript, join(temporary, "first", "mirror"), currentVersion]);
+		expect(alreadyAdvanced.stdout).toContain("already contains release");
 
 		const rerun = run([script, staged, remote, currentVersion, join(temporary, "rerun")]);
 		expect(rerun.stdout).toContain("already contains the same release tree");

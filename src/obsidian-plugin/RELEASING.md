@@ -31,13 +31,17 @@ canonical source and build environment.
 4. The monorepo workflow builds, attests the three assets, and pushes
    destination tag `X.Y.Z` using the deploy key.
 5. The destination workflow verifies the canonical attestations, attests the
-   mirrored assets, creates release `X.Y.Z` with only `main.js`,
-   `manifest.json`, and `styles.css`, then advances destination `main`.
+   mirrored assets, and creates release `X.Y.Z` with only `main.js`,
+   `manifest.json`, and `styles.css`.
+6. The source workflow checks the published bytes, then uses the same deploy
+   key to fast-forward destination `main`. GitHub's repository-local
+   `GITHUB_TOKEN` cannot update `main` when a release changes the mirrored
+   workflow file.
 
 Verify a downloaded asset with
 `gh attestation verify main.js -R Bing-Chill-inc/algoforge-obsidian`.
 The same digest should also verify against `Bing-Chill-inc/Algoforge-main`.
 
 Never reuse a published version. If destination release creation fails, rerun
-its workflow; `main` deliberately remains on the previous good version until
-the release succeeds.
+its workflow, then rerun the source workflow. `main` deliberately remains on
+the previous good version until the release succeeds.

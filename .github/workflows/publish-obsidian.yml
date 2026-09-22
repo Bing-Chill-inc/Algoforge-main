@@ -101,3 +101,39 @@ jobs:
             git@github.com:Bing-Chill-inc/algoforge-obsidian.git \
             "$VERSION" \
             "$RUNNER_TEMP/algoforge-obsidian-publish"
+
+      - name: Verify the destination release
+        env:
+          VERSION: ${{ steps.version.outputs.version }}
+        run: |
+          set -euo pipefail
+          release_json="$RUNNER_TEMP/obsidian-release.json"
+          for attempt in {1..60}; do
+            if curl -fsSL "https://api.github.com/repos/Bing-Chill-inc/algoforge-obsidian/releases/tags/$VERSION" \
+              -o "$release_json" 2>/dev/null; then
+              break
+            fi
+            echo "Waiting for destination release $VERSION (attempt $attempt)."
+            sleep 10
+          done
+          test -s "$release_json"
+          test "$(jq -r .tag_name "$release_json")" = "$VERSION"
+          expected="$(printf '%s\n' main.js manifest.json styles.css)"
+          actual="$(jq -r '.assets[].name' "$release_json" | sort)"
+          test "$actual" = "$expected"
+          for asset in main.js manifest.json styles.css; do
+            url="$(jq -r --arg name "$asset" '.assets[] | select(.name == $name) | .browser_download_url' "$release_json")"
+            curl -fsSL "$url" -o "$RUNNER_TEMP/$asset"
+            cmp "$RUNNER_TEMP/$asset" "$RUNNER_TEMP/algoforge-obsidian-release/$asset"
+          done
+
+      - name: Advance destination main after release
+        env:
+          VERSION: ${{ steps.version.outputs.version }}
+          GIT_SSH_COMMAND: >-
+            ssh -i ${{ runner.temp }}/obsidian-ssh/id_ed25519
+            -o IdentitiesOnly=yes
+            -o UserKnownHostsFile=${{ runner.temp }}/obsidian-ssh/known_hosts
+        run: |
+          src/obsidian-plugin/scripts/advance-main.sh \
+            "$RUNNER_TEMP/algoforge-obsidian-publish/mirror" "$VERSION"

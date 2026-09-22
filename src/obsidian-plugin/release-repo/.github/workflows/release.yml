@@ -78,17 +78,3 @@ jobs:
               --title "$VERSION" \
               --notes "Automated AlgoForge Obsidian release $VERSION."
           fi
-
-      - name: Publish release metadata to main
-        env:
-          RELEASE_SHA: ${{ github.sha }}
-        run: |
-          set -euo pipefail
-          git fetch origin main
-          if git show-ref --verify --quiet refs/remotes/origin/main; then
-            git merge-base --is-ancestor origin/main "$RELEASE_SHA" || {
-              echo "::error::Release commit is not a fast-forward of destination main."
-              exit 1
-            }
-          fi
-          git push origin "$RELEASE_SHA:refs/heads/main"
