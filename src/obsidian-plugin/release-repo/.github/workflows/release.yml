@@ -7,6 +7,8 @@ on:
 
 permissions:
   contents: write
+  id-token: write
+  attestations: write
 
 concurrency:
   group: algoforge-obsidian-release
@@ -37,12 +39,22 @@ jobs:
           test -s versions.json
           test "$(jq -r --arg version "$VERSION" '.[$version]' versions.json)" = "$(jq -r .minAppVersion manifest.json)"
 
-      - name: Package release
+      - name: Verify canonical build provenance
         env:
-          VERSION: ${{ github.ref_name }}
+          GH_TOKEN: ${{ github.token }}
         run: |
           set -euo pipefail
-          zip -q "algoforge-obsidian-${VERSION}.zip" main.js manifest.json styles.css
+          for asset in main.js manifest.json styles.css; do
+            gh attestation verify "$asset" -R Bing-Chill-inc/Algoforge-main
+          done
+
+      - name: Attest mirrored release assets
+        uses: actions/attest@v4
+        with:
+          subject-path: |
+            main.js
+            manifest.json
+            styles.css
 
       - name: Create or verify GitHub release
         env:
@@ -50,24 +62,19 @@ jobs:
           VERSION: ${{ github.ref_name }}
         run: |
           set -euo pipefail
-          archive="algoforge-obsidian-${VERSION}.zip"
           if gh release view "$VERSION" >/dev/null 2>&1; then
             existing="$RUNNER_TEMP/existing-release"
             mkdir -p "$existing"
             gh release download "$VERSION" --dir "$existing" \
               --pattern main.js \
               --pattern manifest.json \
-              --pattern styles.css \
-              --pattern "$archive"
+              --pattern styles.css
             cmp main.js "$existing/main.js"
             cmp manifest.json "$existing/manifest.json"
             cmp styles.css "$existing/styles.css"
-            unzip -p "$existing/$archive" main.js | cmp main.js -
-            unzip -p "$existing/$archive" manifest.json | cmp manifest.json -
-            unzip -p "$existing/$archive" styles.css | cmp styles.css -
             echo "Release $VERSION already exists with matching required assets."
           else
-            gh release create "$VERSION" main.js manifest.json styles.css "$archive" \
+            gh release create "$VERSION" main.js manifest.json styles.css \
               --title "$VERSION" \
               --notes "Automated AlgoForge Obsidian release $VERSION."
           fi

@@ -34,11 +34,39 @@ describe("Obsidian release publication", () => {
 		)).toThrow("numeric SemVer");
 	});
 
-	test("stages only the automation-owned mirror files", async () => {
+	test("stages release assets and the exact reviewable source snapshot", async () => {
 		const temporary = await makeTemporaryDirectory();
 		const output = join(temporary, "release");
 		await stageRelease(pluginRoot, output, currentVersion);
-		expect(await listFiles(output)).toEqual([...MIRROR_FILES]);
+		const files = await listFiles(output);
+		for (const file of MIRROR_FILES) expect(files).toContain(file);
+		for (const file of [
+			"src/obsidian-plugin/src/main.ts",
+			"src/obsidian-plugin/build.ts",
+			"src/common/embeddedEditorProtocol.ts",
+			"src/front-editeur/src/main.ts",
+			"src/front-editeur/build.ts",
+			"src/back/assetsDynamiques.ts",
+		]) {
+			expect(files).toContain(file);
+		}
+		expect(files.some((file) => file.includes("/dist/") || file.includes("/node_modules/"))).toBe(false);
+		expect(await readFile(join(output, "src/obsidian-plugin/src/main.ts"), "utf8"))
+			.toBe(await readFile(join(pluginRoot, "src/main.ts"), "utf8"));
+	});
+
+	test("attests assets in both repositories and releases only supported files", async () => {
+		const sourceWorkflow = await readFile(
+			join(pluginRoot, "..", "..", ".github/workflows/publish-obsidian.yml"), "utf8",
+		);
+		const mirrorWorkflow = await readFile(
+			join(pluginRoot, "release-repo/.github/workflows/release.yml"), "utf8",
+		);
+		expect(sourceWorkflow).toContain("actions/attest@v4");
+		expect(mirrorWorkflow).toContain("actions/attest@v4");
+		expect(mirrorWorkflow).toContain("gh attestation verify");
+		expect(mirrorWorkflow).toContain('gh release create "$VERSION" main.js manifest.json styles.css');
+		expect(mirrorWorkflow).not.toContain(".zip");
 	});
 
 	test("publishes immutable tags and safely accepts an identical rerun", async () => {

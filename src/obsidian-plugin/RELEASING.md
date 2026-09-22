@@ -18,7 +18,9 @@ and must not be edited by hand after its one-time bootstrap.
 
 The destination was bootstrapped with the workflow stored at
 `release-repo/.github/workflows/release.yml`. Every publication stages that
-workflow again, keeping the mirror self-hosting.
+workflow again, keeping the mirror self-hosting. The tagged mirror commit also
+contains the TypeScript source snapshot under `src/`; the monorepo remains the
+canonical source and build environment.
 
 ## Publish a version
 
@@ -26,10 +28,15 @@ workflow again, keeping the mirror self-hosting.
    numeric SemVer version.
 2. Merge the release commit into `main` and wait for normal CI to pass.
 3. Tag that commit as `obsidian-vX.Y.Z` and push the tag.
-4. The monorepo workflow builds and pushes destination tag `X.Y.Z` using the
-   deploy key.
-5. The destination workflow creates release `X.Y.Z` with the required
-   individual assets, then advances destination `main`.
+4. The monorepo workflow builds, attests the three assets, and pushes
+   destination tag `X.Y.Z` using the deploy key.
+5. The destination workflow verifies the canonical attestations, attests the
+   mirrored assets, creates release `X.Y.Z` with only `main.js`,
+   `manifest.json`, and `styles.css`, then advances destination `main`.
+
+Verify a downloaded asset with
+`gh attestation verify main.js -R Bing-Chill-inc/algoforge-obsidian`.
+The same digest should also verify against `Bing-Chill-inc/Algoforge-main`.
 
 Never reuse a published version. If destination release creation fails, rerun
 its workflow; `main` deliberately remains on the previous good version until

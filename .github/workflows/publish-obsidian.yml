@@ -7,6 +7,8 @@ on:
 
 permissions:
   contents: read
+  id-token: write
+  attestations: write
 
 concurrency:
   group: algoforge-obsidian-publish
@@ -56,6 +58,14 @@ jobs:
         env:
           VERSION: ${{ steps.version.outputs.version }}
         run: bun run release:stage --version "$VERSION" --output "$RUNNER_TEMP/algoforge-obsidian-release"
+
+      - name: Attest the built plugin assets
+        uses: actions/attest@v4
+        with:
+          subject-path: |
+            src/obsidian-plugin/dist/main.js
+            src/obsidian-plugin/dist/manifest.json
+            src/obsidian-plugin/dist/styles.css
 
       - name: Configure destination deploy key
         env:

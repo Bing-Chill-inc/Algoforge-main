@@ -1,5 +1,5 @@
-import { copyFile, mkdir, readdir, readFile, rm, stat } from "node:fs/promises";
-import { dirname, join, relative } from "node:path";
+import { copyFile, cp, mkdir, readdir, readFile, rm, stat } from "node:fs/promises";
+import { basename, dirname, join, relative } from "node:path";
 import { fileURLToPath } from "node:url";
 
 export const MIRROR_FILES = [
@@ -10,6 +10,29 @@ export const MIRROR_FILES = [
 	"manifest.json",
 	"styles.css",
 	"versions.json",
+] as const;
+
+const SOURCE_DIRECTORIES = [
+	"src/common",
+	"src/front-editeur/src",
+	"src/obsidian-plugin/src",
+	"src/obsidian-plugin/scripts",
+	"src/obsidian-plugin/tests",
+] as const;
+const SOURCE_FILES = [
+	"src/back/assetsDynamiques.ts",
+	"src/back/types/RouteHandler.d.ts",
+	"src/front-editeur/build.ts",
+	"src/front-editeur/bun.lock",
+	"src/front-editeur/libraryCatalog.ts",
+	"src/front-editeur/package.json",
+	"src/front-editeur/tsconfig.json",
+	"src/front-editeur/tsconfig.build.json",
+	"src/front-editeur/tsconfig.anomalies.json",
+	"src/obsidian-plugin/build.ts",
+	"src/obsidian-plugin/bun.lock",
+	"src/obsidian-plugin/package.json",
+	"src/obsidian-plugin/tsconfig.json",
 ] as const;
 
 interface PackageMetadata { version?: unknown; }
@@ -64,8 +87,28 @@ export async function stageRelease(root: string, output: string, version: string
 		),
 	]);
 
+	const monorepoRoot = dirname(dirname(root));
+	for (const directory of SOURCE_DIRECTORIES) {
+		await cp(join(monorepoRoot, directory), join(output, directory), {
+			recursive: true,
+			filter: (path) => basename(path) !== ".DS_Store",
+		});
+	}
+	for (const file of SOURCE_FILES) {
+		const destination = join(output, file);
+		await mkdir(dirname(destination), { recursive: true });
+		await copyFile(join(monorepoRoot, file), destination);
+	}
+
 	const staged = await listFiles(output);
-	if (JSON.stringify(staged) !== JSON.stringify([...MIRROR_FILES])) {
+	const expected = [
+		...MIRROR_FILES,
+		...SOURCE_FILES,
+		...(await Promise.all(SOURCE_DIRECTORIES.map(async (directory) =>
+			(await listFiles(join(monorepoRoot, directory))).map((file) => `${directory}/${file}`),
+		))).flat(),
+	].sort();
+	if (JSON.stringify(staged) !== JSON.stringify(expected)) {
 		throw new Error(`Unexpected mirror contents: ${staged.join(", ")}.`);
 	}
 }
@@ -77,6 +120,7 @@ async function readJson<T>(path: string): Promise<T> {
 async function listFiles(root: string, current = root): Promise<string[]> {
 	const result: string[] = [];
 	for (const name of await readdir(current)) {
+		if (name === ".DS_Store") continue;
 		const path = join(current, name);
 		if ((await stat(path)).isDirectory()) result.push(...await listFiles(root, path));
 		else result.push(relative(root, path).replaceAll("\\", "/"));

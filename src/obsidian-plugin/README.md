@@ -22,6 +22,9 @@ plugins. You can also install the release repository with BRAT.
 This repository is an automated release mirror. The canonical source and
 development history live in
 [Bing-Chill-inc/Algoforge-main](https://github.com/Bing-Chill-inc/Algoforge-main/tree/main/src/obsidian-plugin).
+Each release tag also contains a read-only snapshot under `src/` of the plugin,
+shared document protocol, and embedded editor source used for that release.
+The mirror is not an independent development checkout.
 From a checkout of that monorepo:
 
 ```sh
@@ -30,6 +33,16 @@ bun install
 bun run check
 ```
 
+The release has only Obsidian's three installation assets. Their provenance
+can be checked with `gh attestation verify main.js -R Bing-Chill-inc/algoforge-obsidian`
+(and likewise for `manifest.json` and `styles.css`). The mirror workflow
+also verifies the canonical build attestation from `Bing-Chill-inc/Algoforge-main`
+before publishing.
+
 ## Privacy and limitations
 
 The plugin is desktop-only, works entirely from local vault files, and performs no authentication, telemetry, or network requests. AlgoForge Cloud and interactive editing inside note embeds are not supported. Obsidian Publish and external Markdown renderers do not run the plugin; export SVG or PNG for a portable image.
+
+The Open Algorithm and Import pickers enumerate vault file paths locally to
+show eligible files; they do not upload paths or file contents. Clipboard
+access is used only for explicit copy/paste actions in the visual editor.
