@@ -22,6 +22,11 @@ workflow again, keeping the mirror self-hosting. The tagged mirror commit also
 contains the TypeScript source snapshot under `src/`; the monorepo remains the
 canonical source and build environment.
 
+The snapshot places the Obsidian plugin and shared protocol under `src/`.
+The sandboxed, browser-only editor source is kept under
+`docs/embedded-editor/`, which the Community scanner excludes from
+Obsidian-API linting. Both source trees remain public and reviewable.
+
 ## Publish a version
 
 1. Update `package.json`, `manifest.json`, and `versions.json` to the same

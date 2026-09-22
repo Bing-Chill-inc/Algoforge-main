@@ -83,7 +83,6 @@ export default class AlgoForgePlugin extends Plugin {
 
 	async onunload(): Promise<void> {
 		this.previews?.destroy();
-		this.app.workspace.detachLeavesOfType(ALGOFORGE_VIEW_TYPE);
 	}
 
 	async saveSettings(): Promise<void> { await this.saveData(this.settings); }

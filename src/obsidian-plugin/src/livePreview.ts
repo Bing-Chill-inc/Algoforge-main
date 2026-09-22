@@ -29,8 +29,10 @@ export function createAlgoForgeLivePreviewExtension(
 		decorations: DecorationSet;
 		private readonly observer: MutationObserver;
 		private readonly mounts = new Map<HTMLElement, { dispose: () => void; target: string }>();
+		private readonly view: EditorView;
 
 		constructor(view: EditorView) {
+			this.view = view;
 			this.decorations = buildDecorations(view, app, previews);
 			this.observer = new MutationObserver(() => this.enhanceGenericEmbeds(view));
 			this.observer.observe(view.dom, { childList: true, subtree: true, attributes: true, characterData: true });
@@ -48,6 +50,9 @@ export function createAlgoForgeLivePreviewExtension(
 			this.observer.disconnect();
 			for (const { dispose } of this.mounts.values()) dispose();
 			this.mounts.clear();
+			for (const element of this.view.dom.querySelectorAll<HTMLElement>(".algoforge-live-preview-suppressed")) {
+				element.removeClass("algoforge-live-preview-suppressed");
+			}
 		}
 
 		private enhanceGenericEmbeds(view: EditorView): void {
@@ -77,10 +82,10 @@ export function createAlgoForgeLivePreviewExtension(
 				);
 				if (!target) continue;
 				if (touchedTargets.has(target)) {
-					element.style.display = "none";
+					element.addClass("algoforge-live-preview-suppressed");
 					continue;
 				}
-				element.style.removeProperty("display");
+				element.removeClass("algoforge-live-preview-suppressed");
 				if (this.mounts.has(element)) continue;
 				element.dataset.algoforgeTarget = target;
 				element.dataset.algoforgeLiveEmbed = "true";

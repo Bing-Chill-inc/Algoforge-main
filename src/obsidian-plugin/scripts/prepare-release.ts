@@ -35,6 +35,14 @@ const SOURCE_FILES = [
 	"src/obsidian-plugin/tsconfig.json",
 ] as const;
 
+function mirrorSourcePath(path: string): string {
+	// The embedded web editor is reviewable source, but is not Obsidian API code.
+	// Obsidian's scanner excludes docs/ while still scanning the plugin under src/.
+	return path.startsWith("src/front-editeur/") || path.startsWith("src/back/")
+		? `docs/embedded-editor/${path}`
+		: path;
+}
+
 interface PackageMetadata { version?: unknown; }
 interface ManifestMetadata { version?: unknown; minAppVersion?: unknown; }
 type VersionsMetadata = Record<string, unknown>;
@@ -89,13 +97,15 @@ export async function stageRelease(root: string, output: string, version: string
 
 	const monorepoRoot = dirname(dirname(root));
 	for (const directory of SOURCE_DIRECTORIES) {
-		await cp(join(monorepoRoot, directory), join(output, directory), {
+		const destination = join(output, mirrorSourcePath(directory));
+		await mkdir(dirname(destination), { recursive: true });
+		await cp(join(monorepoRoot, directory), destination, {
 			recursive: true,
 			filter: (path) => basename(path) !== ".DS_Store",
 		});
 	}
 	for (const file of SOURCE_FILES) {
-		const destination = join(output, file);
+		const destination = join(output, mirrorSourcePath(file));
 		await mkdir(dirname(destination), { recursive: true });
 		await copyFile(join(monorepoRoot, file), destination);
 	}
@@ -103,9 +113,10 @@ export async function stageRelease(root: string, output: string, version: string
 	const staged = await listFiles(output);
 	const expected = [
 		...MIRROR_FILES,
-		...SOURCE_FILES,
+		...SOURCE_FILES.map(mirrorSourcePath),
 		...(await Promise.all(SOURCE_DIRECTORIES.map(async (directory) =>
-			(await listFiles(join(monorepoRoot, directory))).map((file) => `${directory}/${file}`),
+			(await listFiles(join(monorepoRoot, directory))).map((file) =>
+				mirrorSourcePath(`${directory}/${file}`)),
 		))).flat(),
 	].sort();
 	if (JSON.stringify(staged) !== JSON.stringify(expected)) {

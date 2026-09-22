@@ -76,6 +76,7 @@
 }
 .algoforge-preview-button:focus-visible { outline: 2px solid var(--interactive-accent); outline-offset: 2px; }
 .algoforge-preview-button img { display: block !important; width: 100% !important; height: auto !important; max-height: none !important; object-fit: contain; }
+.algoforge-live-preview-suppressed { display: none !important; }
 .algoforge-preview-status {
 	padding: var(--size-4-3);
 	color: var(--text-muted);

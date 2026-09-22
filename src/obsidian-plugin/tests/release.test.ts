@@ -44,12 +44,13 @@ describe("Obsidian release publication", () => {
 			"src/obsidian-plugin/src/main.ts",
 			"src/obsidian-plugin/build.ts",
 			"src/common/embeddedEditorProtocol.ts",
-			"src/front-editeur/src/main.ts",
-			"src/front-editeur/build.ts",
-			"src/back/assetsDynamiques.ts",
+			"docs/embedded-editor/src/front-editeur/src/main.ts",
+			"docs/embedded-editor/src/front-editeur/build.ts",
+			"docs/embedded-editor/src/back/assetsDynamiques.ts",
 		]) {
 			expect(files).toContain(file);
 		}
+		expect(files.some((file) => file.startsWith("src/front-editeur/") || file.startsWith("src/back/"))).toBe(false);
 		expect(files.some((file) => file.includes("/dist/") || file.includes("/node_modules/"))).toBe(false);
 		expect(await readFile(join(output, "src/obsidian-plugin/src/main.ts"), "utf8"))
 			.toBe(await readFile(join(pluginRoot, "src/main.ts"), "utf8"));

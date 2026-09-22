@@ -22,8 +22,10 @@ plugins. You can also install the release repository with BRAT.
 This repository is an automated release mirror. The canonical source and
 development history live in
 [Bing-Chill-inc/Algoforge-main](https://github.com/Bing-Chill-inc/Algoforge-main/tree/main/src/obsidian-plugin).
-Each release tag also contains a read-only snapshot under `src/` of the plugin,
-shared document protocol, and embedded editor source used for that release.
+Each release tag also contains a read-only snapshot of the Obsidian plugin and
+shared document protocol under `src/`. The sandboxed web editor's source is
+under `docs/embedded-editor/`: it uses browser APIs within its isolated
+iframe, not Obsidian's plugin APIs.
 The mirror is not an independent development checkout.
 From a checkout of that monorepo:
 
