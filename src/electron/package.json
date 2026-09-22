@@ -1,6 +1,6 @@
 {
 	"name": "algoforge-electron",
-	"version": "4.1.0",
+	"version": "4.1.1",
 	"main": "electron-main.js",
 	"type": "module",
 	"scripts": {
@@ -95,7 +95,7 @@
 						"name": "AlgoForge",
 						"description": "L'application de création d'algorithmes",
 						"authors": "AlgoForge inc.",
-						"version": "4.1.0",
+						"version": "4.1.1",
 						"setupExe": "AlgoForgeSetup.exe"
 					}
 				},

@@ -147,7 +147,50 @@ jobs:
           curl --fail --location --silent http://127.0.0.1:5206/ >/dev/null
           curl --fail --location --silent http://127.0.0.1:5206/cloud/ >/dev/null
 
+  validate-arm64:
+    if: github.event_name == 'pull_request' || github.event_name == 'push'
+    runs-on: ubuntu-24.04-arm
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build native ARM64 image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: src/back/Dockerfile
+          platforms: linux/arm64
+          load: true
+          push: false
+          tags: algoforge-ci:arm64
+          cache-from: type=gha,scope=arm64
+          cache-to: type=gha,mode=max,scope=arm64
+
+      - name: Smoke test native ARM64 image
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(docker image inspect algoforge-ci:arm64 --format '{{.Architecture}}')" = arm64
+          docker run --rm --entrypoint bun algoforge-ci:arm64 --version
+          docker run -d --name algoforge-arm64 -p 5205:5205 algoforge-ci:arm64
+          trap 'docker rm -f algoforge-arm64 >/dev/null 2>&1 || true' EXIT
+          for attempt in {1..60}; do
+            if curl --fail --location --silent http://127.0.0.1:5205/edit/ >/dev/null; then
+              break
+            fi
+            if [[ "$attempt" == 60 ]]; then
+              docker logs algoforge-arm64
+              exit 1
+            fi
+            sleep 1
+          done
+          curl --fail --location --silent http://127.0.0.1:5205/cloud/ >/dev/null
+
   publish:
+    needs: validate-arm64
     if: github.event_name == 'push'
     runs-on: ubuntu-latest
     permissions:
@@ -207,8 +250,32 @@ jobs:
             OCI_VERSION=${{ github.ref_name }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
-          provenance: mode=max
-          sbom: true
+          # Keep attestation manifests out of the runnable multi-platform index:
+          # some ARM clients reject their unknown/unknown platform entries.
+          provenance: false
+          sbom: false
+
+      - name: Verify published platforms and tags
+        shell: bash
+        env:
+          IMAGE: ${{ steps.image.outputs.name }}
+        run: |
+          set -euo pipefail
+          if [[ "$GITHUB_REF" == refs/heads/main ]]; then
+            tags=(edge "sha-${GITHUB_SHA::7}")
+          else
+            version="${GITHUB_REF_NAME#v}"
+            IFS=. read -r major minor patch <<< "$version"
+            if [[ ! "$major" =~ ^[0-9]+$ || ! "$minor" =~ ^[0-9]+$ || ! "$patch" =~ ^[0-9]+$ ]]; then
+              echo "::error::Expected a vX.Y.Z release tag."
+              exit 1
+            fi
+            tags=("$version" "$major.$minor" "$major" latest "sha-${GITHUB_SHA::7}")
+          fi
+          for tag in "${tags[@]}"; do
+            docker buildx imagetools inspect --raw "$IMAGE:$tag" |
+              jq -e '[.manifests[].platform | "\(.os)/\(.architecture)"] | sort == ["linux/amd64", "linux/arm64"]'
+          done
 
       - name: Attest image provenance
         uses: actions/attest-build-provenance@v3
@@ -216,3 +283,36 @@ jobs:
           subject-name: ${{ steps.image.outputs.name }}
           subject-digest: ${{ steps.build.outputs.digest }}
           push-to-registry: true
+
+  verify-published-arm64:
+    if: github.event_name == 'push'
+    needs: publish
+    runs-on: ubuntu-24.04-arm
+    steps:
+      - name: Pull and run the published ARM64 image
+        shell: bash
+        env:
+          IMAGE: ghcr.io/${{ github.repository }}
+        run: |
+          set -euo pipefail
+          image="${IMAGE,,}"
+          if [[ "$GITHUB_REF" == refs/heads/main ]]; then
+            tag=edge
+          else
+            tag=latest
+          fi
+          docker pull --platform linux/arm64 "$image:$tag"
+          test "$(docker image inspect "$image:$tag" --format '{{.Architecture}}')" = arm64
+          docker run --rm --platform linux/arm64 --entrypoint bun "$image:$tag" --version
+          docker run -d --name algoforge-published-arm64 --platform linux/arm64 -p 5205:5205 "$image:$tag"
+          trap 'docker rm -f algoforge-published-arm64 >/dev/null 2>&1 || true' EXIT
+          for attempt in {1..60}; do
+            if curl --fail --location --silent http://127.0.0.1:5205/edit/ >/dev/null; then
+              break
+            fi
+            if [[ "$attempt" == 60 ]]; then
+              docker logs algoforge-published-arm64
+              exit 1
+            fi
+            sleep 1
+          done

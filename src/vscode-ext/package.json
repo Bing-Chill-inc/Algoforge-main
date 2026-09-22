@@ -2,7 +2,7 @@
 	"name": "algoforge-vscode",
 	"displayName": "AlgoForge - Visual Editor",
 	"description": "Design AlgoForge algorithms visually inside Visual Studio Code.",
-	"version": "4.1.0",
+	"version": "4.1.1",
 	"publisher": "algoforge",
 	"license": "MIT",
 	"repository": {
