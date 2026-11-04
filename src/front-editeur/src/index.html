@@ -8,6 +8,7 @@
 		<link rel="stylesheet" href="style.css" />
 		<script>
 			window.addEventListener("load", () => {
+				if (location.protocol !== "https:" && location.protocol !== "http:") return;
 				const script = document.createElement("script");
 				script.src = "https://plausible.feror.fr/js/script.js";
 				script.dataset.domain = "algoforge.fr";

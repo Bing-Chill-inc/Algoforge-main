@@ -85,6 +85,15 @@ function createEditorWindow(initialDocument = null) {
 		editorWindow.on("closed", () => windowDocuments.delete(documentId));
 	}
 
+	// Native window.open children close with their opener on Windows.
+	// Own editor windows at application level so each has an independent lifetime.
+	editorWindow.webContents.setWindowOpenHandler(({ url }) => {
+		if (url.startsWith("app://edit/")) {
+			const newWindow = createEditorWindow();
+			newWindow.loadURL(url);
+		}
+		return { action: "deny" };
+	});
 	editorWindow.loadURL(editorUrl);
 	return editorWindow;
 }
