@@ -64,6 +64,9 @@ jobs:
               working-directory: src/obsidian-plugin
               run: bun run check
 
+            - name: Test desktop runtime injection against built editor
+              run: bun src/front-editeur/build.ts && bun test src/electron/tests
+
             - name: Test editor runtime injection
               working-directory: src/back
               run: bun test tests/editorRuntimeConfig.test.ts

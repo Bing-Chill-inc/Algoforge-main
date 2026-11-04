@@ -7,7 +7,7 @@ export type EditorRuntimeConfig = {
 };
 
 const runtimeConfigPattern =
-	/(<script type="application\/json" id="algoforge-runtime-config">)[\s\S]*?(<\/script>)/;
+	/(<script\s+type="application\/json"\s+id="algoforge-runtime-config"\s*>)[\s\S]*?(<\/script>)/;
 
 export function injectEditorRuntimeConfig(
 	content: string,
@@ -17,7 +17,7 @@ export function injectEditorRuntimeConfig(
 	if (!runtimeConfigPattern.test(content)) {
 		throw new Error("Editor runtime configuration marker is missing.");
 	}
-	return content.replace(runtimeConfigPattern, `$1${serialized}$2`);
+	return content.replace(runtimeConfigPattern, (_match, opening, closing) => `${opening}${serialized}${closing}`);
 }
 
 export function defaultEditorRuntimeConfig(): EditorRuntimeConfig {

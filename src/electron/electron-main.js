@@ -1,3 +1,4 @@
+import { injectRuntimeConfig } from "./runtime-config.js";
 import { app, BrowserWindow, dialog, protocol } from "electron";
 import path from "path";
 import fs from "fs";
@@ -348,21 +349,11 @@ function handleReady() {
 				}
 			}
 
-			const serialized = JSON.stringify(config).replaceAll(
-				"<",
-				"\\u003c",
-			);
-			const marker =
-				/(<script type="application\/json" id="algoforge-runtime-config">)[\s\S]*?(<\/script>)/;
-			if (!marker.test(fileContent)) {
-				return new Response(
-					"Editor runtime configuration marker is missing.",
-					{
-						status: 500,
-					},
-				);
+			try {
+				fileContent = injectRuntimeConfig(fileContent, config);
+			} catch (error) {
+				return new Response(error.message, { status: 500 });
 			}
-			fileContent = fileContent.replace(marker, `$1${serialized}$2`);
 
 			return new Response(fileContent, {
 				headers: { "Content-Type": "text/html" },
