@@ -60,8 +60,8 @@ export async function buildEditor({
 		const htmlPath = join(nextOutputDirectory, "index.html");
 		let html = await readFile(htmlPath, "utf8");
 		html = html.replace(
-			/\s*<script\s+defer\s+data-domain="algoforge\.fr"\s+src="https:\/\/plausible\.feror\.fr\/js\/script\.js"\s*><\/script>/,
-				"",
+			/<script\b[^>]*>[\s\S]*?<\/script>/g,
+			(script) => script.includes("plausible.feror.fr") ? "" : script,
 		);
 		if (target === "embedded") {
 			html = html.replaceAll("/api/algos", "").replaceAll("/api/users", "");
