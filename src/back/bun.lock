@@ -15,7 +15,7 @@
         "express-async-handler": "^1.2.0",
         "express-rate-limit": "^8.6.2",
         "handlebars": "^4.7.8",
-        "nodemailer": "^9.0.5",
+        "nodemailer": "^10.0.10",
         "nodemailer-mock": "^2.0.8",
         "pg": "^8.15.6",
         "reflect-metadata": "^0.2.2",
@@ -399,7 +399,7 @@
 
     "node-gyp": ["node-gyp@12.4.0", "", { "dependencies": { "env-paths": "^2.2.0", "exponential-backoff": "^3.1.1", "graceful-fs": "^4.2.6", "nopt": "^9.0.0", "proc-log": "^6.0.0", "semver": "^7.3.5", "tar": "^7.5.4", "tinyglobby": "^0.2.12", "undici": "^6.25.0", "which": "^6.0.0" }, "bin": { "node-gyp": "bin/node-gyp.js" } }, "sha512-OMcPNvqTCFUnNaBlmdgq+lfNqY7gTiSmNRDjY3uAXRyudeKZEZxu3CLtjMQrx4zZxCX2b/mpNqTtwuCJgXhHkw=="],
 
-    "nodemailer": ["nodemailer@9.0.5", "", {}, "sha512-wvjiKvjczmsN7U/8006JOdXubgBk2XFAbioDMbT+sM7cPs0QrhJTa6KBRX7P5REGGkDcLUz/EarWidb8G8C1jQ=="],
+    "nodemailer": ["nodemailer@10.0.10", "", {}, "sha512-He9XskOFms62SyAKkLu8CcGcYHAo+BSHSsORI8s4PJH8qZgZY4L4lDfvyN0twvmbpyG+eGrxpyBlskj9d9rJ8A=="],
 
     "nodemailer-mock": ["nodemailer-mock@2.0.14", "", { "dependencies": { "debug": "^4.4.3" }, "peerDependencies": { "nodemailer": "^6.x || ^7.x || ^8.x || ^9.x" } }, "sha512-YqS6rMiDFSoQiQmZPowPkqJd0oQ3qPRhOzYJvfSIRSkOjQmW6XK7rqt/yr1sGXWoMtBpmsdHiY8wNoJberoLTA=="],
 
