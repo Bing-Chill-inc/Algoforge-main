@@ -35,7 +35,7 @@
 	},
 	"devDependencies": {
 		"@types/bcrypt-nodejs": "^0.0.31",
-		"@types/bun": "^1.2.11",
+		"@types/bun": "^1.4.2",
 		"@types/cli-color": "^2.0.6",
 		"@types/cors": "^2.8.17",
 		"@types/express": "^5.0.1",
